@@ -41,9 +41,9 @@
         
   <h1>c++ static 使用</h1>
 
-<div id="outline-container-orgbb78b6f" class="outline-2">
-<h2 id="orgbb78b6f">概述</h2>
-<div class="outline-text-2" id="text-orgbb78b6f">
+<div id="outline-container-org7131faf" class="outline-2">
+<h2 id="org7131faf">概述</h2>
+<div class="outline-text-2" id="text-org7131faf">
 <p>
 C++中的static关键词可以修饰变量(面向过程和面向对象的)和函数(同样也是有面向过程
 和面向对象的)，他可以改变变量和函数的作用域和生存周期。记起来可能会比较混乱，
@@ -59,13 +59,13 @@ C++中的static关键词可以修饰变量(面向过程和面向对象的)和函
 </div>
 
 
-<div id="outline-container-org6e91e59" class="outline-2">
-<h2 id="org6e91e59">面向过程的static</h2>
-<div class="outline-text-2" id="text-org6e91e59">
+<div id="outline-container-org6c29f00" class="outline-2">
+<h2 id="org6c29f00">面向过程的static</h2>
+<div class="outline-text-2" id="text-org6c29f00">
 </div>
-<div id="outline-container-org2610ab9" class="outline-3">
-<h3 id="org2610ab9">面向过程的static变量</h3>
-<div class="outline-text-3" id="text-org2610ab9">
+<div id="outline-container-org9876f92" class="outline-3">
+<h3 id="org9876f92">面向过程的static变量</h3>
+<div class="outline-text-3" id="text-org9876f92">
 <ul class="org-ul">
 <li>局部static变量
 <ul class="org-ul">
@@ -86,9 +86,9 @@ static变量在不同文件中，可以有同名的变量，但是全局变量�
 </ul>
 </div>
 </div>
-<div id="outline-container-org731bec8" class="outline-3">
-<h3 id="org731bec8">面向过程的static函数</h3>
-<div class="outline-text-3" id="text-org731bec8">
+<div id="outline-container-org6b8086c" class="outline-3">
+<h3 id="org6b8086c">面向过程的static函数</h3>
+<div class="outline-text-3" id="text-org6b8086c">
 <ul class="org-ul">
 <li>静态函数不能被其他文件引用，全局函数则可以。</li>
 <li>其他文件可以定义相同名字的函数，不会发生冲突。</li>
@@ -97,9 +97,9 @@ static变量在不同文件中，可以有同名的变量，但是全局变量�
 </div>
 </div>
 
-<div id="outline-container-org28706e5" class="outline-2">
-<h2 id="org28706e5">面向对象的static(无私的static)</h2>
-<div class="outline-text-2" id="text-org28706e5">
+<div id="outline-container-orgd6bb8f5" class="outline-2">
+<h2 id="orgd6bb8f5">面向对象的static(无私的static)</h2>
+<div class="outline-text-2" id="text-orgd6bb8f5">
 <p>
 面向对象的static主要是在class中使用的。他们属于这个类及其所有实例化的对象，因
 此可以通过类名或者实例名来访问他们，但是我们知道对于普通的变量和函数，在通过对
@@ -108,18 +108,18 @@ static变量在不同文件中，可以有同名的变量，但是全局变量�
 </p>
 </div>
 
-<div id="outline-container-org674fbf8" class="outline-3">
-<h3 id="org674fbf8">面向对象的static变量</h3>
-<div class="outline-text-3" id="text-org674fbf8">
+<div id="outline-container-org53f6c64" class="outline-3">
+<h3 id="org53f6c64">面向对象的static变量</h3>
+<div class="outline-text-3" id="text-org53f6c64">
 <ul class="org-ul">
 <li>static的变量一定要在类外显式地定义，并且也就是在定义的时候分配内存空间的。
 如果不这样定义，编译的时候会提示undefined。</li>
 </ul>
 </div>
 </div>
-<div id="outline-container-orgd5f3ed9" class="outline-3">
-<h3 id="orgd5f3ed9">面向对象的static函数</h3>
-<div class="outline-text-3" id="text-orgd5f3ed9">
+<div id="outline-container-orge423eee" class="outline-3">
+<h3 id="orge423eee">面向对象的static函数</h3>
+<div class="outline-text-3" id="text-orge423eee">
 <ul class="org-ul">
 <li>类的静态成员函数只能在类体内加上static限定，在类外，比如在类外实现的时候前
 面不能加static。</li>

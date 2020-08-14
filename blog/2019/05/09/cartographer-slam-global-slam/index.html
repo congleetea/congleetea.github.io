@@ -41,9 +41,9 @@
         
   <h1>SLAM-cartographer: Global SLAM</h1>
 
-<div id="outline-container-org736b678" class="outline-2">
-<h2 id="org736b678">概述</h2>
-<div class="outline-text-2" id="text-org736b678">
+<div id="outline-container-org70cf505" class="outline-2">
+<h2 id="org70cf505">概述</h2>
+<div class="outline-text-2" id="text-org70cf505">
 <p>
 cartographer 在 Local SLAM 中通过imu，odometry等插入初值，结合scan信息进行scan
 match，最后得到一个robot的pose和一系列submap。在 Global SLAM 中将对这些数据进
@@ -97,13 +97,13 @@ match，最后得到一个robot的pose和一系列submap。在 Global SLAM 中�
 </div>
 
 
-<div id="outline-container-org9ac779f" class="outline-2">
-<h2 id="org9ac779f">一些概念</h2>
-<div class="outline-text-2" id="text-org9ac779f">
+<div id="outline-container-org5c94420" class="outline-2">
+<h2 id="org5c94420">一些概念</h2>
+<div class="outline-text-2" id="text-org5c94420">
 </div>
-<div id="outline-container-org1a5343c" class="outline-3">
-<h3 id="org1a5343c">PoseGraph2D (继承PoseGraph -&gt; PoseGraphInterface)</h3>
-<div class="outline-text-3" id="text-org1a5343c">
+<div id="outline-container-org29f2705" class="outline-3">
+<h3 id="org29f2705">PoseGraph2D (继承PoseGraph -&gt; PoseGraphInterface)</h3>
+<div class="outline-text-3" id="text-org29f2705">
 <p>
 MapBuilder 在创建 GlobalTrajectoryBuilder 时中会实例化 PoseGraph 对象, 并作为
 GlobalTrajectoryBuilder 的成员。
@@ -122,9 +122,9 @@ adjustment for 2d mapping) 的方法做 loop closure。在cartographer中， <b>
 </ul>
 </div>
 
-<div id="outline-container-org4b95512" class="outline-4">
-<h4 id="org4b95512">线程池及任务的执行</h4>
-<div class="outline-text-4" id="text-org4b95512">
+<div id="outline-container-org49fac09" class="outline-4">
+<h4 id="org49fac09">线程池及任务的执行</h4>
+<div class="outline-text-4" id="text-org49fac09">
 <ul class="org-ul">
 <li>每次收到SLAM需要的信息都会生成一个work，这个work都会保存到PoseGraph的
 work_queue_队列中，适当的时候会执行DrainWorkQueue从队列中取出work进行处理，每
@@ -176,9 +176,9 @@ tasks_not_ready_队列中移动到task_queue_中。等待执行。</li>
 </div>
 
 
-<div id="outline-container-orge2884f1" class="outline-3">
-<h3 id="orge2884f1">Node</h3>
-<div class="outline-text-3" id="text-orge2884f1">
+<div id="outline-container-org4388a39" class="outline-3">
+<h3 id="org4388a39">Node</h3>
+<div class="outline-text-3" id="text-org4388a39">
 <div class="org-src-container">
 <pre class="src src-c++">struct TrajectoryNode {
   struct Data {
@@ -216,9 +216,9 @@ tasks_not_ready_队列中移动到task_queue_中。等待执行。</li>
 </div>
 
 
-<div id="outline-container-org07f8183" class="outline-3">
-<h3 id="org07f8183">Constraints (TrajectoryNode::Data)</h3>
-<div class="outline-text-3" id="text-org07f8183">
+<div id="outline-container-org0b949ae" class="outline-3">
+<h3 id="org0b949ae">Constraints (TrajectoryNode::Data)</h3>
+<div class="outline-text-3" id="text-org0b949ae">
 <div class="org-src-container">
 <pre class="src src-c++">struct Constraint {
   struct Pose {
@@ -244,9 +244,9 @@ tasks_not_ready_队列中移动到task_queue_中。等待执行。</li>
 </div>
 
 
-<div id="outline-container-orgbaadee6" class="outline-3">
-<h3 id="orgbaadee6">FixedRatioSampler(global_localization_sampler_)</h3>
-<div class="outline-text-3" id="text-orgbaadee6">
+<div id="outline-container-org4d12031" class="outline-3">
+<h3 id="org4d12031">FixedRatioSampler(global_localization_sampler_)</h3>
+<div class="outline-text-3" id="text-org4d12031">
 <p>
 LocalTrajectoryBuilder也有一个采样器，不过那是针对某个轨迹的每个类型的传感器
 数据的。而这里的是每个轨迹都有一个采样器，目的是我们通过它只进行每个轨迹上的
@@ -256,9 +256,9 @@ LocalTrajectoryBuilder也有一个采样器，不过那是针对某个轨迹的�
 </div>
 
 
-<div id="outline-container-orgd151aeb" class="outline-3">
-<h3 id="orgd151aeb">坐标变化</h3>
-<div class="outline-text-3" id="text-orgd151aeb">
+<div id="outline-container-org02e8624" class="outline-3">
+<h3 id="org02e8624">坐标变化</h3>
+<div class="outline-text-3" id="text-org02e8624">
 <ul class="org-ul">
 <li>local map frame: 固定坐标系，是local slam的坐标系，不要理解成submap的坐标系。</li>
 <li>global map frame: 固定坐标系，是glbal slam的坐标系，可以通过添加轨迹时设置
@@ -273,9 +273,9 @@ P_in_submap = frame_in_local.inv() * P_in_local.</li>
 </div>
 
 
-<div id="outline-container-org0f3f8b5" class="outline-3">
-<h3 id="org0f3f8b5">轨迹的状态</h3>
-<div class="outline-text-3" id="text-org0f3f8b5">
+<div id="outline-container-org127d855" class="outline-3">
+<h3 id="org127d855">轨迹的状态</h3>
+<div class="outline-text-3" id="text-org127d855">
 <p>
 包括两个部分：
 </p>
@@ -306,14 +306,14 @@ struct InternalTrajectoryState {
 
 
 
-<div id="outline-container-orgb1db9bb" class="outline-2">
-<h2 id="orgb1db9bb">PoseGraphData</h2>
+<div id="outline-container-orgbbda39c" class="outline-2">
+<h2 id="orgbbda39c">PoseGraphData</h2>
 </div>
 
 
-<div id="outline-container-orgc72cbe2" class="outline-2">
-<h2 id="orgc72cbe2">Local to Global: GetLocalToGlobalTransform(trajectory_id)</h2>
-<div class="outline-text-2" id="text-orgc72cbe2">
+<div id="outline-container-org0d9ac31" class="outline-2">
+<h2 id="org0d9ac31">Local to Global: GetLocalToGlobalTransform(trajectory_id)</h2>
+<div class="outline-text-2" id="text-org0d9ac31">
 <p>
 该函数得到的结果是local map frame到global map frame之间的转换，有了这个转换，
 就可以将local map中的位姿转换到global map中了。
@@ -350,9 +350,9 @@ PoseGraphData中有一个保存各个submap在此刻的global_pose: MapById&lt;S
 </div>
 
 
-<div id="outline-container-org5e494bb" class="outline-2">
-<h2 id="org5e494bb">SubmapState</h2>
-<div class="outline-text-2" id="text-org5e494bb">
+<div id="outline-container-org9b92a2c" class="outline-2">
+<h2 id="org9b92a2c">SubmapState</h2>
+<div class="outline-text-2" id="text-org9b92a2c">
 <ul class="org-ul">
 <li>kNoConstraintSearch:</li>
 <li>kFinished:</li>
@@ -367,9 +367,9 @@ PoseGraphData中有一个保存各个submap在此刻的global_pose: MapById&lt;S
 </div>
 
 
-<div id="outline-container-org640e02b" class="outline-2">
-<h2 id="org640e02b">Constraint</h2>
-<div class="outline-text-2" id="text-org640e02b">
+<div id="outline-container-org557324a" class="outline-2">
+<h2 id="org557324a">Constraint</h2>
+<div class="outline-text-2" id="text-org557324a">
 <div class="org-src-container">
 <pre class="src src-c++">struct Constraint {
   struct Pose {
@@ -400,28 +400,28 @@ PoseGraphData中有一个保存各个submap在此刻的global_pose: MapById&lt;S
 </div>
 
 
-<div id="outline-container-org8ef1427" class="outline-2">
-<h2 id="org8ef1427">ConstraintBuilder2D</h2>
+<div id="outline-container-org86c94eb" class="outline-2">
+<h2 id="org86c94eb">ConstraintBuilder2D</h2>
 </div>
 
 
 
-<div id="outline-container-orge664d47" class="outline-2">
-<h2 id="orge664d47">过程</h2>
-<div class="outline-text-2" id="text-orge664d47">
+<div id="outline-container-orgc100938" class="outline-2">
+<h2 id="orgc100938">过程</h2>
+<div class="outline-text-2" id="text-orgc100938">
 </div>
-<div id="outline-container-orgbe65820" class="outline-3">
-<h3 id="orgbe65820">PoseGraph 处理 Imu,odometry,landmark</h3>
-<div class="outline-text-3" id="text-orgbe65820">
+<div id="outline-container-org8765c6e" class="outline-3">
+<h3 id="org8765c6e">PoseGraph 处理 Imu,odometry,landmark</h3>
+<div class="outline-text-3" id="text-org8765c6e">
 <p>
 将数据加入到 optimization_problem_的对应传感器队列中，并按时间排列。
 </p>
 </div>
 </div>
 
-<div id="outline-container-orgf0a2bbd" class="outline-3">
-<h3 id="orgf0a2bbd">Ranges</h3>
-<div class="outline-text-3" id="text-orgf0a2bbd">
+<div id="outline-container-orga9fa824" class="outline-3">
+<h3 id="orga9fa824">Ranges</h3>
+<div class="outline-text-3" id="text-orga9fa824">
 <ul class="org-ul">
 <li>添加轨迹的时候设置轨迹的初始值。</li>
 <li>将LocalSLAM的matching result加入pose graph的节点中：

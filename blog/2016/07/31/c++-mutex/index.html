@@ -42,9 +42,9 @@
   <h1>C++ mutex</h1>
 
 
-<div id="outline-container-orgbd174bd" class="outline-2">
-<h2 id="orgbd174bd">数据竞争现象</h2>
-<div class="outline-text-2" id="text-orgbd174bd">
+<div id="outline-container-org94ca94d" class="outline-2">
+<h2 id="org94ca94d">数据竞争现象</h2>
+<div class="outline-text-2" id="text-org94ca94d">
 <p>
 数据竞争(data race)。在并发编程中，多个线程如果同时访问相同的数据，就会发成data race，这时候
 访问就可能失败。解决这个问题的方法是给共享的资源加锁 mutex。线程A要访问共享数据的时候获取mutex，
@@ -91,9 +91,9 @@ numEven是共享资源，其他线程可能也会访问，这时候线程在访�
 </div>
 
 
-<div id="outline-container-org3ec2843" class="outline-2">
-<h2 id="org3ec2843">使用std::mutex容易出现的问题</h2>
-<div class="outline-text-2" id="text-org3ec2843">
+<div id="outline-container-org27fb871" class="outline-2">
+<h2 id="org27fb871">使用std::mutex容易出现的问题</h2>
+<div class="outline-text-2" id="text-org27fb871">
 <p>
 但是在实际使用中，这种方法往往会因为一些问题导致线程无法解锁，或者由于程序员的原因忘了解锁，其他线程就无法
 访问数据了。比如下面的两种情况：
@@ -159,9 +159,9 @@ void threadA() {
 </div>
 
 
-<div id="outline-container-org39ecdb3" class="outline-2">
-<h2 id="org39ecdb3">自动上锁和解锁 std::lock_guard</h2>
-<div class="outline-text-2" id="text-org39ecdb3">
+<div id="outline-container-org2c124dc" class="outline-2">
+<h2 id="org2c124dc">自动上锁和解锁 std::lock_guard</h2>
+<div class="outline-text-2" id="text-org2c124dc">
 <p>
 std::lock_guard 是c++11提供的一个 class ，结合 std::mutex 使用，它在实例化的时候，在构造函数中
 自动上锁，上锁之后，在作用域块内一直锁住，知道离开作用域，对象被析构时，自动解锁。这样将 lock
@@ -189,9 +189,9 @@ int main() {
 </div>
 
 
-<div id="outline-container-orgb0811fb" class="outline-2">
-<h2 id="orgb0811fb">std::lock_guard的局限</h2>
-<div class="outline-text-2" id="text-orgb0811fb">
+<div id="outline-container-org0085370" class="outline-2">
+<h2 id="org0085370">std::lock_guard的局限</h2>
+<div class="outline-text-2" id="text-org0085370">
 <p>
 使用 std::lock_guard 很简单，但是不太灵活。而且在使用时还会有其他的问题，这个 class，没有其
 他的接口，也就是除了在构造，析构的时候 lock 和 unlock ，我们几乎不能进行其他的操作。比如：
@@ -248,9 +248,9 @@ int main() {
 </div>
 
 
-<div id="outline-container-org24125d5" class="outline-2">
-<h2 id="org24125d5">std::unique_lock()</h2>
-<div class="outline-text-2" id="text-org24125d5">
+<div id="outline-container-org7328eaa" class="outline-2">
+<h2 id="org7328eaa">std::unique_lock()</h2>
+<div class="outline-text-2" id="text-org7328eaa">
 <p>
 unique_lock 和 lock_guard 一样都是在构造的时候自动 lock，在析构的时候自动 unlock，但不同的是他
 提供了其他的接口可以在中间让我们unlock。
@@ -319,9 +319,9 @@ int main() {
 </div>
 
 
-<div id="outline-container-orga8a9986" class="outline-2">
-<h2 id="orga8a9986">总结：std::unique_lock()和std::lock_guard()的区别</h2>
-<div class="outline-text-2" id="text-orga8a9986">
+<div id="outline-container-org479d70f" class="outline-2">
+<h2 id="org479d70f">总结：std::unique_lock()和std::lock_guard()的区别</h2>
+<div class="outline-text-2" id="text-org479d70f">
 <p>
 两者相同的地方是，都会在构造的时候自动lock，析构的时候自动unlock。
 </p>
@@ -339,9 +339,9 @@ int main() {
 </div>
 
 
-<div id="outline-container-org3b55b13" class="outline-2">
-<h2 id="org3b55b13">references</h2>
-<div class="outline-text-2" id="text-org3b55b13">
+<div id="outline-container-org2a7dfa7" class="outline-2">
+<h2 id="org2a7dfa7">references</h2>
+<div class="outline-text-2" id="text-org2a7dfa7">
 <p>
 <a href="http://jakascorner.com/blog/2016/01/data-races.html">Data race and mutex</a>
 </p>

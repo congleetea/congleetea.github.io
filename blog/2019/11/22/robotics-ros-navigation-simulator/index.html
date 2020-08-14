@@ -42,9 +42,9 @@
   <h1>ROS下navigation的仿真</h1>
 
 
-<div id="outline-container-orgf94032c" class="outline-2">
-<h2 id="orgf94032c">使用gazebo和turtlebot仿真</h2>
-<div class="outline-text-2" id="text-orgf94032c">
+<div id="outline-container-org39b43c2" class="outline-2">
+<h2 id="org39b43c2">使用gazebo和turtlebot仿真</h2>
+<div class="outline-text-2" id="text-org39b43c2">
 <p>
 在没有机器人的情况下，可以使用gazebo进行仿真，这里记录一下在ros kinetic中，使用
 gazebo进行仿真的步骤。
@@ -99,9 +99,9 @@ roslaunch turtlebot3_navigation turtlebot3_navigation.launch map_file:=$PWD/map.
 </div>
 
 
-<div id="outline-container-orge7bec0d" class="outline-2">
-<h2 id="orge7bec0d">使用rbx1仿真</h2>
-<div class="outline-text-2" id="text-orge7bec0d">
+<div id="outline-container-org28065f0" class="outline-2">
+<h2 id="org28065f0">使用rbx1仿真</h2>
+<div class="outline-text-2" id="text-org28065f0">
 <p>
 如果已经有地图的话，不需要启动gazebo，直接在rviz中对导航进行仿真。
 </p>
@@ -130,9 +130,9 @@ rosrun rviz rviz -d `rospack find rbx1_nav`/nav.rviz
 </div>
 </div>
 
-<div id="outline-container-org1cdc019" class="outline-2">
-<h2 id="org1cdc019">取消当前导航</h2>
-<div class="outline-text-2" id="text-org1cdc019">
+<div id="outline-container-orgb05151f" class="outline-2">
+<h2 id="orgb05151f">取消当前导航</h2>
+<div class="outline-text-2" id="text-orgb05151f">
 <p>
 move_base中可以通过发送消息到topic: /move_base/cancel　就可以取消当前的导航。
 </p>
