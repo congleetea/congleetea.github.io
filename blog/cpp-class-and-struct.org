@@ -1,0 +1,18 @@
+#+TITLE:       c++中struct和class的区别
+#+AUTHOR:      Xuancong Lee
+#+EMAIL:       congleetea@gmail.com
+#+DATE:        2016-07-18 Wed
+#+URI:         /blog/%y/%m/%d/cpp-class-and-struct
+#+KEYWORDS:    c++,difference,struct,class,-2
+#+TAGS:        c/c++ 
+#+LANGUAGE:    en
+#+OPTIONS:     H:3 num:nil toc:nil \n:nil ::t |:t ^:nil -:nil f:t *:t <:t
+#+DESCRIPTION: c++ 中的 struct 和 class 区别。 
+
+
+* 参考 
+  - https://stackoverflow.com/questions/92859/what-are-the-differences-between-struct-and-class-in-c
+
+  - https://www.fluentcpp.com/2017/06/13/the-real-difference-between-struct-class/
+
+  - https://blogs.mentor.com/colinwalls/blog/2014/06/02/struct-vs-class-in-c/

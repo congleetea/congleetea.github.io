@@ -1,0 +1,18 @@
+#+TITLE:       C++ tips
+#+AUTHOR:      Clare Lee
+#+EMAIL:       congleetea@gmail.com
+#+DATE:        2016-02-15 Fri
+#+URI:         /blog/%y/%m/%d/c++-tips
+#+KEYWORDS:    c/c++,-3
+#+TAGS:        c/c++
+#+LANGUAGE:    en
+#+OPTIONS:     H:3 num:nil toc:nil \n:nil ::t |:t ^:nil -:nil f:t *:t <:t
+#+DESCRIPTION: <TODO: insert your description here>
+
+
+
+- 不能在迭代器里面进行删除元素的操作。如果要在内部删除，需要更新迭代器的指向。
+- 设计线程时要明白线程的任务和与外界的交互，不要滥用线程，可以一个线程工作，并且
+  不会影响性能的就不要分成两个线程。
+- class中获取变量值要加const, 如： int getXXX const() {return a_;} 保证不修改到
+  变量。

@@ -1,3 +1,4 @@
-#+TITLE: Index
+#+TITLE: HOME 
+#+LABEL: fig:SED-HR4049
+[[./blog/images/lengshuihe.jpeg]]
 
-This is the home page of Clare Lee.

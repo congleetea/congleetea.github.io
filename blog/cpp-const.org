@@ -1,0 +1,84 @@
+#+TITLE:       C++ const 总结
+#+AUTHOR:      Clare Lee
+#+EMAIL:       congleetea@gmail.com
+#+DATE:        2016-10-12 Sat
+#+URI:         /blog/%y/%m/%d/c++-const
+#+KEYWORDS:    c++,const,-3
+#+TAGS:        c/c++
+#+LANGUAGE:    en
+#+OPTIONS:     H:3 num:nil toc:nil \n:nil ::t |:t ^:nil -:nil f:t *:t <:t
+#+DESCRIPTION: <TODO: insert your description here>
+
+* const 修饰指针
+  主要看const位于*的哪一边。位于*左边则限制内容，位于右边则限制指针。
+
+- const int *p = &a
+  const 右边是*p，*p是指针的内容，因此，p的内容不能被修改，而指针可以被修改：
+
+  #+BEGIN_SRC c++
+    int i = 0;
+    int j = 0;
+    const int *p = &i; // *p不能修改，也就是p所指向的内容不能被修改，但p指针可以被修改.
+    *p = 10;  // error, 修改内容不行。
+    i = 10;   // ok, 通过i修改是可行的。
+    p = &j;   // ok, 修改指针。
+  #+END_SRC
+
+- int * const p = &a
+  const 右边p是指针，因此，p指针不能修改，内容可以修改:
+  #+BEGIN_SRC c++
+    int i = 0;
+    int j = 0;
+    int* const p = &i; // 指针p不能修改，内容可以修改.
+    *p = 10;  // ok, 修改内容可行。
+    i = 10;   // ok, 通过i修改是可行的。
+    p = &j;   // error, 修改指针不行。
+  #+END_SRC
+
+- const int* const p = &a
+  第一个const右边是内容*p，第二个右边是指针p，因此二者都不可以修改。
+
+- const int *a 和 int const *a 是一样的。
+
+
+* const 修饰类的对象和成员函数
+
+** const 类对象和成员函数的调用关系
+  类对象的常亮性决定了调用哪一个函数(是否尾部为const限制的)。
+
+  #+BEGIN_SRC c++
+    #include <stdio.h>
+    #include <stdlib.h>
+    #include <iostream>
+    using namespace std;
+    class A {
+     public:
+      void f() {
+        cout << "non const" << endl;
+      }
+      void f() const {
+        cout << " const" << endl;
+      }
+    };
+
+    int main(int argc, char **argv) {
+      A a;
+      a.f();  // 输出 non const, 如果没有void f(){}函数则调用 void f() const{}
+      const A &b = a;
+      b.f();  // 输出 const
+      const A *c = &a;
+      c->f(); // 输出 const
+      A *const d = &a;
+      d->f(); // 输出 non const, 如果没有void f(){}函数则调用 void f() const{}
+      A *const e = d;
+      e->f(); // 输出 non const, 如果没有void f(){}函数则调用 void f() const{}
+      const A *f = c;
+      f->f(); // 输出 const
+      return 0;
+    }
+  #+END_SRC
+
+
+** const成员函数和变量的关系
+  - 在成员函数后面加上const，则该函数不能修改类的任何成员变量。
+  - 形参如果带有const，则带入的参数不能被修改。

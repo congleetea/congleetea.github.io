@@ -1,0 +1,91 @@
+#+TITLE:       C++ 模板的类型推导
+#+AUTHOR:      Clare Lee
+#+EMAIL:       congleetea@gmail.com
+#+DATE:        2017-10-23 Wed
+#+URI:         /blog/%y/%m/%d/c++-template-paramtype
+#+KEYWORDS:    c++,const,reference,pointer,template,auto,-2
+#+TAGS:        c/c++
+#+LANGUAGE:    en
+#+OPTIONS:     H:3 num:nil toc:nil \n:nil ::t |:t ^:nil -:nil f:t *:t <:t
+#+DESCRIPTION: 模板的类型推导
+
+* 模板的类型推导
+  模板的类型推导不仅和模板的形参类型有关，还和传入的实参类型有关。主要分三种情况，
+  总结如下：
+
+  假设模板形参类型为 ParamType，函数调用的实参是 expr, 即：
+
+  #+BEGIN_SRC c++
+  template <typename T>
+  void f(ParamType param);
+  #+END_SRC
+
+  调用时：
+  #+BEGIN_SRC c++
+  f(expr);
+  #+END_SRC
+
+  于是模板有以下几种情况：
+
+  - 类型1: ParamType 是指针或引用(非万能引用)
+   #+BEGIN_SRC c++
+     template<typename T>
+     void f(T& param); // ParamType具有引用性.
+     // 或者
+     void f(const T& param); // ParamType具有引用性和常量性.
+     // 或者
+     void f(T* param);  // ParamType具有指针性.
+   #+END_SRC
+
+   此时的推导原则模板形参带有什么性质(包括常量性和引用性)，就把expr的这种性质忽
+   略即可。
+
+   | void f(T& param)时expr类型 | T 的型别推导(忽略引用性) | param             |
+   |----------------------------+--------------------------+-------------------|
+   | int x = 2                  | int                      | f(x): int&        |
+   | const int cx = x           | const int                | f(cx): const int& |
+   | const int& rx = x          | const int                | f(rx): const int& |
+
+   | void f(const T& param)时expr类型 | T 的型别推导(忽略引用性和常量性) | param            |
+   |----------------------------------+----------------------------------+------------------|
+   | int x = 2                        | int                              | f(x): const int& |
+   | const int cx = x                 | int                              | f(cx): const int& |
+   | const int& rx = x                | int                              | f(rx): const int& |
+
+   | void f(T* param)时expr类型 | T 的型别推导(忽略指针性) | param             |
+   |----------------------------+--------------------------+-------------------|
+   | int x = 2                  | int                      | f(&x): int*       |
+   | const int* px = x          | int                      | f(px): const int* |
+
+
+  - 类型2: ParamType 万能引用
+
+    #+BEGIN_SRC c++
+     template<typename T>
+     void f(T&& param);
+   #+END_SRC
+   这种情况要区分expr是左值还是右值。如果是左值，则T被推导为引用型别的唯一情形。
+   如果是右值，则按照类型1中的规则。
+
+    | void f(T&& param)时expr类型 | T 的型别推导        | param             |
+    |-----------------------------+---------------------+-------------------|
+    | int x = 2                   | x是左值，T为int&    | f(x): int&        |
+    | const int cx = x            | 左值，T为const int& | f(cx): const int& |
+    | const int& rx = x           | 左值，T为const int& | f(rx): const int& |
+    | f(27)                       | 27是右值,T为int     | f(27): int&&      |
+
+
+  - 类型3: ParamType 非指针和引用
+   #+BEGIN_SRC c++
+     template<typename T>
+     void f(T param);
+   #+END_SRC
+   这种情况其实就是按值传递，意味着无论传入什么，param都是一个副本，也就是一个全
+   新的对象。将会忽略expr的引用性和常量性。
+
+   | void f(T param)时expr类型              | T 的型别推导                            | param               |
+   |----------------------------------------+-----------------------------------------+---------------------|
+   | int x = 2                              | int (忽略引用性和常量性)                | f(x): int           |
+   | const int cx = x                       | int (忽略引用性和常量性)                | f(cx): int          |
+   | const int& rx = x                      | int (忽略引用性和常量性)                | f(rx): int          |
+
