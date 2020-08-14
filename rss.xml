@@ -4,8 +4,8 @@
     <title>清园索道</title>
     <link>https://congleetea.github.io</link>
     <description>上下求索，识己识人识事</description>
-    <pubDate>Fri, 14 Aug 2020 19:44:11 CST</pubDate>
-    <lastBuildDate>Fri, 14 Aug 2020 19:44:11 CST</lastBuildDate>
+    <pubDate>Fri, 14 Aug 2020 19:46:42 CST</pubDate>
+    <lastBuildDate>Fri, 14 Aug 2020 19:46:42 CST</lastBuildDate>
     <docs>http://www.rssboard.org/rss-specification</docs>
     <generator>Org-page static site generator (https://github.com/kelvinh/org-page)</generator>
     <item>
@@ -58,25 +58,25 @@
       <guid>https://congleetea.github.io/blog/2016/02/15/c++-tips</guid>
     </item>
     <item>
-      <title>TOOL: Chrome浏览器使用时遇到的问题</title>
-      <link>https://congleetea.github.io/blog/2018/09/08/chrome-use-problem</link>
-      <description><![CDATA[记录chrome使用中的一些小问题]]></description>
+      <title>etcd认证设置</title>
+      <link>https://congleetea.github.io/blog/2017/05/02/etcd-auth-setting</link>
+      <description><![CDATA[etcd的认证设置]]></description>
       <pubDate>2020-08-14</pubDate>
-      <guid>https://congleetea.github.io/blog/2018/09/08/chrome-use-problem</guid>
+      <guid>https://congleetea.github.io/blog/2017/05/02/etcd-auth-setting</guid>
     </item>
     <item>
-      <title>TOOL: 双网卡上内外网的路由设置</title>
-      <link>https://congleetea.github.io/blog/2019/04/24/double-network-card-setting</link>
-      <description><![CDATA[双网卡上内外网的设置]]></description>
+      <title>emqttd随笔</title>
+      <link>https://congleetea.github.io/blog/2017/01/03/emqttd-introduce.org</link>
+      <description><![CDATA[emqttd介绍]]></description>
       <pubDate>2020-08-14</pubDate>
-      <guid>https://congleetea.github.io/blog/2019/04/24/double-network-card-setting</guid>
+      <guid>https://congleetea.github.io/blog/2017/01/03/emqttd-introduce.org</guid>
     </item>
     <item>
-      <title>TOOL: 编写 USB rules 作为永久规则</title>
-      <link>https://congleetea.github.io/blog/2019/03/16/udev-usb-rules</link>
-      <description><![CDATA[<TODO: insert your description here>]]></description>
+      <title>Kafka介绍</title>
+      <link>https://congleetea.github.io/blog/2016/11/12/kafka-introduce</link>
+      <description><![CDATA[kafka介绍]]></description>
       <pubDate>2020-08-14</pubDate>
-      <guid>https://congleetea.github.io/blog/2019/03/16/udev-usb-rules</guid>
+      <guid>https://congleetea.github.io/blog/2016/11/12/kafka-introduce</guid>
     </item>
   </channel>
 </rss>

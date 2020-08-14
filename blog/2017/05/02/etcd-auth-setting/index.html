@@ -2,12 +2,12 @@
 <html lang="en-us">
   
   <head>
-  <title>TOOL: Chrome浏览器使用时遇到的问题 - 清园索道</title>
+  <title>etcd认证设置 - 清园索道</title>
   <meta charset="utf-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
   <meta name="author" content="Xuancong Lee" />
-    <meta name="description" content="记录chrome使用中的一些小问题" />
-    <meta name="keywords" content="tools,chrome,open link" />
+    <meta name="description" content="etcd的认证设置" />
+    <meta name="keywords" content="etcd,auth" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
   <link rel="stylesheet" href="/media/css/main.css" type="text/css">
   <link rel="stylesheet" href="/media/css/base16-ocean.light-min.css" type="text/css">
@@ -39,45 +39,94 @@
 
       <article id="content">
         
-  <h1>TOOL: Chrome浏览器使用时遇到的问题</h1>
+  <h1>etcd认证设置</h1>
 
-
-<div id="outline-container-org745162a" class="outline-2">
-<h2 id="org745162a">不能通过外部打开链接</h2>
-<div class="outline-text-2" id="text-org745162a">
-<ul class="org-ul">
-<li>问题描述
-在终端中通过 open link 打开链接的时候，可以启动 chrome，但是空白页面，不显示内容。</li>
-
-<li><p>
-解决
+<div id="outline-container-org91f797e" class="outline-2">
+<h2 id="org91f797e">etcd: consistent key-value store for shared configuration and service discovery.</h2>
+<div class="outline-text-2" id="text-org91f797e">
+<p>
+也就是两个功能shared configuration和service discovery都是再k-v存储基础上的。存储类似redis，
+写入，读取和更新都是通过改变这些kv值来实现。
 </p>
 
 <p>
-vim ./.local/share/applications/google-chrome.desktop, 将Exec修改为：
+另外watcher和ttl也是基于这些kv值的监控实现的。
 </p>
 
-<div class="org-src-container">
-<pre class="src src-text">Exec=/opt/google/chrome/chrome %u
-</pre>
+<p>
+因此，注册和注销其实就是对应kv的put和get。
+</p>
+</div>
 </div>
 
-<p>
-就是在最后加上 %u，
-</p>
+<div id="outline-container-org621c901" class="outline-2">
+<h2 id="org621c901">auth</h2>
+<div class="outline-text-2" id="text-org621c901">
+<div class="org-src-container">
+<pre class="src src-sh">$ etcdctl user list
 
-<p>
-这个文件是Linux 的桌面入口(desktop entry)格式的文件，定义了桌面图标启动的形式。
-</p>
+## 添加用户myuser
+$ etcdctl user add myuser (input password) 
+Password of myuser: 
+Type password of myuser again for confirmation: 
+User myuser created
 
-<p>
-refer1: <a href="https://www.ibm.com/developerworks/cn/linux/l-cn-dtef/index.html">https://www.ibm.com/developerworks/cn/linux/l-cn-dtef/index.html</a>
-</p>
+$ etcdctl role add goim   ## 添加role，名为goim
+Role goim created
 
-<p>
-refer2: <a href="https://blog.csdn.net/Future_promise/article/details/78215201">https://blog.csdn.net/Future_promise/article/details/78215201</a>
-</p></li>
-</ul>
+$ etcdctl user grant-role myuser goim ## 给用户myuser添加role：goim 
+Role goim is granted to user myuser
+
+$ etcdctl user get myuser  ## 查看myuser用户的信息
+User: myuser
+Roles: goim
+
+$ etcdctl role grant-permission goim --prefix=true readwrite im/  ## 赋予role相应的权限
+Role goim updated
+
+$ etcdctl user add root   ## 确保存在root用户，作为管理者。
+Password of root: 
+Type password of root again for confirmation: 
+User root created
+$ etcdctl auth enable     ## 激活auth功能
+Authentication Enabled
+
+$ etcdctl --user root:mypass auth disable  ## 取消认证功能
+Authentication Disabled
+$ etcdctl auth enable     ## 重新激活auth功能
+Authentication Enabled
+
+$ etcdctl --user root:mypass role list  ## 查看已有的所有role.
+goim
+root 
+
+$ etcdctl --user root:mypass role get goim
+Role goim
+KV Read:
+[im/, im0) (prefix im/)
+KV Write:
+[im/, im0) (prefix im/)
+
+$ etcdctl --user root:mypass role revoke-permission goim --prefix=true im/  ## 取消goim的权限, 官方文档有remove命令，已经不用了。
+Permission of range [im/, im0) is revoked from role goim 
+$ etcdctl --user root:mypass role get goim  ## 再次查看，role的相应权限已经取消了。
+Role goim
+KV Read:
+KV Write: 
+
+## 激活认证的情况下，新建其他role
+$ etcdctl --user root:mypass role add intoyun-kfkworkers
+Role intoyun-kfkworkers created
+
+$ etcdctl --user root:mypass user grant-role myuser intoyun-kfkworkers
+Role intoyun-kfkworkers is granted to user myuser
+$ etcdctl --user root:mypass user get myuser
+User: myuser
+Roles: goim intoyun-kfkworkers
+$ etcdctl --user root:mypass role grant-permission intoyun-kfkworkers --prefix=true readwrite intoyun-kfkworkers/
+Role intoyun-kfkworkers updated
+</pre>
+</div>
 </div>
 </div>
 
@@ -85,10 +134,10 @@ refer2: <a href="https://blog.csdn.net/Future_promise/article/details/78215201">
       </article>
       <div>
     <ul id="tags">
-        <li><a href="/tags/tools/">tools</a></li>
+        <li><a href="/tags/services/">services</a></li>
     </ul>
     <div class="post-meta">
-      <span title="post date">Published: 2018-09-08</span>
+      <span title="post date">Published: 2017-05-02</span>
       </br>
       <span title="last modification date">Last Modification: 2020-08-14</span>
       </br>
@@ -99,8 +148,8 @@ refer2: <a href="https://blog.csdn.net/Future_promise/article/details/78215201">
         <div id="disqus_thread"></div>
         <script type="text/javascript">
         //var disqus_developer = 1;
-        var disqus_identifier = "/blog/2018/09/08/chrome-use-problem";
-        var disqus_url = "https://congleetea.github.io/blog/2018/09/08/chrome-use-problem";
+        var disqus_identifier = "/blog/2017/05/02/etcd-auth-setting";
+        var disqus_url = "https://congleetea.github.io/blog/2017/05/02/etcd-auth-setting";
         var disqus_shortname = 'congleetea';
         /* * * DON'T EDIT BELOW THIS LINE * * */
         (function() {
