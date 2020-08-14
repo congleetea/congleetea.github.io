@@ -1,0 +1,14 @@
+#+TITLE:       插值
+#+AUTHOR:      Clare Lee
+#+EMAIL:       congleetea@gmail.com
+#+DATE:        2019-02-21 Thu
+#+URI:         /blog/%y/%m/%d/interpolation
+#+KEYWORDS:    math,interpolation
+#+TAGS:        math
+#+LANGUAGE:    en
+#+OPTIONS:     H:3 num:nil toc:nil \n:nil ::t |:t ^:nil -:nil f:t *:t <:t
+#+DESCRIPTION: 关于插值法的运用和常用方法
+
+https://zh.wikipedia.org/wiki/%E6%8F%92%E5%80%BC
+
+https://zh.wikipedia.org/wiki/%E5%8F%8C%E4%B8%89%E6%AC%A1%E6%8F%92%E5%80%BC

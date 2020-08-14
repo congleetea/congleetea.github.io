@@ -1,0 +1,26 @@
+#+TITLE:       矩阵：奇异值分解
+#+AUTHOR:      Clare Lee
+#+EMAIL:       congleetea@gmail.com
+#+DATE:        2019-09-12 Thu
+#+URI:         /blog/%y/%m/%d/svd
+#+KEYWORDS:    matrix,svd 
+#+TAGS:        math
+#+LANGUAGE:    en
+#+OPTIONS:     H:3 num:nil toc:nil \n:nil ::t |:t ^:nil -:nil f:t *:t <:t
+#+DESCRIPTION: 关于奇异值分解 
+
+* 什么是奇异值
+* 奇异值分解的几何意义
+* 如何进行奇异值分解
+* 奇异值分解的运用
+
+  
+
+* 参考
+
+  - [[https://zh.wikipedia.org/wiki/%E5%B9%BF%E4%B9%89%E9%80%86%E9%98%B5][广义逆阵]]
+  - [[https://zhuanlan.zhihu.com/p/31386807][矩阵的特征分解与奇异值分解(SVD)]]
+  - [[http://blog.sciencenet.cn/home.php?mod=space&uid=696950&do=blog&quickforward=1&id=699380 ][奇异值分解(SVD) --- 线性变换几何意义]]
+  - [[https://www.zhihu.com/question/263722514/answer/272977924][人们是如何想到奇异值分解的?]]
+  - [[https://www.zhihu.com/question/22237507/answer/53804902][奇异值的物理意义是什么?]] 
+  - [[http://www.ams.org/publicoutreach/feature-column/fcarc-svd][We Recommend a Singular Value Decomposition]]

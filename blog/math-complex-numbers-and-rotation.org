@@ -1,0 +1,96 @@
+#+TITLE:       复数与旋转
+#+AUTHOR:      Clare Lee
+#+EMAIL:       congleetea@gmail.com
+#+DATE:        2019-05-05 Sun
+#+URI:         /blog/%y/%m/%d/complex-numbers-and-rotation
+#+KEYWORDS:    complex,rotation
+#+TAGS:        math
+#+LANGUAGE:    en
+#+OPTIONS:     H:3 num:nil toc:nil \n:nil ::t |:t ^:nil -:nil f:t *:t <:t
+#+DESCRIPTION: 描述虚数的原始意义
+
+  
+* 虚数i表示什么？
+  我们先从一个我们常用的等式说起:
+
+  \begin{equation}
+  1x^{2} = 1
+  \end{equation}
+
+  我们可以写成：
+  
+  \begin{equation}
+   1*x*x=1 
+  \end{equation}
+  我们可以认为是1经过两次相同的运算之后又得到1.
+
+  那么我们看虚数：
+  \begin{equation}
+  1i^{2} = 1 * i * i = -1
+  \end{equation}
+
+  我们也可以认为是1通过两次相同的运算得到-1，什么情况能够得到这种结果呢？
+  如下图：一个坐标轴上原点两边分别1通过逆时针旋转两次90度就得到-1了。
+ 
+  #+CAPTION: 1逆时针旋转两次得到-1 
+  #+LABEL: fig:SED-HR4049
+  [[./images/i2=-1.png]]
+  
+  这样我们可以看出i其实表示的就是逆时针方向旋转90度。
+
+  再看一个问题:
+  
+  \begin{equation}
+  (-1)^{99} = -1
+  \end{equation}
+
+  我们都知道，-1每相乘两次就会变成+1，也就是他的结果其实是以2作为循环的。那么虚
+  数相乘呢？
+
+  \begin{equation}
+  1 = 1
+  \end{equation}
+  \begin{equation}
+  i=i 
+  \end{equation}
+  \begin{equation}
+  i^2= -1
+  \end{equation}
+  \begin{equation}
+  i^3= -i
+  \end{equation}
+  \begin{equation}
+  i^4= 1 
+  \end{equation}
+
+  也就是说他们是以4作为循环的，乘四次之后又回到原来的结果。看看下面这个图就很好
+  解释了：
+
+  #+CAPTION: i表示的逆时针旋转 
+  #+LABEL: fig:SED-HR4049
+  [[./images/imaginary_n.png]]
+
+  因为旋转4次90度之后又回到原来的位置了。
+
+
+* 复数的运算
+   
+  进一步想，我们能不能既有虚数，又有实数呢？ 
+  
+  
+** 复数的加法 
+    
+** 复数的大小（模）
+    距离原点的距离。
+
+** 乘法    
+   乘一个复数表示旋转一个角度。
+    
+* 欧拉公式
+
+
+* 参考
+
+  - [1] [[http://www.ruanyifeng.com/blog/2012/09/imaginary_number.html][虚数的意义]] /https://betterexplained.com/articles/a-visual-intuitive-guide-to-imaginary-numbers/
+
+
