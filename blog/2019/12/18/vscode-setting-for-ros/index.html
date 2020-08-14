@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  
+  <head>
+  <title>TOOL: VSCode配置ROS的使用 - 清园索道</title>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
+  <meta name="author" content="Clare Lee" />
+    <meta name="description" content="为Linux，ROS配置VSCode" />
+    <meta name="keywords" content="ros,vscode,astyle,catkin_make" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+  <link rel="stylesheet" href="/media/css/main.css" type="text/css">
+  <link rel="stylesheet" href="/media/css/base16-ocean.light-min.css" type="text/css">
+  <link href='https://fonts.googleapis.com/css?family=Fira+Sans' rel='stylesheet' type='text/css'>
+  <link href='https://fonts.googleapis.com/css?family=Fira+Mono' rel='stylesheet' type='text/css'>
+</head>
+
+  <body>
+    <div id="page-wrap">
+      <div>
+  <header id="header">
+    <div class="logo">
+      <h1><a href="/"><span class="logo-black">清园索道</span></a></h1>
+    </div>
+    <div class="fortune">
+      <blockquote>
+        上下求索，识己识人识事
+      </blockquote>
+    </div>
+    <ul id="main-nav">
+        <li><a href="/blog/">Blog</a></li>
+      <li><a href="/tags/">分类</a></li>
+      <li><a href="/about/">关于我</a></li>
+      <li><a href="https://github.com/congleetea">GitHub</a></li>
+      <li><a href="/rss.xml">RSS</a></li>
+    </ul>
+  </header>
+</div>
+
+      <article id="content">
+        
+  <h1>TOOL: VSCode配置ROS的使用</h1>
+
+<div id="outline-container-org63b55af" class="outline-2">
+<h2 id="org63b55af">概述</h2>
+<div class="outline-text-2" id="text-org63b55af">
+<p>
+vscode在linux下面也是一个比较好用的代码编辑器。由于我们经常要用到ROS，因此这里讲
+述一下相关的配置。
+</p>
+
+<p>
+vscode的所有配置文件都在~/.vscode目录中。很多人习惯搞多个ROS的工作空间，其实完全
+没有必要，放在一个工作空间可以避免很多配置信息的切换。下面的vscode配置主要是ROS
+的代码提示，编译，代码google风格格式化。
+</p>
+</div>
+</div>
+
+
+<div id="outline-container-org97c06bc" class="outline-2">
+<h2 id="org97c06bc">vscode配置ros插件</h2>
+<div class="outline-text-2" id="text-org97c06bc">
+</div>
+<div id="outline-container-org7f81e50" class="outline-3">
+<h3 id="org7f81e50">安装vscode</h3>
+<div class="outline-text-3" id="text-org7f81e50">
+<p>
+这一步可以直接上官网，根据官网安装就行。不同的版本可能有用一些差别，但是对于
+配置方法应该是一样的。我用的是1.42.0
+</p>
+</div>
+</div>
+<div id="outline-container-org3da59c5" class="outline-3">
+<h3 id="org3da59c5">安装ROS插件</h3>
+<div class="outline-text-3" id="text-org3da59c5">
+<p>
+打开vscode，使用快捷键Ctrl+Shift+X，左边会有一个输入框，输入ROS，选择一下，
+点击安装即可。
+</p>
+
+
+<div id="orga457e67" class="figure">
+<p><img src="/assets/blog/2019/12/18/vscode-setting-for-ros/vscode-install-plugin.png" alt="vscode-install-plugin.png" />
+</p>
+<p><span class="figure-number">Figure 1: </span>install plugin</p>
+</div>
+
+
+<div id="org4b9a891" class="figure">
+<p><img src="/assets/blog/2019/12/18/vscode-setting-for-ros/vscode-install-ROS-plugin.png" alt="vscode-install-ROS-plugin.png" />
+</p>
+<p><span class="figure-number">Figure 2: </span>install ros plugin</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org6f3bd0b" class="outline-3">
+<h3 id="org6f3bd0b">安装C/C++插件</h3>
+<div class="outline-text-3" id="text-org6f3bd0b">
+<p>
+使用快捷键Ctrl+Shift+X, 在左边输入框中输入"c/c++"安装。
+</p>
+
+<div id="orgf4dcba3" class="figure">
+<p><img src="/assets/blog/2019/12/18/vscode-setting-for-ros/vscode-install-c-cpp.png" alt="vscode-install-c-cpp.png" />
+</p>
+<p><span class="figure-number">Figure 3: </span>install c/cpp plugin</p>
+</div>
+</div>
+</div>
+
+
+<div id="outline-container-org985cffc" class="outline-3">
+<h3 id="org985cffc">配置c/c++</h3>
+<div class="outline-text-3" id="text-org985cffc">
+<p>
+Ctrl+Shift+P, 输入C/C++: Edit Configuration (JSON), 输入一下内容：
+</p>
+<div class="org-src-container">
+<pre class="src src-json">{
+    "configurations": [
+        {
+            "name": "Linux",
+            "includePath": [
+                "${workspaceFolder}",
+                "/opt/ros/kinetic/include"
+            ],
+            "defines": [],
+            "compilerPath": "/usr/bin/gcc",
+            "cStandard": "c11",
+            "cppStandard": "c++17",
+            "intelliSenseMode": "gcc-x64"
+        }
+    ],
+    "version": 4
+}
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgf601f23" class="outline-3">
+<h3 id="orgf601f23">配置 catkin_make</h3>
+<div class="outline-text-3" id="text-orgf601f23">
+<p>
+Ctrl+Shift+P, 输入tasks: Configure Task, 会在~/.vscode中生成task.json文件, 修改如下:
+</p>
+<div class="org-src-container">
+<pre class="src src-json">{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "catkin_make",
+            "type": "shell",
+            "command": "catkin_make",
+            "args": [],//如果需要在命令后面加一些后缀，可以写在这里，比如-DCATKIN_WHITELIST_PACKAGES=“pac1;pac2”
+            "group": {"kind":"build","isDefault":true},
+            "presentation": {
+                "reveal": "always" //可选always或者silence，代表是否输出信息
+            },
+            "problemMatcher": "$msCompile"
+        },
+    ]
+}
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org1c8d8f0" class="outline-3">
+<h3 id="org1c8d8f0">使用</h3>
+<div class="outline-text-3" id="text-org1c8d8f0">
+<p>
+配置完成之后，打开工作空间目录文件夹。可以目录栏右键新建package和文件。
+Ctrl+Shift+B进行编译。
+</p>
+</div>
+</div>
+</div>
+
+
+<div id="outline-container-orgc5a3002" class="outline-2">
+<h2 id="orgc5a3002">astyle</h2>
+<div class="outline-text-2" id="text-orgc5a3002">
+<ul class="org-ul">
+<li>安装astyle 3.1</li>
+<li>Ctrl+Shift+X 打开扩展工具页面，输入astyle，安装。</li>
+<li><p>
+Ctrl+Shift+P 输入：Preferences：Open Settings(JSON)，填入：
+</p>
+<div class="org-src-container">
+<pre class="src src-text">{
+    "window.zoomLevel": 0,
+    "astyle.executable": "astyle",
+    // "astyle.astylerc": "${workspaceRoot}/.vscode/astylerc", //此处默认是```$HOME/.astylerc```(不填)
+    "astyle.additional_languages": [
+        "c",
+        "cpp",
+    ],
+    "astyle.cmd_options": [
+        "--lineend=linux",
+        "--delete-empty-lines",
+        "--style=google",
+        "--indent=spaces=2",
+        "--attach-namespaces",
+        "--attach-classes",
+        "--attach-inlines",
+        "--add-brackets",
+        "--align-pointer=name",
+        "--align-reference=name",
+        "--break-after-logical",
+        "--pad-oper",
+        "--unpad-paren",
+        "--suffix=none",
+        "--indent-switches",
+        "--max-code-length=80",
+        "--indent-after-parens",
+    ],
+    "[cpp]": {
+        "editor.defaultFormatter": "chiehyu.vscode-astyle"
+    },
+    "explorer.confirmDelete": false,
+}
+</pre>
+</div>
+
+<p>
+下面cmd_options里面的内容可以放在一个其他地方取名astyle，然后在第三行
+astyle.astylerc后面指定目录，这样cmd_options里面的东西就不需要了。
+</p></li>
+<li>Ctrl+Shift+I进行格式化。</li>
+</ul>
+</div>
+</div>
+
+
+      </article>
+      <div>
+    <ul id="tags">
+        <li><a href="/tags/tools/">tools</a></li>
+    </ul>
+    <div class="post-meta">
+      <span title="post date">Published: 2019-12-18</span>
+      </br>
+      <span title="last modification date">Last Modification: 2020-08-14</span>
+      </br>
+      <span title="author" >Author: Clare Lee</span>
+    </div>
+    <section>
+      <h2>Comments</h2>
+        <div id="disqus_thread"></div>
+        <script type="text/javascript">
+        //var disqus_developer = 1;
+        var disqus_identifier = "/blog/2019/12/18/vscode-setting-for-ros";
+        var disqus_url = "https://congleetea.github.io/blog/2019/12/18/vscode-setting-for-ros";
+        var disqus_shortname = 'congleetea';
+        /* * * DON'T EDIT BELOW THIS LINE * * */
+        (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+        </script>
+        <noscript>Please enable JavaScript to view the <a href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+        <a href="//disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+    </section>
+  <script src="//code.jquery.com/jquery-latest.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.1.0/highlight.min.js"></script>
+  <script src="/media/js/main.js"></script>
+  <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  <div class="copyright">
+    <p>Generated by <a href="http://www.gnu.org/software/emacs/">Emacs</a> 25.x (<a href="http://orgmode.org">Org mode</a> 9.x)</p>
+    <p>
+      Copyright &copy; 2012 - <span id="footerYear"></span> <a href="mailto:congleetea &lt;at&gt; gmail &lt;dot&gt; com">Clare Lee</a>
+      &nbsp;&nbsp;-&nbsp;&nbsp;
+      Powered by <a href="https://github.com/kelvinh/org-page" target="_blank">org-page</a>
+      <script type="text/javascript">document.getElementById("footerYear").innerHTML = (new Date()).getFullYear();</script>
+    </p>
+  </div>
+</div>
+
+    </div>
+  </body>
+</html>

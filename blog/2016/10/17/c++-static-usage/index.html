@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  
+  <head>
+  <title>c++ static 使用 - 清园索道</title>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
+  <meta name="author" content="Clare Lee" />
+    <meta name="description" content="c++中static用法总结" />
+    <meta name="keywords" content="c++,static,class,variable,function,-3" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+  <link rel="stylesheet" href="/media/css/main.css" type="text/css">
+  <link rel="stylesheet" href="/media/css/base16-ocean.light-min.css" type="text/css">
+  <link href='https://fonts.googleapis.com/css?family=Fira+Sans' rel='stylesheet' type='text/css'>
+  <link href='https://fonts.googleapis.com/css?family=Fira+Mono' rel='stylesheet' type='text/css'>
+</head>
+
+  <body>
+    <div id="page-wrap">
+      <div>
+  <header id="header">
+    <div class="logo">
+      <h1><a href="/"><span class="logo-black">清园索道</span></a></h1>
+    </div>
+    <div class="fortune">
+      <blockquote>
+        上下求索，识己识人识事
+      </blockquote>
+    </div>
+    <ul id="main-nav">
+        <li><a href="/blog/">Blog</a></li>
+      <li><a href="/tags/">分类</a></li>
+      <li><a href="/about/">关于我</a></li>
+      <li><a href="https://github.com/congleetea">GitHub</a></li>
+      <li><a href="/rss.xml">RSS</a></li>
+    </ul>
+  </header>
+</div>
+
+      <article id="content">
+        
+  <h1>c++ static 使用</h1>
+
+<div id="outline-container-org1dc1eb9" class="outline-2">
+<h2 id="org1dc1eb9">概述</h2>
+<div class="outline-text-2" id="text-org1dc1eb9">
+<p>
+C++中的static关键词可以修饰变量(面向过程和面向对象的)和函数(同样也是有面向过程
+和面向对象的)，他可以改变变量和函数的作用域和生存周期。记起来可能会比较混乱，
+其实只要理清楚几个方面就没有问题了。
+</p>
+
+<ul class="org-ul">
+<li>用在什么地方：面向过程和面向对象，两个有static变量和static函数。后者面向对象
+是指使用在class中的static变量和static函数。</li>
+<li>在什么地方声明，定义和初始化。作用域和生存周期。</li>
+</ul>
+</div>
+</div>
+
+
+<div id="outline-container-orgcde3255" class="outline-2">
+<h2 id="orgcde3255">面向过程的static</h2>
+<div class="outline-text-2" id="text-orgcde3255">
+</div>
+<div id="outline-container-org46b1b0e" class="outline-3">
+<h3 id="org46b1b0e">面向过程的static变量</h3>
+<div class="outline-text-3" id="text-org46b1b0e">
+<ul class="org-ul">
+<li>局部static变量
+<ul class="org-ul">
+<li>局部static变量在函数里面声明和定义，可以同时进行初始化，如果没有给初始值，
+则被赋予默认的初始值。</li>
+<li>初始化之后变量保存在全局数据区，在程序退出之后才会被销毁。</li>
+<li>作用域在static变量定义的语句块中。比如在一个函数中定义的，那就只能在定义
+之后和函数退出之前使用。</li>
+</ul></li>
+<li>全局static变量
+<ul class="org-ul">
+<li>全局static变量定义之后即分配空间到全局数据区，同样在函数退出时才销毁。</li>
+<li>全局static变量作用域在文件内，如果在头文件中，那就在引用该头文件的地方也
+有作用。</li>
+<li>和全局变量很像，而且很多时候也可以使用全局变量来替换，区别在于，全局
+static变量在不同文件中，可以有同名的变量，但是全局变量则不行。</li>
+</ul></li>
+</ul>
+</div>
+</div>
+<div id="outline-container-orgbc557c2" class="outline-3">
+<h3 id="orgbc557c2">面向过程的static函数</h3>
+<div class="outline-text-3" id="text-orgbc557c2">
+<ul class="org-ul">
+<li>静态函数不能被其他文件引用，全局函数则可以。</li>
+<li>其他文件可以定义相同名字的函数，不会发生冲突。</li>
+</ul>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org91edd4e" class="outline-2">
+<h2 id="org91edd4e">面向对象的static(无私的static)</h2>
+<div class="outline-text-2" id="text-org91edd4e">
+<p>
+面向对象的static主要是在class中使用的。他们属于这个类及其所有实例化的对象，因
+此可以通过类名或者实例名来访问他们，但是我们知道对于普通的变量和函数，在通过对
+象访问他们的时候其实前面是隐藏了对象的指针this的, 而static的函数不具有this指
+针，因此类的static函数也就不能访问类的非static函数和变量。
+</p>
+</div>
+
+<div id="outline-container-org1452108" class="outline-3">
+<h3 id="org1452108">面向对象的static变量</h3>
+<div class="outline-text-3" id="text-org1452108">
+<ul class="org-ul">
+<li>static的变量一定要在类外显式地定义，并且也就是在定义的时候分配内存空间的。
+如果不这样定义，编译的时候会提示undefined。</li>
+</ul>
+</div>
+</div>
+<div id="outline-container-org06ec8bf" class="outline-3">
+<h3 id="org06ec8bf">面向对象的static函数</h3>
+<div class="outline-text-3" id="text-org06ec8bf">
+<ul class="org-ul">
+<li>类的静态成员函数只能在类体内加上static限定，在类外，比如在类外实现的时候前
+面不能加static。</li>
+<li>静态成员函数可以访问静态成员变量和静态成员函数，但是不能访问非静态成员变量
+和非静态成员函数。</li>
+<li>静态成员变量和函数属于这个类和类的所有对象，因此，包括非静态函数也可以使用
+静态成员函变量和函数。当然也要遵循public，protected，private等规则。</li>
+<li>调用静态成员变量和函数的时候可以使用ClassName::或者Instance.的形式访问。</li>
+</ul>
+</div>
+</div>
+</div>
+
+
+      </article>
+      <div>
+    <ul id="tags">
+        <li><a href="/tags/c-c++/">c/c++</a></li>
+    </ul>
+    <div class="post-meta">
+      <span title="post date">Published: 2016-10-17</span>
+      </br>
+      <span title="last modification date">Last Modification: 2020-08-14</span>
+      </br>
+      <span title="author" >Author: Clare Lee</span>
+    </div>
+    <section>
+      <h2>Comments</h2>
+        <div id="disqus_thread"></div>
+        <script type="text/javascript">
+        //var disqus_developer = 1;
+        var disqus_identifier = "/blog/2016/10/17/c++-static-usage";
+        var disqus_url = "https://congleetea.github.io/blog/2016/10/17/c++-static-usage";
+        var disqus_shortname = 'congleetea';
+        /* * * DON'T EDIT BELOW THIS LINE * * */
+        (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+        </script>
+        <noscript>Please enable JavaScript to view the <a href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+        <a href="//disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+    </section>
+  <script src="//code.jquery.com/jquery-latest.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.1.0/highlight.min.js"></script>
+  <script src="/media/js/main.js"></script>
+  <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  <div class="copyright">
+    <p>Generated by <a href="http://www.gnu.org/software/emacs/">Emacs</a> 25.x (<a href="http://orgmode.org">Org mode</a> 9.x)</p>
+    <p>
+      Copyright &copy; 2012 - <span id="footerYear"></span> <a href="mailto:congleetea &lt;at&gt; gmail &lt;dot&gt; com">Clare Lee</a>
+      &nbsp;&nbsp;-&nbsp;&nbsp;
+      Powered by <a href="https://github.com/kelvinh/org-page" target="_blank">org-page</a>
+      <script type="text/javascript">document.getElementById("footerYear").innerHTML = (new Date()).getFullYear();</script>
+    </p>
+  </div>
+</div>
+
+    </div>
+  </body>
+</html>

@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  
+  <head>
+  <title>C++ const 总结 - 清园索道</title>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
+  <meta name="author" content="Clare Lee" />
+    <meta name="description" content="&lt;TODO: insert your description here&gt;" />
+    <meta name="keywords" content="c++,const,-3" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+  <link rel="stylesheet" href="/media/css/main.css" type="text/css">
+  <link rel="stylesheet" href="/media/css/base16-ocean.light-min.css" type="text/css">
+  <link href='https://fonts.googleapis.com/css?family=Fira+Sans' rel='stylesheet' type='text/css'>
+  <link href='https://fonts.googleapis.com/css?family=Fira+Mono' rel='stylesheet' type='text/css'>
+</head>
+
+  <body>
+    <div id="page-wrap">
+      <div>
+  <header id="header">
+    <div class="logo">
+      <h1><a href="/"><span class="logo-black">清园索道</span></a></h1>
+    </div>
+    <div class="fortune">
+      <blockquote>
+        上下求索，识己识人识事
+      </blockquote>
+    </div>
+    <ul id="main-nav">
+        <li><a href="/blog/">Blog</a></li>
+      <li><a href="/tags/">分类</a></li>
+      <li><a href="/about/">关于我</a></li>
+      <li><a href="https://github.com/congleetea">GitHub</a></li>
+      <li><a href="/rss.xml">RSS</a></li>
+    </ul>
+  </header>
+</div>
+
+      <article id="content">
+        
+  <h1>C++ const 总结</h1>
+
+<div id="outline-container-org7710bd9" class="outline-2">
+<h2 id="org7710bd9">const 修饰指针</h2>
+<div class="outline-text-2" id="text-org7710bd9">
+<p>
+主要看const位于*的哪一边。位于*左边则限制内容，位于右边则限制指针。
+</p>
+
+<ul class="org-ul">
+<li><p>
+const int *p = &amp;a
+const 右边是*p，*p是指针的内容，因此，p的内容不能被修改，而指针可以被修改：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-c++">int i = 0;
+int j = 0;
+const int *p = &amp;i; // *p不能修改，也就是p所指向的内容不能被修改，但p指针可以被修改.
+*p = 10;  // error, 修改内容不行。
+i = 10;   // ok, 通过i修改是可行的。
+p = &amp;j;   // ok, 修改指针。
+</pre>
+</div></li>
+
+<li><p>
+int * const p = &amp;a
+const 右边p是指针，因此，p指针不能修改，内容可以修改:
+</p>
+<div class="org-src-container">
+<pre class="src src-c++">int i = 0;
+int j = 0;
+int* const p = &amp;i; // 指针p不能修改，内容可以修改.
+*p = 10;  // ok, 修改内容可行。
+i = 10;   // ok, 通过i修改是可行的。
+p = &amp;j;   // error, 修改指针不行。
+</pre>
+</div></li>
+
+<li>const int* const p = &amp;a
+第一个const右边是内容*p，第二个右边是指针p，因此二者都不可以修改。</li>
+
+<li>const int *a 和 int const *a 是一样的。</li>
+</ul>
+</div>
+</div>
+
+
+<div id="outline-container-orgb7a64cb" class="outline-2">
+<h2 id="orgb7a64cb">const 修饰类的对象和成员函数</h2>
+<div class="outline-text-2" id="text-orgb7a64cb">
+</div>
+<div id="outline-container-orgd5c7d1e" class="outline-3">
+<h3 id="orgd5c7d1e">const 类对象和成员函数的调用关系</h3>
+<div class="outline-text-3" id="text-orgd5c7d1e">
+<p>
+类对象的常亮性决定了调用哪一个函数(是否尾部为const限制的)。
+</p>
+
+<div class="org-src-container">
+<pre class="src src-c++">#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;iostream&gt;
+using namespace std;
+class A {
+ public:
+  void f() {
+    cout &lt;&lt; "non const" &lt;&lt; endl;
+  }
+  void f() const {
+    cout &lt;&lt; " const" &lt;&lt; endl;
+  }
+};
+
+int main(int argc, char **argv) {
+  A a;
+  a.f();  // 输出 non const, 如果没有void f(){}函数则调用 void f() const{}
+  const A &amp;b = a;
+  b.f();  // 输出 const
+  const A *c = &amp;a;
+  c-&gt;f(); // 输出 const
+  A *const d = &amp;a;
+  d-&gt;f(); // 输出 non const, 如果没有void f(){}函数则调用 void f() const{}
+  A *const e = d;
+  e-&gt;f(); // 输出 non const, 如果没有void f(){}函数则调用 void f() const{}
+  const A *f = c;
+  f-&gt;f(); // 输出 const
+  return 0;
+}
+</pre>
+</div>
+</div>
+</div>
+
+
+<div id="outline-container-orgcda8d83" class="outline-3">
+<h3 id="orgcda8d83">const成员函数和变量的关系</h3>
+<div class="outline-text-3" id="text-orgcda8d83">
+<ul class="org-ul">
+<li>在成员函数后面加上const，则该函数不能修改类的任何成员变量。</li>
+<li>形参如果带有const，则带入的参数不能被修改。</li>
+</ul>
+</div>
+</div>
+</div>
+
+
+      </article>
+      <div>
+    <ul id="tags">
+        <li><a href="/tags/c-c++/">c/c++</a></li>
+    </ul>
+    <div class="post-meta">
+      <span title="post date">Published: 2016-10-12</span>
+      </br>
+      <span title="last modification date">Last Modification: 2020-08-14</span>
+      </br>
+      <span title="author" >Author: Clare Lee</span>
+    </div>
+    <section>
+      <h2>Comments</h2>
+        <div id="disqus_thread"></div>
+        <script type="text/javascript">
+        //var disqus_developer = 1;
+        var disqus_identifier = "/blog/2016/10/12/c++-const";
+        var disqus_url = "https://congleetea.github.io/blog/2016/10/12/c++-const";
+        var disqus_shortname = 'congleetea';
+        /* * * DON'T EDIT BELOW THIS LINE * * */
+        (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+        </script>
+        <noscript>Please enable JavaScript to view the <a href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+        <a href="//disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+    </section>
+  <script src="//code.jquery.com/jquery-latest.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.1.0/highlight.min.js"></script>
+  <script src="/media/js/main.js"></script>
+  <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  <div class="copyright">
+    <p>Generated by <a href="http://www.gnu.org/software/emacs/">Emacs</a> 25.x (<a href="http://orgmode.org">Org mode</a> 9.x)</p>
+    <p>
+      Copyright &copy; 2012 - <span id="footerYear"></span> <a href="mailto:congleetea &lt;at&gt; gmail &lt;dot&gt; com">Clare Lee</a>
+      &nbsp;&nbsp;-&nbsp;&nbsp;
+      Powered by <a href="https://github.com/kelvinh/org-page" target="_blank">org-page</a>
+      <script type="text/javascript">document.getElementById("footerYear").innerHTML = (new Date()).getFullYear();</script>
+    </p>
+  </div>
+</div>
+
+    </div>
+  </body>
+</html>

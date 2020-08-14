@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  
+  <head>
+  <title>C++ 智能指针 - 清园索道</title>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
+  <meta name="author" content="Clare Lee" />
+    <meta name="description" content="c++智能指针" />
+    <meta name="keywords" content="c++,auto_ptr,unique_ptr,shared_ptr,-3" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+  <link rel="stylesheet" href="/media/css/main.css" type="text/css">
+  <link rel="stylesheet" href="/media/css/base16-ocean.light-min.css" type="text/css">
+  <link href='https://fonts.googleapis.com/css?family=Fira+Sans' rel='stylesheet' type='text/css'>
+  <link href='https://fonts.googleapis.com/css?family=Fira+Mono' rel='stylesheet' type='text/css'>
+</head>
+
+  <body>
+    <div id="page-wrap">
+      <div>
+  <header id="header">
+    <div class="logo">
+      <h1><a href="/"><span class="logo-black">清园索道</span></a></h1>
+    </div>
+    <div class="fortune">
+      <blockquote>
+        上下求索，识己识人识事
+      </blockquote>
+    </div>
+    <ul id="main-nav">
+        <li><a href="/blog/">Blog</a></li>
+      <li><a href="/tags/">分类</a></li>
+      <li><a href="/about/">关于我</a></li>
+      <li><a href="https://github.com/congleetea">GitHub</a></li>
+      <li><a href="/rss.xml">RSS</a></li>
+    </ul>
+  </header>
+</div>
+
+      <article id="content">
+        
+  <h1>C++ 智能指针</h1>
+
+<div id="outline-container-orgb4db740" class="outline-2">
+<h2 id="orgb4db740">为什么会出现智能指针</h2>
+<div class="outline-text-2" id="text-orgb4db740">
+<p>
+什么是智能，其实就是程序自动为我们做一些事情。那么智能指针到底为我们自动地做了
+什么了呢?
+</p>
+
+<p>
+我们先从指针使用说起，我们知道系统的有些资源产生之后是需要释放的，产生比较容
+易，但是释放却往往会出问题，因为事物产生是很清晰的，但是释放则不那么清晰：就
+像开门只要有钥匙就没问题，因为不开门就进不了屋子，但是关门则不影响你出门，事
+实上我们也经常忘记了关门。在程序中类似的资源有很多,比如:
+</p>
+<ul class="org-ul">
+<li>文件操作(fopen/fclose)</li>
+<li>内存操作(new/delete 或 malloc/free)</li>
+<li>资源锁操作(lock/unlock)</li>
+</ul>
+<p>
+这些操作，我们往往前者不会忘记，后者在释放的时候往往会忘记。或者即使没有忘记，
+但是程序出现异常，中途退出了，也不会执行后面的释放操作。因此可以总结一下在使用
+指针的时候不会进行资源释放的原因：
+</p>
+<ul class="org-ul">
+<li>会忘记 delete 你之前 new 的指针;</li>
+<li>异常在 delete 之前出现，无法执行 delete.</li>
+</ul>
+
+
+<p>
+如何避免这样的情况呢? 如果有一种东西可以在退出之后自动释放那就好了，那就完全不
+需要我们去担心忘记或者异常导致资源不能释放的问题了。显然C++中有这样的特性可以
+使用，这就是 RAII 的思想。
+</p>
+</div>
+
+
+<div id="outline-container-org9662f72" class="outline-3">
+<h3 id="org9662f72">资源获取即初始化 RAII(Resource Acquisition Is Initialization)</h3>
+<div class="outline-text-3" id="text-org9662f72">
+<p>
+1984-1989年期间，比雅尼·斯特劳斯特鲁普和安德鲁·柯尼希在设计C++异常时，为解决
+资源管理时的异常安全性而使用了该用法，后来比雅尼·斯特劳斯特鲁普将其称为RAII。
+</p>
+
+<p>
+RAII要求， <b>资源的有效期</b> 与 <b>持有资源的对象的生命期</b> 严格绑定，即由对象的构
+造函数完成资源的分配（获取），同时由析构函数完成资源的释放。在这种要求下，只
+要对象能正确地析构，就不会出现资源泄露问题。
+</p>
+
+<p>
+我们要理解资源的生命期(生和死，生的时候初始化，死的时候销毁资源)，要知道资源
+在什么时候产生，什么时候死亡(销毁)，否则也会用错。
+</p>
+
+<p>
+基于此，我们就可以把这些内存操作，锁操作，文件操作等用类的形式封装起来，类就
+有 RAII 的特点，他可以在析构函数中释放资源, 避免因为上面提到的原因导致资源没
+有被释放。智能指针和智能锁就是使用这种原理的。
+</p>
+</div>
+</div>
+
+
+<div id="outline-container-org5b71182" class="outline-3">
+<h3 id="org5b71182">智能指针</h3>
+<div class="outline-text-3" id="text-org5b71182">
+<p>
+所谓智能指针就是智能地管理指针所指向的动态资源的释放，也就是说智能指针其实是
+对一个已存在的对象的指针的管理。
+</p>
+
+<p>
+当然，如果智能指针只是构造函数中初始化，析构函数中销毁那就简单了。因为指针还
+有一些复制，赋值操作，这就会引入一些其他的问题，也就 <b>不止一种智能指针</b> 。
+</p>
+
+<p>
+我们得明确智能指针维护的是指针对象。因为要考虑各种类型的数据，因此他是以 <b>模
+板</b> 的形式实现的。结合上面的内容，共享指针应该具备一下这些考虑：
+</p>
+<ul class="org-ul">
+<li>拥有RAII的机制来管理指针。对于编译器来说，智能指针实际上是一个栈对象，并非
+指针类型，在栈对象生命期即将结束时，智能指针通过析构函数释放它管理的堆内存。</li>
+<li>有指针的基本功能。所有智能指针都重载了“*”和“-&gt;”操作符，让它可以直接返回对象
+的引用以及能用-&gt;去操作其指向的对象。若要访问智能指针原来的方法则使用“·”操作
+符。</li>
+<li>还需要考虑拷贝问题。</li>
+</ul>
+</div>
+</div>
+</div>
+
+
+<div id="outline-container-orgffa65c0" class="outline-2">
+<h2 id="orgffa65c0">智能指针的演变和实现</h2>
+<div class="outline-text-2" id="text-orgffa65c0">
+<p>
+下面我们来看看各种智能指针的演变过程和实现方法。
+</p>
+</div>
+
+<div id="outline-container-org61ad40d" class="outline-3">
+<h3 id="org61ad40d">auto_ptr</h3>
+<div class="outline-text-3" id="text-org61ad40d">
+<p>
+这是98版本引入的智能指针。本质是管理权转移, 当共享指针在进行复制的时候，会把
+对象交个新的共享指针，但是旧的共享指针会被置为NULL，这样就不会导致在虚构函数
+中对同一对象进行多次销毁。
+</p>
+
+<div class="org-src-container">
+<pre class="src src-c++">#include &lt;iostream&gt;
+#include &lt;string&gt;
+#include &lt;memory&gt;
+
+// 设计一个类做测试.
+class CObj {
+ public:
+  CObj(std::string name) {
+    name_ = name;
+  }
+  ~CObj(){}
+  std::string name_;
+};
+
+// auto_ptr如何实现?
+template &lt;class T&gt;
+class SmartPtr {
+ public:
+  // 构造函数初始化指针.
+  SmartPtr(T *ptr) : ptr_(ptr) {}
+  // 复制构造函数
+  SmartPtr(SmartPtr&lt;T&gt; &amp;p) {
+    ptr_ = p.ptr_;
+    p.ptr_ = NULL;
+  }
+  // 复制分配构造函数
+  SmartPtr&lt;T&gt; &amp;operator=(SmartPtr&lt;T&gt; &amp;p) {
+    if (this != &amp;p) {
+      delete ptr_;
+      ptr_ = p.ptr_;
+      p.ptr_ = NULL;
+    }
+    return *this;
+  }
+  // 析构函数销毁指针指向的对象.
+  ~SmartPtr() {
+    delete ptr_;
+  }
+  // 操作符返回指针指向的内容的引用.
+  T &amp;operator*() {
+    return *ptr_;
+  }
+  // 可以通过-&gt;访问成员, 本来使用这里的时候通过-&gt;得到只是指针，那么要访问成员就应该是-&gt;-&gt;，这样可读性太差，编译器就将它优化成-&gt;了。
+  T *operator-&gt;() {
+    return ptr_;
+  }
+ protected:
+  T *ptr_;
+};
+
+int main() {
+  SmartPtr&lt;CObj&gt; ap1(new CObj("jack"));
+  std::cout &lt;&lt; "ap1 name: " &lt;&lt; ap1-&gt;name_ &lt;&lt; std::endl;  // ok. 通过-&gt;访问成员.
+
+  SmartPtr&lt;int&gt; ap2(new int(10));
+  std::cout &lt;&lt; "before ap2 value: " &lt;&lt; *ap2 &lt;&lt; std::endl;  // ok. 通过*获取对象内容.
+  SmartPtr&lt;int&gt; ap3(ap2);
+  std::cout &lt;&lt; "after ap3 value: " &lt;&lt; *ap3 &lt;&lt; std::endl;  // ok. 经过复制构造函
+  // 数, 可以访问.
+  std::cout &lt;&lt; "after ap2 value: " &lt;&lt; *ap2 &lt;&lt; std::endl;  // error: ap2之前对象
+  // 的管理权已经交给了
+  // ap3, ap2是空指针,
+  // 不能访问.
+  return 0;
+}
+</pre>
+</div>
+
+<p>
+根据前面说的，我们知道在智能指针生命期结束才会释放资源，那么上面的例子中ap2在
+将对象管理权交给ap3之后依然还没有结束生命期，这时候如果我们再去使用ap2就会出
+问题，因为他已经将管理权交出去了。这就是auto_ptr的缺陷，所以后面有了其他的智
+能指针就不建议使用auto_ptr，就算使用了也不要使用 "=" 和拷贝构造，否则交出管理
+权的智能指针成了一个僵尸就不好管理了。
+</p>
+</div>
+</div>
+
+
+<div id="outline-container-orgb7ad0b9" class="outline-3">
+<h3 id="orgb7ad0b9">unique_ptr (scoped_ptr)</h3>
+<div class="outline-text-3" id="text-orgb7ad0b9">
+<p>
+鉴于auto_ptr的缺陷，c++标准又迟迟没有改良这个指针，这期间一些大牛就在一个
+boost社区造了一个scoped_ptr指针，知道c++11的时候，c++标准才推出unique_ptr。这
+两者思想是一样的，就是暴力的防止用户调用拷贝构造和赋值运算符“=”进行夺权管理。
+它直接将拷贝构造和“=”运算符重载函数给封装起来，以此防止用户来调用或恶意的去实
+现它。
+</p>
+
+
+<div class="org-src-container">
+<pre class="src src-c++">#include &lt;iostream&gt;
+#include &lt;string&gt;
+#include &lt;memory&gt;
+
+// 设计一个类做测试.
+class CObj {
+ public:
+  CObj(std::string name) {
+    name_ = name;
+  }
+  ~CObj(){}
+  std::string name_;
+};
+
+// unique_ptr/scoped_ptr如何实现?
+template &lt;class T&gt;
+class SmartPtr {
+ public:
+  // 构造函数初始化指针.
+  SmartPtr(T *ptr) : ptr_(ptr) {}
+  // 析构函数销毁指针指向的对象.
+  ~SmartPtr() {
+    delete ptr_;
+  }
+  // 操作符返回指针指向的内容的引用.
+  T &amp;operator*() {
+    return *ptr_;
+  }
+  // 可以通过-&gt;访问成员, 本来使用这里的时候通过-&gt;得到只是指针，那么要访问成员就应该是-&gt;-&gt;，这样可读性太差，编译器就将它优化成-&gt;了。
+  T *operator-&gt;() {
+    return ptr_;
+  }
+ protected:
+  T *ptr_;
+  // 将复制函数和拷贝构造保护起来。
+  SmartPtr(SmartPtr&lt;T&gt; &amp;p);
+  SmartPtr&lt;T&gt; &amp;operator=(SmartPtr&lt;T&gt; &amp;p);
+};
+
+int main() {
+  SmartPtr&lt;CObj&gt; ap0(new CObj("jack"));
+  SmartPtr&lt;CObj&gt; ap1 = ap0; // error,不能这样赋值.
+
+  SmartPtr&lt;int&gt; ap2(new int(10));
+  SmartPtr&lt;int&gt; ap3(ap2);   // error, 不能这样拷贝.
+  return 0;
+}
+</pre>
+</div>
+
+<p>
+现在我们发现ap1不能使用=来拷贝，ap3也不能通过拷贝构造来拷贝。这样避免了管理权
+交出导致的问题，也就是让scoped_ptr/unique_ptr独享了管理权，只要初始化之后就不
+能被通过 <b>任何复制将管理权交给别人</b> 。虽然避免了这个问题，但是很多时候我们还
+是无可避免的要将对象进行拷贝，怎么处理呢? 这就是下面的共享指针shared_ptr。
+</p>
+</div>
+</div>
+
+<div id="outline-container-org1701c84" class="outline-3">
+<h3 id="org1701c84">shared_ptr</h3>
+<div class="outline-text-3" id="text-org1701c84">
+<p>
+这也是c++11才有的，在boost中名字也是一样的。他为了能够更好的执行拷贝等操作，
+引入了一个计数器，这个计数器在共享指针初始化的时候为1，后面每次被拷贝都会计数
+器+1，当这个共享指针过了生命期之后将计数器-1，当最后一个共享指针退出时，如果
+检测到计数器为0，那么就释放资源。
+</p>
+
+<div class="org-src-container">
+<pre class="src src-c++">#include &lt;iostream&gt;
+#include &lt;string&gt;
+#include &lt;memory&gt;
+
+// 设计一个类做测试.
+class CObj {
+ public:
+  CObj(std::string name) {
+    name_ = name;
+  }
+  ~CObj() {}
+  std::string name_;
+};
+
+// shared_ptr如何实现?
+template &lt;class T&gt;
+class SmartPtr {
+ public:
+  // 构造函数初始化指针.
+  SmartPtr(T *ptr)
+      : ptr_(ptr)
+      , count_(new int(1)) {
+    std::cout &lt;&lt; "init count: " &lt;&lt; *count_ &lt;&lt; std::endl;
+  }
+  // 复制构造函数
+  SmartPtr(SmartPtr&lt;T&gt; &amp;p) {
+    ptr_ = p.ptr_;
+    count_ = p.count_;
+    ++(*count_);
+    std::cout &lt;&lt; "cp count: " &lt;&lt; *count_ &lt;&lt; std::endl;
+  }
+  // 复制分配构造函数
+  SmartPtr&lt;T&gt; &amp;operator=(const SmartPtr&lt;T&gt; &amp;p) {
+    if (this != &amp;p) {
+      ptr_ = p.ptr_;
+      count_ = p.count_;
+      ++(*count_);
+      std::cout &lt;&lt; "op = count: " &lt;&lt; *count_ &lt;&lt; std::endl;
+    }
+    return *this;
+  }
+  // 析构函数销毁指针指向的对象.
+  ~SmartPtr() {
+    --(*count_);
+    std::cout &lt;&lt; "~ count: " &lt;&lt; *count_ &lt;&lt; std::endl;
+    if (*count_ == 0) {
+      std::cout &lt;&lt; "release." &lt;&lt; std::endl;
+      delete ptr_;
+      delete count_;
+      ptr_ = NULL;
+      count_ = NULL;
+    }
+  }
+  // 操作符返回指针指向的内容的引用.
+  T &amp;operator*() {
+    return *ptr_;
+  }
+  // 可以通过-&gt;访问成员, 本来使用这里的时候通过-&gt;得到只是指针，那么要访问成员就应该是-&gt;-&gt;，这样可读性太差，编译器就将它优化成-&gt;了。
+  T *operator-&gt;() {
+    return ptr_;
+  }
+ protected:
+  T *ptr_;
+  int *count_;
+};
+
+int main() {
+  SmartPtr&lt;CObj&gt; ap1(new CObj("jack"));
+  std::cout &lt;&lt; "ap1 name: " &lt;&lt; ap1-&gt;name_ &lt;&lt; std::endl;
+  SmartPtr&lt;int&gt; ap2(new int(10)); // 创建了共享指针,count=1;
+  std::cout &lt;&lt; "before ap2 value: " &lt;&lt; *ap2 &lt;&lt; std::endl;
+  SmartPtr&lt;int&gt; ap3(ap2);  // 将ap2通过拷贝构造给ap3，count+1=2;
+  std::cout &lt;&lt; "after ap3 value: " &lt;&lt; *ap3 &lt;&lt; std::endl;
+  std::cout &lt;&lt; "after ap2 value: " &lt;&lt; *ap2 &lt;&lt; std::endl;
+  return 0;
+  // main结束之后count在析构ap2的时候-1=1;析构ap3的时候-1=0，最后释放内存资源。
+  // ap1同理。
+}
+</pre>
+</div>
+
+<p>
+可以看出，这些都可以拷贝，而且不影响使用。目前看来，shared_ptr完全解决了前面
+提到的问题，堪称完美。但是有一种特殊的情况，使用shared_ptr也会出问题。我们来
+看一下：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-c++">#include &lt;iostream&gt;
+#include &lt;string&gt;
+#include &lt;memory&gt;
+
+// 设计一个类做测试.
+class CObj {
+ public:
+  CObj(std::string name) {
+    name_ = name;
+  }
+  ~CObj() {}
+  std::string name_;
+};
+
+// shared_ptr如何实现?
+template &lt;class T&gt;
+class SmartPtr {
+ public:
+  // 构造函数初始化指针.
+  SmartPtr(T *ptr)
+      : ptr_(ptr)
+      , count_(new int(1)) {
+    std::cout &lt;&lt; "init count: " &lt;&lt; *count_ &lt;&lt; std::endl;
+  }
+  // 复制构造函数
+  SmartPtr(SmartPtr&lt;T&gt; &amp;p) {
+    ptr_ = p.ptr_;
+    count_ = p.count_;
+    ++(*count_);
+    std::cout &lt;&lt; "cp count: " &lt;&lt; *count_ &lt;&lt; std::endl;
+  }
+  // 复制分配构造函数
+  SmartPtr&lt;T&gt; &amp;operator=(const SmartPtr&lt;T&gt; &amp;p) {
+    if (this != &amp;p) {
+      ptr_ = p.ptr_;
+      count_ = p.count_;
+      ++(*count_);
+      std::cout &lt;&lt; "op = count: " &lt;&lt; *count_ &lt;&lt; std::endl;
+    }
+    return *this;
+  }
+  // 析构函数销毁指针指向的对象.
+  ~SmartPtr() {
+    --(*count_);
+    std::cout &lt;&lt; "~ count: " &lt;&lt; *count_ &lt;&lt; std::endl;
+    if (*count_ == 0) {
+      std::cout &lt;&lt; "release." &lt;&lt; std::endl;
+      delete ptr_;
+      delete count_;
+      ptr_ = NULL;
+      count_ = NULL;
+    }
+  }
+  // 操作符返回指针指向的内容的引用.
+  T &amp;operator*() {
+    return *ptr_;
+  }
+  // 可以通过-&gt;访问成员, 本来使用这里的时候通过-&gt;得到只是指针，那么要访问成员就应该是-&gt;-&gt;，这样可读性太差，编译器就将它优化成-&gt;了。
+  T *operator-&gt;() {
+    return ptr_;
+  }
+ protected:
+  T *ptr_;
+  int *count_;
+};
+
+struct Node {
+  SmartPtr&lt;Node&gt; _prev;
+  SmartPtr&lt;Node&gt; _next;
+
+  Node(int x)
+      : _prev(NULL)
+      , _next(NULL)
+  {}
+  ~Node() {
+    std::cout &lt;&lt; "~Node" &lt;&lt; std::endl;
+  }
+};
+
+int main() {
+  SmartPtr&lt;Node&gt; cur(new Node(1));
+  SmartPtr&lt;Node&gt; next(new Node(2));
+  cur-&gt;_next = next;
+  next-&gt;_prev = cur;
+  return 0;
+}
+</pre>
+</div>
+
+<p>
+输出：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-shell">init count: 1
+init count: 1
+init count: 1
+init count: 1
+init count: 1
+init count: 1
+op = count: 2
+op = count: 2
+count: 1
+count: 1
+</pre>
+</div>
+
+<p>
+我们发现最后count还是1，这样指针的资源就不会被释放，造成内存泄漏。
+</p>
+
+
+<p>
+我们分析一下发现：cur 和 next 初始化之后都 count=1，在cur-&gt;_next = next之后，
+next 的 count+1=2；同样cur也是一样的=2。在main退出的时候析构函数中count=1，就
+不会进行释放内存，造成了泄露。
+</p>
+
+<p>
+这种情况是共享指针进行了循环引用。_prev和_next相互引用，导致最后都没有释放内
+存。这时候怎么解决呢? 这就是后面有产生了一种 weak_ptr的智能指针。
+</p>
+</div>
+</div>
+
+<div id="outline-container-org06f2922" class="outline-3">
+<h3 id="org06f2922">weak_ptr</h3>
+<div class="outline-text-3" id="text-org06f2922">
+<p>
+循环引用一般都会发生在这种"你中有我，我中有你"的情况里面，这里导致的问题就是内存
+泄漏，这段空间一直都没有释放,现在很明显引用计数在这里就不是很合适了，但是
+shared_ptr除了这里不够完善，其他的地方表现都令我们比较满意，所以boost社区的大牛
+们在这里仅是补充了最后一个智能指针weak_ptr。
+</p>
+
+<p>
+weak_ptr是为了配合shared_ptr而引入的一种智能指针，它更像是shared_ptr的一个助手而
+不是智能指针，因为它不具有普通指针的行为，没有重载operator*和-&gt;,它的最大作用在于
+协助shared_ptr工作，像监控者一样观测资源的使用情况。具体就是:
+</p>
+<ul class="org-ul">
+<li>首先weak_ptr是专门为shared_ptr 而准备的。</li>
+<li>它是 boost::shared_ptr 的监控者对象，作为监控者，那也就意味着weak_ptr它只对
+shared_ptr 进行引用却不会去改变其引用计数，当被监控的 shared_ptr 失效后，相
+应的weak_ptr 也相应失效，然后它就什么都不管，光是个删，也就是这里的cur 和
+next在析构的时候 ，它都不用引用计数减1（因为这里引用计数一直保持是1，可以直
+接释放资源） ， 直接删除结点就好。这样也就间接地解决了循环引用的问题，当然
+week_ptr指针的功能不是只有这一个。但是现在我们只要知道它可以解决循环引用就好。</li>
+</ul>
+
+<p>
+我们直接看一下使用:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-c++">#include &lt;iostream&gt;
+#include &lt;string&gt;
+#include &lt;memory&gt;
+
+struct Node {
+  std::weak_ptr&lt;Node&gt; _prev;
+  std::weak_ptr&lt;Node&gt; _next;
+
+  ~Node() {
+    std::cout &lt;&lt; "~Node" &lt;&lt; std::endl;
+  }
+};
+
+int main() {
+  std::shared_ptr&lt;Node&gt; cur(new Node());
+  std::shared_ptr&lt;Node&gt; next(new Node());
+  cur-&gt;_next = next;
+  next-&gt;_prev = cur;
+  return 0;
+}
+</pre>
+</div>
+
+<p>
+执行之后我们看到资源都会全部释放了。
+</p>
+</div>
+</div>
+</div>
+
+
+<div id="outline-container-org6b925bb" class="outline-2">
+<h2 id="org6b925bb">小结</h2>
+<div class="outline-text-2" id="text-org6b925bb">
+<p>
+至此，我们把几个智能指针就解释清楚了。总结一下：
+</p>
+<ul class="org-ul">
+<li>拒绝使用 auto_ptr，因为其不仅不符合 C++ 编程思想。</li>
+<li>在确定对象无需共享的情况下，使用 scoped_ptr/unique_ptr。</li>
+<li>在对象需要共享的情况下，使用 shared_ptr。</li>
+<li>在需要访问 shared_ptr 对象，而又不想改变其引用计数的情况下(循环引用)使用
+weak_ptr 辅助。</li>
+</ul>
+
+<p>
+下面介绍一些常用的智能指针接口函数：
+</p>
+<ul class="org-ul">
+<li>x_ptr.get() 返回一个原始的指针;</li>
+<li>x_ptr.reset() 重新绑定指向的对象，而原来的对象则会被释放;</li>
+<li>x_ptr.release() 这个函数只是把智能指针赋值为空，但是它原来指向的内存并没有被释放，相当于它只是释放了对资源的所有权;</li>
+<li>shared_ptr.use_count() 来查看资源的所有者个数;</li>
+</ul>
+</div>
+</div>
+
+
+<div id="outline-container-org7fadbb8" class="outline-2">
+<h2 id="org7fadbb8">参考</h2>
+<div class="outline-text-2" id="text-org7fadbb8">
+<ul class="org-ul">
+<li>c++经验之谈一：RAII原理介绍 <a href="https://zhuanlan.zhihu.com/p/34660259">https://zhuanlan.zhihu.com/p/34660259</a></li>
+<li>浅谈智能指针的历史包袱: <a href="https://www.cnblogs.com/tp-16b/p/9033370.html">https://www.cnblogs.com/tp-16b/p/9033370.html</a></li>
+<li>c++智能指针简单剖析 <a href="https://www.cnblogs.com/lanxuezaipiao/p/4132096.html">https://www.cnblogs.com/lanxuezaipiao/p/4132096.html</a></li>
+</ul>
+</div>
+</div>
+
+
+      </article>
+      <div>
+    <ul id="tags">
+        <li><a href="/tags/c-c++/">c/c++</a></li>
+    </ul>
+    <div class="post-meta">
+      <span title="post date">Published: 2017-08-12</span>
+      </br>
+      <span title="last modification date">Last Modification: 2020-08-14</span>
+      </br>
+      <span title="author" >Author: Clare Lee</span>
+    </div>
+    <section>
+      <h2>Comments</h2>
+        <div id="disqus_thread"></div>
+        <script type="text/javascript">
+        //var disqus_developer = 1;
+        var disqus_identifier = "/blog/2017/08/12/cpp-smart-pointer";
+        var disqus_url = "https://congleetea.github.io/blog/2017/08/12/cpp-smart-pointer";
+        var disqus_shortname = 'congleetea';
+        /* * * DON'T EDIT BELOW THIS LINE * * */
+        (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+        </script>
+        <noscript>Please enable JavaScript to view the <a href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+        <a href="//disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+    </section>
+  <script src="//code.jquery.com/jquery-latest.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.1.0/highlight.min.js"></script>
+  <script src="/media/js/main.js"></script>
+  <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  <div class="copyright">
+    <p>Generated by <a href="http://www.gnu.org/software/emacs/">Emacs</a> 25.x (<a href="http://orgmode.org">Org mode</a> 9.x)</p>
+    <p>
+      Copyright &copy; 2012 - <span id="footerYear"></span> <a href="mailto:congleetea &lt;at&gt; gmail &lt;dot&gt; com">Clare Lee</a>
+      &nbsp;&nbsp;-&nbsp;&nbsp;
+      Powered by <a href="https://github.com/kelvinh/org-page" target="_blank">org-page</a>
+      <script type="text/javascript">document.getElementById("footerYear").innerHTML = (new Date()).getFullYear();</script>
+    </p>
+  </div>
+</div>
+
+    </div>
+  </body>
+</html>

@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  
+  <head>
+  <title>TOOL: 编写 USB rules 作为永久规则 - 清园索道</title>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
+  <meta name="author" content="Clare Lee" />
+    <meta name="description" content="&lt;TODO: insert your description here&gt;" />
+    <meta name="keywords" content="udevadmin,usb,rules" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+  <link rel="stylesheet" href="/media/css/main.css" type="text/css">
+  <link rel="stylesheet" href="/media/css/base16-ocean.light-min.css" type="text/css">
+  <link href='https://fonts.googleapis.com/css?family=Fira+Sans' rel='stylesheet' type='text/css'>
+  <link href='https://fonts.googleapis.com/css?family=Fira+Mono' rel='stylesheet' type='text/css'>
+</head>
+
+  <body>
+    <div id="page-wrap">
+      <div>
+  <header id="header">
+    <div class="logo">
+      <h1><a href="/"><span class="logo-black">清园索道</span></a></h1>
+    </div>
+    <div class="fortune">
+      <blockquote>
+        上下求索，识己识人识事
+      </blockquote>
+    </div>
+    <ul id="main-nav">
+        <li><a href="/blog/">Blog</a></li>
+      <li><a href="/tags/">分类</a></li>
+      <li><a href="/about/">关于我</a></li>
+      <li><a href="https://github.com/congleetea">GitHub</a></li>
+      <li><a href="/rss.xml">RSS</a></li>
+    </ul>
+  </header>
+</div>
+
+      <article id="content">
+        
+  <h1>TOOL: 编写 USB rules 作为永久规则</h1>
+
+<div id="outline-container-orge060560" class="outline-2">
+<h2 id="orge060560">方法1</h2>
+<div class="outline-text-2" id="text-orge060560">
+</div>
+<div id="outline-container-org7591285" class="outline-3">
+<h3 id="org7591285">查找 ATTRS{devpath}</h3>
+<div class="outline-text-3" id="text-org7591285">
+<p>
+依次插拔各个usb，执行下面指令找出 ATTRS{devpath}:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-shell">udevadm info -a -n /dev/ttyUSB0 | grep ATTRS{devpath}
+</pre>
+</div>
+
+<p>
+选择第一个 ATTRS{devpath} 作为该usb的 devpath。
+</p>
+</div>
+</div>
+
+
+<div id="outline-container-org0fbed39" class="outline-3">
+<h3 id="org0fbed39">编写xxx.rules</h3>
+<div class="outline-text-3" id="text-org0fbed39">
+<p>
+如下填入 devpath，得到最后的 xxx.rules： 
+</p>
+<div class="org-src-container">
+<pre class="src src-text">KERNEL=="tty*", ATTRS{devpath}=="1.4",MODE="0666", GROUP:="dialout",  SYMLINK+="lidarup"
+KERNEL=="tty*", ATTRS{devpath}=="1.1",MODE="0666", GROUP:="dialout",  SYMLINK+="lidardown"
+</pre>
+</div>
+
+<div class="org-src-container">
+<pre class="src src-shell">chmod +x xxx.rules
+</pre>
+</div>
+
+<p>
+给该文件可执行权限。完成之后重新插拔usb线就可以生效。
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org0ab4b3f" class="outline-2">
+<h2 id="org0ab4b3f">方法2</h2>
+<div class="outline-text-2" id="text-org0ab4b3f">
+<p>
+通过下面方法找到USB的ID_PATH_TAG: 
+</p>
+<div class="org-src-container">
+<pre class="src src-shell">udevadm info --name=/dev/ttyUSB0 | grep ID_PATH_TAG
+</pre>
+</div>
+
+<p>
+编写xxx.rules:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-text">ACTION=="add",ENV{ID_BUS}=="usb",ENV{ID_PATH_TAG}=="pci-0000_00_14_0-usb-0_2_2_1_0",SYMLINK+="imu"
+ACTION=="add",ENV{ID_BUS}=="usb",ENV{ID_PATH_TAG}=="pci-0000_00_14_0-usb-0_2_3_1_0",SYMLINK+="lidardown"
+</pre>
+</div>
+
+<p>
+将文件放在/etc/udev/roles.d下面, sudo chmod +x /etc/udev/rules.d/xxx.rules。
+</p>
+
+<p>
+如果用户权限不够：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-shell">sudo usermod -a -G dialout $USER
+</pre>
+</div>
+</div>
+</div>
+
+
+      </article>
+      <div>
+    <ul id="tags">
+        <li><a href="/tags/tools/">tools</a></li>
+    </ul>
+    <div class="post-meta">
+      <span title="post date">Published: 2019-03-16</span>
+      </br>
+      <span title="last modification date">Last Modification: 2020-08-14</span>
+      </br>
+      <span title="author" >Author: Clare Lee</span>
+    </div>
+    <section>
+      <h2>Comments</h2>
+        <div id="disqus_thread"></div>
+        <script type="text/javascript">
+        //var disqus_developer = 1;
+        var disqus_identifier = "/blog/2019/03/16/udev-usb-rules";
+        var disqus_url = "https://congleetea.github.io/blog/2019/03/16/udev-usb-rules";
+        var disqus_shortname = 'congleetea';
+        /* * * DON'T EDIT BELOW THIS LINE * * */
+        (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+        </script>
+        <noscript>Please enable JavaScript to view the <a href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+        <a href="//disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+    </section>
+  <script src="//code.jquery.com/jquery-latest.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.1.0/highlight.min.js"></script>
+  <script src="/media/js/main.js"></script>
+  <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  <div class="copyright">
+    <p>Generated by <a href="http://www.gnu.org/software/emacs/">Emacs</a> 25.x (<a href="http://orgmode.org">Org mode</a> 9.x)</p>
+    <p>
+      Copyright &copy; 2012 - <span id="footerYear"></span> <a href="mailto:congleetea &lt;at&gt; gmail &lt;dot&gt; com">Clare Lee</a>
+      &nbsp;&nbsp;-&nbsp;&nbsp;
+      Powered by <a href="https://github.com/kelvinh/org-page" target="_blank">org-page</a>
+      <script type="text/javascript">document.getElementById("footerYear").innerHTML = (new Date()).getFullYear();</script>
+    </p>
+  </div>
+</div>
+
+    </div>
+  </body>
+</html>

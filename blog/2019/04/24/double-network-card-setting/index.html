@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  
+  <head>
+  <title>TOOL: 双网卡上内外网的路由设置 - 清园索道</title>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
+  <meta name="author" content="Clare Lee" />
+    <meta name="description" content="双网卡上内外网的设置" />
+    <meta name="keywords" content="tools,network,route" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+  <link rel="stylesheet" href="/media/css/main.css" type="text/css">
+  <link rel="stylesheet" href="/media/css/base16-ocean.light-min.css" type="text/css">
+  <link href='https://fonts.googleapis.com/css?family=Fira+Sans' rel='stylesheet' type='text/css'>
+  <link href='https://fonts.googleapis.com/css?family=Fira+Mono' rel='stylesheet' type='text/css'>
+</head>
+
+  <body>
+    <div id="page-wrap">
+      <div>
+  <header id="header">
+    <div class="logo">
+      <h1><a href="/"><span class="logo-black">清园索道</span></a></h1>
+    </div>
+    <div class="fortune">
+      <blockquote>
+        上下求索，识己识人识事
+      </blockquote>
+    </div>
+    <ul id="main-nav">
+        <li><a href="/blog/">Blog</a></li>
+      <li><a href="/tags/">分类</a></li>
+      <li><a href="/about/">关于我</a></li>
+      <li><a href="https://github.com/congleetea">GitHub</a></li>
+      <li><a href="/rss.xml">RSS</a></li>
+    </ul>
+  </header>
+</div>
+
+      <article id="content">
+        
+  <h1>TOOL: 双网卡上内外网的路由设置</h1>
+
+
+<div id="outline-container-org31dfc79" class="outline-2">
+<h2 id="org31dfc79">双网卡上内外网的设置</h2>
+<div class="outline-text-2" id="text-org31dfc79">
+<p>
+由于工作需要要经常连接一个内网的机器，内网不能上外网，查资料很不方便。因此买了
+一个网卡，希望一个处理内网，一个处理外网。但是出现的问题时，连上内网之后就不能
+上外网了，只能关掉之后才能上。下面对路由进行设置，使默认走外网网卡，
+192.168.32.0 网段的走内网。
+</p>
+
+<ul class="org-ul">
+<li><p>
+ifconfig 查看两个网卡信息; 外网走 wlp2s0, 内网走wlx085700299283。
+</p>
+
+<div class="org-src-container">
+<pre class="src src-text">lo        Link encap:Local Loopback  
+inet addr:127.0.0.1  Mask:255.0.0.0
+inet6 addr: ::1/128 Scope:Host
+UP LOOPBACK RUNNING  MTU:65536  Metric:1
+RX packets:4960 errors:0 dropped:0 overruns:0 frame:0
+TX packets:4960 errors:0 dropped:0 overruns:0 carrier:0
+collisions:0 txqueuelen:1000 
+RX bytes:8681516 (8.6 MB)  TX bytes:8681516 (8.6 MB)
+
+wlp2s0    Link encap:Ethernet  HWaddr 20:16:b9:48:71:0a  
+inet addr:192.168.111.177  Bcast:192.168.111.255  Mask:255.255.255.0
+inet6 addr: fe80::134a:e8b8:2e58:aebc/64 Scope:Link
+UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1
+RX packets:323247 errors:0 dropped:99 overruns:0 frame:0
+TX packets:127117 errors:0 dropped:0 overruns:0 carrier:0
+collisions:0 txqueuelen:1000 
+RX bytes:126203475 (126.2 MB)  TX bytes:22426944 (22.4 MB)
+
+wlx085700299283 Link encap:Ethernet  HWaddr 08:57:00:29:92:83  
+inet addr:192.168.31.102  Bcast:192.168.31.255  Mask:255.255.255.0
+inet6 addr: fe80::86c7:ad2d:efc5:96a4/64 Scope:Link
+UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1
+RX packets:5777 errors:0 dropped:93822 overruns:0 frame:0
+TX packets:223 errors:0 dropped:0 overruns:0 carrier:0
+collisions:0 txqueuelen:1000 
+RX bytes:5510774 (5.5 MB)  TX bytes:7343823 (7.3 MB)
+</pre>
+</div></li>
+
+<li><p>
+查看已有路由：
+</p>
+<div class="org-src-container">
+<pre class="src src-shell">sudo route -v
+</pre>
+</div>
+
+<p>
+必要的时候清除默认网关：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-shell">sudo route del default
+</pre>
+</div></li>
+</ul>
+
+
+<ul class="org-ul">
+<li><p>
+设置默认网关，默认走外网：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-shell">sudo route add default gw 192.168.111.1 
+</pre>
+</div></li>
+
+<li><p>
+为内网设置内网转发特例
+</p>
+
+<div class="org-src-container">
+<pre class="src src-shell">route add -net 192.168.31.0 netmask 255.255.255.0 dev wlx085700299283
+</pre>
+</div></li>
+</ul>
+
+
+<p>
+这样就行了。
+</p>
+
+<p>
+以上操作不能持久，开机之后又会回到默认情况，所以可以将上述命令保存到
+/etc/rc.local中。
+</p>
+</div>
+</div>
+
+
+<div id="outline-container-org590aade" class="outline-2">
+<h2 id="org590aade">ubuntu 固定ip设置</h2>
+<div class="outline-text-2" id="text-org590aade">
+<p>
+sudo vim /etc/network/interfaces
+</p>
+
+<div class="org-src-container">
+<pre class="src src-text">auto lo
+iface lo inet loopback
+auto enp2s0 
+iface enp2s0 inet static
+address 192.168.1.2 
+netmask 255.255.255.0
+gateway 192.168.1.1
+</pre>
+</div>
+
+<p>
+enp2s0 是网卡名称。
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgf187d33" class="outline-2">
+<h2 id="orgf187d33">参考</h2>
+<div class="outline-text-2" id="text-orgf187d33">
+<p>
+<a href="https://blog.csdn.net/hshl1214/article/details/53103790">Linux 双网卡（内外网） 同时使用路由设置</a>
+</p>
+</div>
+</div>
+
+
+      </article>
+      <div>
+    <ul id="tags">
+        <li><a href="/tags/tools/">tools</a></li>
+    </ul>
+    <div class="post-meta">
+      <span title="post date">Published: 2019-04-24</span>
+      </br>
+      <span title="last modification date">Last Modification: 2020-08-14</span>
+      </br>
+      <span title="author" >Author: Clare Lee</span>
+    </div>
+    <section>
+      <h2>Comments</h2>
+        <div id="disqus_thread"></div>
+        <script type="text/javascript">
+        //var disqus_developer = 1;
+        var disqus_identifier = "/blog/2019/04/24/double-network-card-setting";
+        var disqus_url = "https://congleetea.github.io/blog/2019/04/24/double-network-card-setting";
+        var disqus_shortname = 'congleetea';
+        /* * * DON'T EDIT BELOW THIS LINE * * */
+        (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+        </script>
+        <noscript>Please enable JavaScript to view the <a href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+        <a href="//disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+    </section>
+  <script src="//code.jquery.com/jquery-latest.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.1.0/highlight.min.js"></script>
+  <script src="/media/js/main.js"></script>
+  <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  <div class="copyright">
+    <p>Generated by <a href="http://www.gnu.org/software/emacs/">Emacs</a> 25.x (<a href="http://orgmode.org">Org mode</a> 9.x)</p>
+    <p>
+      Copyright &copy; 2012 - <span id="footerYear"></span> <a href="mailto:congleetea &lt;at&gt; gmail &lt;dot&gt; com">Clare Lee</a>
+      &nbsp;&nbsp;-&nbsp;&nbsp;
+      Powered by <a href="https://github.com/kelvinh/org-page" target="_blank">org-page</a>
+      <script type="text/javascript">document.getElementById("footerYear").innerHTML = (new Date()).getFullYear();</script>
+    </p>
+  </div>
+</div>
+
+    </div>
+  </body>
+</html>
