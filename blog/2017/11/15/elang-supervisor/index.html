@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  
+  <head>
+  <title>elang的supervisor - 清园索道</title>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
+  <meta name="author" content="Xuancong Lee" />
+    <meta name="description" content="erlang的监督行为" />
+    <meta name="keywords" content="erlang,supervisor" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+  <link rel="stylesheet" href="/media/css/main.css" type="text/css">
+  <link rel="stylesheet" href="/media/css/base16-ocean.light-min.css" type="text/css">
+  <link href='https://fonts.googleapis.com/css?family=Fira+Sans' rel='stylesheet' type='text/css'>
+  <link href='https://fonts.googleapis.com/css?family=Fira+Mono' rel='stylesheet' type='text/css'>
+</head>
+
+  <body>
+    <div id="page-wrap">
+      <div>
+  <header id="header">
+    <div class="logo">
+      <h1><a href="/"><span class="logo-black">清园索道</span></a></h1>
+    </div>
+    <div class="fortune">
+      <blockquote>
+        上下求索，识己识人识事
+      </blockquote>
+    </div>
+    <ul id="main-nav">
+        <li><a href="/blog/">Blog</a></li>
+      <li><a href="/tags/">分类</a></li>
+      <li><a href="/about/">关于我</a></li>
+      <li><a href="https://github.com/congleetea">GitHub</a></li>
+      <li><a href="/rss.xml">RSS</a></li>
+    </ul>
+  </header>
+</div>
+
+      <article id="content">
+        
+  <h1>elang的supervisor</h1>
+
+
+<div id="outline-container-org6186a36" class="outline-2">
+<h2 id="org6186a36">init返回</h2>
+<div class="outline-text-2" id="text-org6186a36">
+<p>
+{ok, sup_flags(), child_spec()}
+</p>
+
+<p>
+sup_flags()是针对这个supervisor的属性，child_spec()是子进程规范列表。
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgc919d97" class="outline-2">
+<h2 id="orgc919d97">监督者标识</h2>
+<div class="outline-text-2" id="text-orgc919d97">
+<div class="org-src-container">
+<pre class="src src-erlang">sup_flags() = #{strategy =&gt; strategy(),         % optional
+                intensity =&gt; non_neg_integer(), % optional
+                period =&gt; pos_integer()}        % optional
+</pre>
+</div>
+</div>
+
+<div id="outline-container-orga2f9810" class="outline-3">
+<h3 id="orga2f9810">四种重启策略strategy</h3>
+<div class="outline-text-3" id="text-orga2f9810">
+<ul class="org-ul">
+<li>one_for_one(default)
+这类子进程其中一个挂了，只有这个进程会被重启，其他不受影响。</li>
+
+<li>one_for_all 
+这类子进程任何一个挂了，所有进程全部重启。</li>
+
+<li>rest_for_one
+这类进程某个子进程挂了，那么在这个挂了的子进程后面启动的所有子进程都会按顺序重启。</li>
+
+<li>simple_one_for_one 
+这是one_for_one的简化版，但是所有子进程都是基于相同的spec动态启动，这些子进程都是同一spec的实例。</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-org2e4e5bb" class="outline-3">
+<h3 id="org2e4e5bb">重启密度</h3>
+<div class="outline-text-3" id="text-org2e4e5bb">
+<p>
+重启密度设置是为了避免无休止的进程重启。重启密度由 intensity(次数) 和 period(s) 确定，超过这个重启密度，supervisor就会终止所有的
+子进程，然后终止自己。
+</p>
+</div>
+</div>
+</div>
+
+
+<div id="outline-container-orgafc769b" class="outline-2">
+<h2 id="orgafc769b">子进程规范</h2>
+<div class="outline-text-2" id="text-orgafc769b">
+<div class="org-src-container">
+<pre class="src src-erlang">child_spec() = #{id =&gt; child_id(),       % mandatory
+                 start =&gt; mfargs(),      % mandatory
+                 restart =&gt; restart(),   % optional
+                 shutdown =&gt; shutdown(), % optional
+                 type =&gt; worker(),       % optional
+                 modules =&gt; modules()}   % optional
+</pre>
+</div>
+</div>
+
+<div id="outline-container-org242f384" class="outline-3">
+<h3 id="org242f384">子进程启动方式start()</h3>
+<div class="outline-text-3" id="text-org242f384">
+<p>
+{Module, Function, Args}，子进程通过这个函数启动。simple_one_for_one 的时候，Args还要加上 start_child/2 中的参数。
+</p>
+</div>
+</div>
+
+<div id="outline-container-org4fe27b9" class="outline-3">
+<h3 id="org4fe27b9">restart()</h3>
+<div class="outline-text-3" id="text-org4fe27b9">
+<p>
+定义被终止的进程什么时候会被重启。
+</p>
+
+<ul class="org-ul">
+<li>permanent 永久的 
+这种类型的子进程只要终止都会被重启。</li>
+
+<li>temporary 临时的
+这种类型的子进程无论如何都不会被重启，就算strategy是one_for_one,rest_for_one.</li>
+
+<li>transient 瞬时的
+这种类型的子进程只有在非正常终止之后才会被重启。即不是normal, shutdown, or {shutdown,Term}这类终止原因。</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-org4fa4303" class="outline-3">
+<h3 id="org4fa4303">shutdown()</h3>
+<div class="outline-text-3" id="text-org4fa4303">
+<p>
+定义进程应该被怎么杀死。
+</p>
+
+<ul class="org-ul">
+<li>brutal_kill
+无条件使用exit(Child,kill)粗暴地杀死。</li>
+
+<li>整数(ms)
+如果是整数，就是超过这个时间就使用exit(Child,shutdown)杀死。</li>
+
+<li>infinity 
+一直等待，当子进程时supervisor的时候，要等待子进程的子进程终止之后才终止supervisor。当然子进程是worker的时候也可以使用这种方式。</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-orgfc8c4c4" class="outline-3">
+<h3 id="orgfc8c4c4">type()</h3>
+<div class="outline-text-3" id="text-orgfc8c4c4">
+<p>
+指明这个子进程是worker还是supervisor。
+</p>
+</div>
+</div>
+
+<div id="outline-container-org2e3a1dc" class="outline-3">
+<h3 id="org2e3a1dc">module()</h3>
+<div class="outline-text-3" id="text-org2e3a1dc">
+<p>
+指出进程使用那个模块。
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org1e17105" class="outline-2">
+<h2 id="org1e17105">关于 start_child/2</h2>
+<div class="outline-text-2" id="text-org1e17105">
+<ul class="org-ul">
+<li>supervisor 的 init 指定的方式如果是 one_for_one 的时候，在启动了supervisor后会自动将制定了spec的worker或sub-supervisor启动起来。</li>
+<li>有时候需要手动调用start_child来在该sup下面启动worker，这时候如果不适用init的spec，那就是用start_child(Sup, NewSpec)。NewSpec就是
+该worker的spec。如果init中制定simple_one_for_one的方式，需要临时增加worker，这时候可以使用start_child(Sup, OptsList)，OptList是参数，
+这个参数会append在spec中的MFA指定的A后面，即真正执行的时候时MF(A+OptsList)。</li>
+</ul>
+</div>
+</div>
+
+
+      </article>
+      <div>
+    <ul id="tags">
+        <li><a href="/tags/erlang/">erlang</a></li>
+    </ul>
+    <div class="post-meta">
+      <span title="post date">Published: 2017-11-15</span>
+      </br>
+      <span title="last modification date">Last Modification: 2020-08-14</span>
+      </br>
+      <span title="author" >Author: Xuancong Lee</span>
+    </div>
+    <section>
+      <h2>Comments</h2>
+        <div id="disqus_thread"></div>
+        <script type="text/javascript">
+        //var disqus_developer = 1;
+        var disqus_identifier = "/blog/2017/11/15/elang-supervisor";
+        var disqus_url = "https://congleetea.github.io/blog/2017/11/15/elang-supervisor";
+        var disqus_shortname = 'congleetea';
+        /* * * DON'T EDIT BELOW THIS LINE * * */
+        (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+        </script>
+        <noscript>Please enable JavaScript to view the <a href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+        <a href="//disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+    </section>
+  <script src="//code.jquery.com/jquery-latest.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.1.0/highlight.min.js"></script>
+  <script src="/media/js/main.js"></script>
+  <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  <div class="copyright">
+    <p>Generated by <a href="http://www.gnu.org/software/emacs/">Emacs</a> 25.x (<a href="http://orgmode.org">Org mode</a> 9.x)</p>
+    <p>
+      Copyright &copy; 2012 - <span id="footerYear"></span> <a href="mailto:congleetea &lt;at&gt; gmail &lt;dot&gt; com">Xuancong Lee</a>
+      &nbsp;&nbsp;-&nbsp;&nbsp;
+      Powered by <a href="https://github.com/kelvinh/org-page" target="_blank">org-page</a>
+      <script type="text/javascript">document.getElementById("footerYear").innerHTML = (new Date()).getFullYear();</script>
+    </p>
+  </div>
+</div>
+
+    </div>
+  </body>
+</html>

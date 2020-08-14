@@ -4,8 +4,8 @@
     <title>清园索道</title>
     <link>https://congleetea.github.io</link>
     <description>上下求索，识己识人识事</description>
-    <pubDate>Fri, 14 Aug 2020 19:53:13 CST</pubDate>
-    <lastBuildDate>Fri, 14 Aug 2020 19:53:13 CST</lastBuildDate>
+    <pubDate>Fri, 14 Aug 2020 19:55:13 CST</pubDate>
+    <lastBuildDate>Fri, 14 Aug 2020 19:55:13 CST</lastBuildDate>
     <docs>http://www.rssboard.org/rss-specification</docs>
     <generator>Org-page static site generator (https://github.com/kelvinh/org-page)</generator>
     <item>
@@ -58,25 +58,25 @@
       <guid>https://congleetea.github.io/blog/2016/02/15/c++-tips</guid>
     </item>
     <item>
-      <title>联合概率和条件概率</title>
-      <link>https://congleetea.github.io/blog/2018/10/17/math-Joint-and-Conditional-Probability</link>
-      <description><![CDATA[联合概率和条件概率]]></description>
+      <title>erlang之gen_fsm小结</title>
+      <link>https://congleetea.github.io/blog/2016/11/12/erlang-gen-fsm</link>
+      <description><![CDATA[erlang行为gen_fsm]]></description>
       <pubDate>2020-08-14</pubDate>
-      <guid>https://congleetea.github.io/blog/2018/10/17/math-Joint-and-Conditional-Probability</guid>
+      <guid>https://congleetea.github.io/blog/2016/11/12/erlang-gen-fsm</guid>
     </item>
     <item>
-      <title>复数与旋转</title>
-      <link>https://congleetea.github.io/blog/2019/05/05/complex-numbers-and-rotation</link>
-      <description><![CDATA[描述虚数的原始意义]]></description>
+      <title>Learn You Some Erlang For Great Good笔记</title>
+      <link>https://congleetea.github.io/blog/2017/11/25/learn-you-some-erlang-for-great-goods-notes</link>
+      <description><![CDATA[阅读Learn You Some Erlang For Great Good的记录]]></description>
       <pubDate>2020-08-14</pubDate>
-      <guid>https://congleetea.github.io/blog/2019/05/05/complex-numbers-and-rotation</guid>
+      <guid>https://congleetea.github.io/blog/2017/11/25/learn-you-some-erlang-for-great-goods-notes</guid>
     </item>
     <item>
-      <title>常用几何知识</title>
-      <link>https://congleetea.github.io/blog/2016/03/21/math-geometry</link>
-      <description><![CDATA[常用的几何知识总结]]></description>
+      <title>使用erlang.mk来新建和编译一个工程</title>
+      <link>https://congleetea.github.io/blog/2017/09/02/erlang-mk-new-build-project</link>
+      <description><![CDATA[便捷的使用erlang.mk来新建和编译发布一个工程]]></description>
       <pubDate>2020-08-14</pubDate>
-      <guid>https://congleetea.github.io/blog/2016/03/21/math-geometry</guid>
+      <guid>https://congleetea.github.io/blog/2017/09/02/erlang-mk-new-build-project</guid>
     </item>
   </channel>
 </rss>

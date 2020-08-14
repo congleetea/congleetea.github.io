@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  
+  <head>
+  <title>erlang节点之间的通信原理 - 清园索道</title>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
+  <meta name="author" content="Xuancong Lee" />
+    <meta name="description" content="erlang节点之间的通信" />
+    <meta name="keywords" content="erlang,epmd" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+  <link rel="stylesheet" href="/media/css/main.css" type="text/css">
+  <link rel="stylesheet" href="/media/css/base16-ocean.light-min.css" type="text/css">
+  <link href='https://fonts.googleapis.com/css?family=Fira+Sans' rel='stylesheet' type='text/css'>
+  <link href='https://fonts.googleapis.com/css?family=Fira+Mono' rel='stylesheet' type='text/css'>
+</head>
+
+  <body>
+    <div id="page-wrap">
+      <div>
+  <header id="header">
+    <div class="logo">
+      <h1><a href="/"><span class="logo-black">清园索道</span></a></h1>
+    </div>
+    <div class="fortune">
+      <blockquote>
+        上下求索，识己识人识事
+      </blockquote>
+    </div>
+    <ul id="main-nav">
+        <li><a href="/blog/">Blog</a></li>
+      <li><a href="/tags/">分类</a></li>
+      <li><a href="/about/">关于我</a></li>
+      <li><a href="https://github.com/congleetea">GitHub</a></li>
+      <li><a href="/rss.xml">RSS</a></li>
+    </ul>
+  </header>
+</div>
+
+      <article id="content">
+        
+  <h1>erlang节点之间的通信原理</h1>
+
+<div id="outline-container-org4368737" class="outline-2">
+<h2 id="org4368737">问题</h2>
+<div class="outline-text-2" id="text-org4368737">
+<ul class="org-ul">
+<li>节点怎么识别到对方？</li>
+<li>节点怎么建立联系？</li>
+<li>节点之间的通信包括哪些？</li>
+<li>如何将erlang的自身集群通道和工程的数据通道分离开？</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-org6c06d47" class="outline-2">
+<h2 id="org6c06d47">节点怎么识别对方</h2>
+<div class="outline-text-2" id="text-org6c06d47">
+<ul class="org-ul">
+<li>节点以分布式模式启动
+节点启动的时候如果使用了-name或者-sname，此时节点名为nodename@hostname形式，不以分布式模式启动时名字恒为
+nonode@nohost(当然也可以在命令行中使用net_kernel:start/1转化为分布式节点)。只有以分布式模式启动的时候才
+可以加入集群，而且节点比如同时使用-name或者-sname，不一样也不能加入集群。</li>
+
+<li><p>
+节点怎么识别对方
+每台机器上启动第一个vm的时候都会顺带启动一个后台进程epmd（Erlang Port Mapper Daemon），该进程默认监听
+TCP/IP 4369端口。该端口可以通过下面两种方式进行更改：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-shell">//单独启动epmd进程
+$ epmd -dmemon -port 5000
+// epmd随分布式节点启动, -epmd参数指定epmd启动方式，其中的-port端口指定监听端口，-epmd_port指定node连接的epmd端口.
+$ erl -name hello@cong.com -epmd "epmd -port 5000 -daemon" -epmd_port 5000
+</pre>
+</div>
+
+<p>
+epmd的端口更改之后，连接虚拟机就要指定这个新的端口，指定方式也有两种方式：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-shell">$ erl -name hello@cong.com -epmd_port 5000
+</pre>
+</div>
+<div class="org-src-container">
+<pre class="src src-text">ERL_EPMD_PORT=5000
+</pre>
+</div></li>
+</ul>
+
+<p>
+kernel的erl_epmd模块提供epmd协议的封装，向net_kernel模块提供服务。如果net_kernel要连接其他节点的时候，
+就取出节点名称的ip部分，透过erl_epmd建立连接到ip:4369，通过epmd协议来查询想要的foo的端口，然后再用
+ip:port去连接真正的服务。
+</p>
+
+<p>
+分布式节点之间是全联通的，也就是nodeA和nodeB建立连接之后，nodeB会介绍已经和其建立连接的所有节点给nodeA，这样彼
+此之间就都会建立联系了, 最后形成一个全联通的网络。
+</p>
+
+<p>
+查看在epmd上注册的node有下面的方法：
+</p>
+
+<ul class="org-ul">
+<li><p>
+直接通过epmd查看：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-shell">$ epmd -names
+name emqttd0 at port 6369
+name ityerpc1 at port 17759
+name emqttd1 at port 19835
+name rabbit at port 25672
+</pre>
+</div></li>
+
+<li><p>
+在erl shell中查看：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-shell">(ityerpc1@127.0.0.1)1&gt; erl_epmd:names().
+{ok,[{"rabbit",25672},
+     {"emqttd1",19835},
+     {"ityerpc1",17759},
+     {"emqttd0",6369}]}
+</pre>
+</div></li>
+</ul>
+
+
+<p>
+各个服务node监听的端口是不一样的，也可以配置kernel参数指定端口范围：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-shell">application:set_env(kernel, inet_dist_listen_min, 9100).
+application:set_env(kernel, inet_dist_listen_max, 9105).
+</pre>
+</div>
+
+<p>
+那么该node的端口就会再9100~9105之间，如果要固定为某个端口可以将两个参数设置为一样就行。
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgd4c5275" class="outline-2">
+<h2 id="orgd4c5275">节点之间怎么建立联系</h2>
+<div class="outline-text-2" id="text-orgd4c5275">
+<p>
+节点之间的互联只要通过一种方式建立了连接，后面就可以进入分布式系统，成为其中的一个节点了。节点之间的连接主要是
+通过net_kernel来处理。
+</p>
+
+<p>
+比如可以通过net_adm:ping(Node).建立连接，如果成功了就会收到pong回应，否则收到pang的失败回应。
+</p>
+
+<p>
+也可以通过net_kernel:connect_node(Node).建立连接, net_kernel模块还提供了disconnect_node(Node)函数，用来断开连接。
+</p>
+
+<p>
+net_kernel默认会在引用到其它节点时(如rpc:call/5, spawn/4, link/1等)，自动与该节点建立连接，通过
+-dist_auto_connect false选项可以关闭这种行为，如此只能通过net_kernel:connect_node/1手动显式地建立连接。
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgda00fb9" class="outline-2">
+<h2 id="orgda00fb9">节点之间的通信包括哪些</h2>
+<div class="outline-text-2" id="text-orgda00fb9">
+<ul class="org-ul">
+<li>节点之间的时钟信号（确认是否alive）
+节点之间要确定彼此是否alive的，因此会每个一段时间发送一个时钟信号，发送时钟信号的频率可以通过下面两种方式控制：
+
+<ul class="org-ul">
+<li><p>
+vm.args文件的kernel参数控制：
+</p>
+<div class="org-src-container">
+<pre class="src src-text">-kernel net_ticktime 60
+</pre>
+</div></li>
+
+<li>使用函数net_kernel:set_net_ticktime/1,2可以设置发送时钟的周期值，而获取这个值可以使用net_kernel:get_net_ticktime/0获取。</li>
+</ul></li>
+
+<li><p>
+rpc传输的数据和指令
+</p>
+
+<p>
+以emqttd为例，连接量较大的时候, 特别是在投递消息的时候都是通过rpc来进行节点之间的投递的，这样rpc的数据量就会很大，如果
+造成了通道的阻塞，就没有办法正常发送确认设备存活的时钟信号，就可能误判为节点已经挂了。
+</p>
+
+<p>
+为了解决这个方法，可以将erlang节点间的集群通道和项目的数据通道分离开，使用两个端口，这样就必须不影响了。<a href="https://github.com/priestjim/gen_rpc">gen_rpc</a> 这个项目
+就是做了这个事情，可以参考。
+</p></li>
+
+<li>mnesia的数据同步</li>
+</ul>
+</div>
+</div>
+
+
+<div id="outline-container-org89d2708" class="outline-2">
+<h2 id="org89d2708">gen_rpc原理</h2>
+<div class="outline-text-2" id="text-org89d2708">
+<p>
+核心原理就是mailbox-per-node，也就是针对集群中的每个节点产生相应的进程，针对每个节点有一个相应的信箱。这样就不会所有数据
+都阻塞vm的分布式端口。
+</p>
+
+<ul class="org-ul">
+<li>当一个client要发送数据到远端节点RemoteNode时，需要查询以RemoteNode命
+名的进程。</li>
+<li>如果RemoteNode命名的进程没有找到，会向dispatcher进程请求一个新的进程，
+而dispatcher会通过合适的client supervisor生成一个新的进程。</li>
+<li>client进程会连接远端节点的gen_rpc server。向其发送请求等待回应。因此
+gen_rpc server是接收所有节点请求的进程。</li>
+<li>gen_rpc server会请求acceptor supervisor进程启动一个新的acceptor，让
+他处理新的socket连接。</li>
+<li>acceptor接管新的socket连接并通过cookie认证client。</li>
+</ul>
+</div>
+
+<div id="outline-container-orgff68bc2" class="outline-3">
+<h3 id="orgff68bc2">gen_rpc的各个进程状态切换</h3>
+<div class="outline-text-3" id="text-orgff68bc2">
+<ul class="org-ul">
+<li><p>
+server 之 gen_rpc_server_tcp
+</p>
+
+
+<div class="figure">
+<p><img src="../../gimages/gen_rpc_server_tcp.png" alt="gen_rpc_server_tcp.png" />
+</p>
+</div></li>
+
+<li><p>
+server 之 acceptor
+</p>
+
+
+<div class="figure">
+<p><img src="../../gimages/acceptor.png" alt="acceptor.png" />
+</p>
+</div>
+
+<p>
+如果收到的request是不需要回复的（如cast等）直接spawn一个进程执行即可。如果是需要回复的（比如call, async_call）
+则会派生两个进程，call_worker, [self(), CallType, RealM, F, A, Caller])，并将acceptor的Pid（self()）作为参数
+带入，在call_worker中再spawn_monitor一个进程，同时进行monitor： {MPid, MRef} = erlang:spawn_monitor(?MODULE, call_middleman, [M,F,A])
+。当call_middleman执行完之后执行exit，这样监控进程call_worker就会收到退出信号: {'DOWN', ....}, 再由call_worker
+通过!直接发回给acceptor。acceptor 收到之后通过socket将结果返回发送请求的node。
+</p>
+
+<div class="org-src-container">
+<pre class="src src-erlang">call_worker(Server, CallType, M, F, A, Caller) -&gt;
+    {MPid, MRef} = erlang:spawn_monitor(?MODULE, call_middleman, [M,F,A]),
+    receive
+        {'DOWN', MRef, process, MPid, {call_middleman_result, Res}} -&gt;
+            Server ! {CallType, Caller, Res};
+        {'DOWN', MRef, process, MPid, AbnormalExit} -&gt;
+            Server ! {CallType, Caller, {badrpc, AbnormalExit}}
+    end.
+</pre>
+</div></li>
+
+<li><p>
+client
+</p>
+
+<p>
+当我们通过gen_rpc:call/cast等等调用的时候，会调用gen_rpc_client模块处理，这里会首先查询是否有要连接的node对应的client进程，如果没有就调用
+dispatcher进程生成一个，再通过该进程将任务发送到远端节点。
+</p>
+
+<p>
+本节点需要连接远端节点node1时会给该node1生成一个client(gen_server)，通过该client去连接node1的tcp_server_port(因此，在配置的时候，tcp_server_port是
+本节点的端口，tcp_client_port是远端节点的tcp_server_port)。连接之后立刻进行认证。这样node1就会执行waiting_for_auth函数了。
+</p>
+
+<p>
+client和server都有一个不活跃时间，该时间过后进程会被stop掉。
+</p></li>
+</ul>
+</div>
+</div>
+</div>
+
+
+      </article>
+      <div>
+    <ul id="tags">
+        <li><a href="/tags/erlang/">erlang</a></li>
+    </ul>
+    <div class="post-meta">
+      <span title="post date">Published: 2017-04-12</span>
+      </br>
+      <span title="last modification date">Last Modification: 2020-08-14</span>
+      </br>
+      <span title="author" >Author: Xuancong Lee</span>
+    </div>
+    <section>
+      <h2>Comments</h2>
+        <div id="disqus_thread"></div>
+        <script type="text/javascript">
+        //var disqus_developer = 1;
+        var disqus_identifier = "/blog/2017/04/12/erlang-node-communication";
+        var disqus_url = "https://congleetea.github.io/blog/2017/04/12/erlang-node-communication";
+        var disqus_shortname = 'congleetea';
+        /* * * DON'T EDIT BELOW THIS LINE * * */
+        (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+        </script>
+        <noscript>Please enable JavaScript to view the <a href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+        <a href="//disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+    </section>
+  <script src="//code.jquery.com/jquery-latest.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.1.0/highlight.min.js"></script>
+  <script src="/media/js/main.js"></script>
+  <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  <div class="copyright">
+    <p>Generated by <a href="http://www.gnu.org/software/emacs/">Emacs</a> 25.x (<a href="http://orgmode.org">Org mode</a> 9.x)</p>
+    <p>
+      Copyright &copy; 2012 - <span id="footerYear"></span> <a href="mailto:congleetea &lt;at&gt; gmail &lt;dot&gt; com">Xuancong Lee</a>
+      &nbsp;&nbsp;-&nbsp;&nbsp;
+      Powered by <a href="https://github.com/kelvinh/org-page" target="_blank">org-page</a>
+      <script type="text/javascript">document.getElementById("footerYear").innerHTML = (new Date()).getFullYear();</script>
+    </p>
+  </div>
+</div>
+
+    </div>
+  </body>
+</html>

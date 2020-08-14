@@ -2,12 +2,12 @@
 <html lang="en-us">
   
   <head>
-  <title>etcd认证设置 - 清园索道</title>
+  <title>erlang的trap_exit参数解释 - 清园索道</title>
   <meta charset="utf-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
   <meta name="author" content="Xuancong Lee" />
-    <meta name="description" content="etcd的认证设置" />
-    <meta name="keywords" content="etcd,auth" />
+    <meta name="description" content="erlang trap_exit解释" />
+    <meta name="keywords" content="erlang,trap_exit" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
   <link rel="stylesheet" href="/media/css/main.css" type="text/css">
   <link rel="stylesheet" href="/media/css/base16-ocean.light-min.css" type="text/css">
@@ -39,94 +39,113 @@
 
       <article id="content">
         
-  <h1>etcd认证设置</h1>
+  <h1>erlang的trap_exit参数解释</h1>
 
-<div id="outline-container-org9e0ffaf" class="outline-2">
-<h2 id="org9e0ffaf">etcd: consistent key-value store for shared configuration and service discovery.</h2>
-<div class="outline-text-2" id="text-org9e0ffaf">
+
+
+<div id="outline-container-org1ae660b" class="outline-2">
+<h2 id="org1ae660b">进程标识 trap_exit 的作用</h2>
+<div class="outline-text-2" id="text-org1ae660b">
 <p>
-也就是两个功能shared configuration和service discovery都是再k-v存储基础上的。存储类似redis，
-写入，读取和更新都是通过改变这些kv值来实现。
+普通的进程一旦需要除了normal的异常信息就会退出，如果在启动的时候加上process_flag(trap_exit, true), 进程就会接受到
+进程退出的消息，进程监控了这个消息就可以避免进程死亡。
 </p>
 
-<p>
-另外watcher和ttl也是基于这些kv值的监控实现的。
-</p>
-
-<p>
-因此，注册和注销其实就是对应kv的put和get。
-</p>
-</div>
-</div>
-
-<div id="outline-container-org879ebd7" class="outline-2">
-<h2 id="org879ebd7">auth</h2>
-<div class="outline-text-2" id="text-org879ebd7">
 <div class="org-src-container">
-<pre class="src src-sh">$ etcdctl user list
+<pre class="src src-erlang">-module(test).
+-compile(export_all).
 
-## 添加用户myuser
-$ etcdctl user add myuser (input password) 
-Password of myuser: 
-Type password of myuser again for confirmation: 
-User myuser created
+start() -&gt;
+    Pid = spawn(
+            fun() -&gt;
+                    process_flag(trap_exit,true)
+                        do_loop()
+            end
+           ),
+    register(test, Pid).
 
-$ etcdctl role add goim   ## 添加role，名为goim
-Role goim created
-
-$ etcdctl user grant-role myuser goim ## 给用户myuser添加role：goim 
-Role goim is granted to user myuser
-
-$ etcdctl user get myuser  ## 查看myuser用户的信息
-User: myuser
-Roles: goim
-
-$ etcdctl role grant-permission goim --prefix=true readwrite im/  ## 赋予role相应的权限
-Role goim updated
-
-$ etcdctl user add root   ## 确保存在root用户，作为管理者。
-Password of root: 
-Type password of root again for confirmation: 
-User root created
-$ etcdctl auth enable     ## 激活auth功能
-Authentication Enabled
-
-$ etcdctl --user root:mypass auth disable  ## 取消认证功能
-Authentication Disabled
-$ etcdctl auth enable     ## 重新激活auth功能
-Authentication Enabled
-
-$ etcdctl --user root:mypass role list  ## 查看已有的所有role.
-goim
-root 
-
-$ etcdctl --user root:mypass role get goim
-Role goim
-KV Read:
-[im/, im0) (prefix im/)
-KV Write:
-[im/, im0) (prefix im/)
-
-$ etcdctl --user root:mypass role revoke-permission goim --prefix=true im/  ## 取消goim的权限, 官方文档有remove命令，已经不用了。
-Permission of range [im/, im0) is revoked from role goim 
-$ etcdctl --user root:mypass role get goim  ## 再次查看，role的相应权限已经取消了。
-Role goim
-KV Read:
-KV Write: 
-
-## 激活认证的情况下，新建其他role
-$ etcdctl --user root:mypass role add intoyun-kfkworkers
-Role intoyun-kfkworkers created
-
-$ etcdctl --user root:mypass user grant-role myuser intoyun-kfkworkers
-Role intoyun-kfkworkers is granted to user myuser
-$ etcdctl --user root:mypass user get myuser
-User: myuser
-Roles: goim intoyun-kfkworkers
-$ etcdctl --user root:mypass role grant-permission intoyun-kfkworkers --prefix=true readwrite intoyun-kfkworkers/
-Role intoyun-kfkworkers updated
+do_loop()-&gt;
+    receive
+        Msg -&gt;
+            io:format("recv ~w~n", [Msg])
+    end,
+    do_loop().
 </pre>
 </div>
+
+<div class="org-src-container">
+<pre class="src src-shell">$ erlc test.erl 
+$ erl -pa .
+Erlang/OTP 19 [erts-8.2] [source] [64-bit] [smp:4:4] [async-threads:10] [hipe] [kernel-poll:false]
+
+Eshell V8.2  (abort with ^G)
+1&gt; test:start().
+true
+2&gt; whereis(test).
+&lt;0.60.0&gt;
+3&gt; exit(whereis(test),normal).
+recv {'EXIT',&lt;0.58.0&gt;,normal}
+true
+4&gt; whereis(test).             
+&lt;0.60.0&gt;
+5&gt; exit(whereis(test),"die"). 
+recv {'EXIT',&lt;0.58.0&gt;,[100,105,101]}
+true
+6&gt; whereis(test).            
+&lt;0.60.0&gt;
+7&gt; exit(whereis(test),kill). 
+true
+8&gt; whereis(test).           
+undefined
+9&gt; 
+</pre>
+</div>
+
+<p>
+从上面我们看到不管发送normal和其他除了kill的其他信号，进程都没有被杀死，而是收到{'EXIT',&lt;0.58.0&gt;,[100,105,101]}的信号，
+如果要强制杀死进程，使用kill就可以了。
+</p>
+
+<p>
+如果没有process_flag(trap_exit,true), 我们看看：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-shell">Eshell V8.2  (abort with ^G)
+1&gt; test:start().
+true
+2&gt; whereis(test).
+&lt;0.60.0&gt;
+3&gt; exit(whereis(test), normal).
+true
+4&gt; whereis(test).              
+&lt;0.60.0&gt;
+5&gt; exit(whereis(test), "die"). 
+true
+6&gt; whereis(test).             
+undefined
+7&gt; 
+</pre>
+</div>
+
+<p>
+这时候我们看到收到"die"的exit消息之后，进程就死掉了，而且不会捕捉到进程的任何异常信息。
+</p>
+
+<p>
+对于之前的otp版本，普通进程收到normal退出消息也会使其死亡，但是19.1除了normal才会让进程死亡。
+</p>
+</div>
+</div>
+
+<div id="outline-container-orge8f337b" class="outline-2">
+<h2 id="orge8f337b">使用trap_exit可以作为监督者，和supervisor有什么区别</h2>
+<div class="outline-text-2" id="text-orge8f337b">
+<p>
+supervisor有重启机制，使用trap_exit可以检测进程的异常信息，避免进程自身死亡，但是他不会重启他的子进程，在emqttd中，
+esockd_connection_sup就是使用process_flag(trap_exit,true)来启动的，虽然具有监督功能，但是不会重启子进程connection，
+显然，connection就是不能重启的。
+</p>
 </div>
 </div>
 
@@ -134,10 +153,10 @@ Role intoyun-kfkworkers updated
       </article>
       <div>
     <ul id="tags">
-        <li><a href="/tags/services/">services</a></li>
+        <li><a href="/tags/erlang/">erlang</a></li>
     </ul>
     <div class="post-meta">
-      <span title="post date">Published: 2017-05-02</span>
+      <span title="post date">Published: 2017-04-07</span>
       </br>
       <span title="last modification date">Last Modification: 2020-08-14</span>
       </br>
@@ -148,8 +167,8 @@ Role intoyun-kfkworkers updated
         <div id="disqus_thread"></div>
         <script type="text/javascript">
         //var disqus_developer = 1;
-        var disqus_identifier = "/blog/2017/05/02/etcd-auth-setting";
-        var disqus_url = "https://congleetea.github.io/blog/2017/05/02/etcd-auth-setting";
+        var disqus_identifier = "/blog/2017/04/07/erlang-trap_exit";
+        var disqus_url = "https://congleetea.github.io/blog/2017/04/07/erlang-trap_exit";
         var disqus_shortname = 'congleetea';
         /* * * DON'T EDIT BELOW THIS LINE * * */
         (function() {

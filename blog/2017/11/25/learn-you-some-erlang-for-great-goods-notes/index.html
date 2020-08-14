@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  
+  <head>
+  <title>Learn You Some Erlang For Great Good笔记 - 清园索道</title>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
+  <meta name="author" content="Xuancong Lee" />
+    <meta name="description" content="阅读Learn You Some Erlang For Great Good的记录" />
+    <meta name="keywords" content="erlang" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+  <link rel="stylesheet" href="/media/css/main.css" type="text/css">
+  <link rel="stylesheet" href="/media/css/base16-ocean.light-min.css" type="text/css">
+  <link href='https://fonts.googleapis.com/css?family=Fira+Sans' rel='stylesheet' type='text/css'>
+  <link href='https://fonts.googleapis.com/css?family=Fira+Mono' rel='stylesheet' type='text/css'>
+</head>
+
+  <body>
+    <div id="page-wrap">
+      <div>
+  <header id="header">
+    <div class="logo">
+      <h1><a href="/"><span class="logo-black">清园索道</span></a></h1>
+    </div>
+    <div class="fortune">
+      <blockquote>
+        上下求索，识己识人识事
+      </blockquote>
+    </div>
+    <ul id="main-nav">
+        <li><a href="/blog/">Blog</a></li>
+      <li><a href="/tags/">分类</a></li>
+      <li><a href="/about/">关于我</a></li>
+      <li><a href="https://github.com/congleetea">GitHub</a></li>
+      <li><a href="/rss.xml">RSS</a></li>
+    </ul>
+  </header>
+</div>
+
+      <article id="content">
+        
+  <h1>Learn You Some Erlang For Great Good笔记</h1>
+
+<div id="outline-container-org45101a7" class="outline-2">
+<h2 id="org45101a7">语句</h2>
+<div class="outline-text-2" id="text-org45101a7">
+<ul class="org-ul">
+<li>动态，强类型，函数式范型，并发范型，actor并发模型</li>
+
+<li>卫语句：“;”和","和orelse，analso还是有区别的，前者即使前面的结果没匹配上，依然后执行后面的语句，而后者就不会了。</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-org2ac7692" class="outline-2">
+<h2 id="org2ac7692">模块</h2>
+<div class="outline-text-2" id="text-org2ac7692">
+<p>
+函数的集合。
+</p>
+
+<ul class="org-ul">
+<li>模块： 函数和属性(预定义模块属性+自定义模块属性)。
+
+<ul class="org-ul">
+<li>模块的设计要避免环形依赖。</li>
+
+<li>属性module必须放在最前面.</li>
+
+<li>属性import 破坏代码的可读性，强烈建议不适用这种属性。通常只有lists模块的函数会被引入，因为他用的比较频繁。</li>
+
+<li>学会使用属性 -ifdef(MACRO).,-else.和-endif 有条件的定义其他的属性。</li>
+
+<li>定义宏，包括“函数”宏.</li>
+
+<li>通过 Mod:module_info()可以查看所有的元数据。</li>
+</ul></li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-orgc515a44" class="outline-2">
+<h2 id="orgc515a44">模块</h2>
+<div class="outline-text-2" id="text-orgc515a44">
+<p>
+函数的集合。
+</p>
+
+<ul class="org-ul">
+<li>模块： 函数和属性(预定义模块属性+自定义模块属性)。
+
+<ul class="org-ul">
+<li>模块的设计要避免环形依赖。</li>
+
+<li>属性module必须放在最前面.</li>
+
+<li>属性import 破坏代码的可读性，强烈建议不适用这种属性。通常只有lists模块的函数会被引入，因为他用的比较频繁。</li>
+
+<li>学会使用属性 -ifdef(MACRO).,-else.和-endif 有条件的定义其他的属性。</li>
+
+<li>定义宏，包括“函数”宏.</li>
+
+<li>通过 Mod:module_info()可以查看所有的元数据。</li>
+</ul></li>
+</ul>
+</div>
+</div>
+
+
+<div id="outline-container-org3af49ad" class="outline-2">
+<h2 id="org3af49ad">函数</h2>
+<div class="outline-text-2" id="text-org3af49ad">
+<p>
+函数，参数，返回结果。
+</p>
+
+<ul class="org-ul">
+<li>函数的模式匹配：善用模式匹配，可以避免多层if else，case 的使用，让代码更优美。使用模式匹配的函数
+是先匹配参数，再给参数赋值；而if else，case的使用是先赋值，再比较。</li>
+
+<li>模式匹配搭配卫语句使用：卫语句不能使用自定义的函数。</li>
+
+<li>true 在 if end 语句中的使用.</li>
+</ul>
+</div>
+</div>
+
+
+<div id="outline-container-org882b452" class="outline-2">
+<h2 id="org882b452">类型</h2>
+<div class="outline-text-2" id="text-org882b452">
+<p>
+erlang 是动态强类型语言。
+</p>
+
+<ul class="org-ul">
+<li>erlang 是动态类型语言，所有错误都在运行时被捕获，在编译代码时，对于可能导致失败的问题，编译器并不总是会给出警告。
+但是erlang的动态类型系统不是程序可靠性和安全性的障碍。这得益于它的容错性；同时，动态类型也是实现热更新最简单的办法。</li>
+
+<li>如果你是一个静态类型拥护者，erlang 提供了Dialyzer可以进行静态类型分析，及早发现错误。</li>
+
+<li>erlang 是强类型语言，不允许像弱类型语言会在不同的数据项之间隐式的类型装换。但是为了适应类型装换的需要，erlang专门
+提供了一些 <b>类型检测</b> 和 <b>类型装换</b> 的BIF函数。</li>
+
+<li>erlang 不提供 type_of(X) -&gt; Type 这样的函数是因为：erlang 只针对正确的情况编程，你的程序只需要处理那些你知道肯定会
+发生以及所期望的情况，对于除此以外的其他情况，都应该尽快排除异常。</li>
+</ul>
+</div>
+</div>
+
+
+<div id="outline-container-org232afdc" class="outline-2">
+<h2 id="org232afdc">递归 - 更优雅的循环</h2>
+<div class="outline-text-2" id="text-org232afdc">
+<p>
+函数式变成通常没有类似for，while这样的循环结构，但提供了递归来实现循环。
+</p>
+
+<ul class="org-ul">
+<li>递归的两点：停止条件；调用自己。</li>
+
+<li>递归的问题：每次执行的结果都会保存到内存中，如果列表长度很长，那么就要把一大堆数据放到内存中，这很好内存，为了
+解决这个问题，可以使用尾递归实现(增加一个累加器，将每次计算的结果放在累加器中)。</li>
+
+<li>尾递归：两个参数不同的函数；增加累加器参数，每次执行之后更新累加器；将剩余的数继续调用自身函数。</li>
+
+<li>尾递归有时候需要翻转列表才能和原列表顺序匹配。</li>
+</ul>
+</div>
+</div>
+
+
+<div id="outline-container-orgd55ac0c" class="outline-2">
+<h2 id="orgd55ac0c">高阶函数</h2>
+<div class="outline-text-2" id="text-orgd55ac0c">
+<p>
+在数学和计算机中，高阶函数是至少满足下列一个条件的函数：接收一个或多个函数作为输入；输出一个函数。
+</p>
+
+<ul class="org-ul">
+<li>高阶函数：所有函数是语言都有一个特性：把自定义的函数作为参数传递给另外一个函数，这个函数会被绑定到一个变量上，
+就像使用变量一样使用这个函数。如果一个函数的参数时这样传递过来的那么这就是一个高阶函数。</li>
+
+<li>高阶函数的参数：函数表示成参数(Module:Function/Arity，告诉虚拟机具体执行哪个函数并把这个函数绑定到一个变量上)。</li>
+
+<li>函数的作用域和闭包：是引用了自由变量的函数。这个被引用的自由变量将和这个函数一同存在，即使已经离开了创造它的环
+境也不例外。也就是，当匿名函数，作用域的概念和可以携带变量的能力结合在一起时，就产生了闭包。</li>
+</ul>
+</div>
+</div>
+
+
+<div id="outline-container-org45ef47d" class="outline-2">
+<h2 id="org45ef47d">错误和异常</h2>
+<div class="outline-text-2" id="text-org45ef47d">
+<p>
+erlang 处理错误的机制和并发是有关联的。
+</p>
+
+<ul class="org-ul">
+<li>关于异常
+
+<ul class="org-ul">
+<li>错误有：编译期错误(语法错误)；逻辑错误；运行时错误(会导致程序崩溃)。这里主要讨论运行时错误。</li>
+
+<li>erlang 三种异常：出错(error)，退出(exit)，抛出(throw)。</li>
+
+<li>error (调用erlang:error/1时触发) 会结束当前进程的执行。所以不想让进程崩溃的异常不要使用这种方式；可以自定义错误。</li>
+
+<li>exit (erlang:exit/1 内部退出, erlang:exit/2 外部退出): 进程退出之后会发送一条消息给接收者。</li>
+
+<li>exit: 接收exit消息的进程如果没有traping exits，那么接收进程也会退出；如果traping exits，退出信号会转化为{'EXIT', From, Reason}送到进程邮箱中。</li>
+
+<li>error 和 exit：捕获error异常会得到最后几次函数调用的栈跟踪和参数列表, 而exit/1不会返回调用栈，因为如果调用栈很深
+就意味着退出进程把这个消息复制给所有监听进程就要复制很多消息，这不现实。</li>
+
+<li>throw: 当期待程序员处理所发生的异常的时候，可以抛出异常throw。相比error和exit，throw没有"让进程崩溃"的意思。</li>
+
+<li>通常在深度递归中内部返回throw，由顶层catch异常后处理该异常。</li>
+</ul></li>
+
+<li>处理异常
+
+<ul class="org-ul">
+<li>三种异常都可以通过 try ... catch ... 处理。默认 catch 得到 Type:Exception 消息，如果没有 Type， 默认就有 throw 的信息。</li>
+<li>try of catch 中被保护部分不能做尾递归。</li>
+</ul></li>
+</ul>
+</div>
+</div>
+
+
+      </article>
+      <div>
+    <ul id="tags">
+        <li><a href="/tags/erlang/">erlang</a></li>
+    </ul>
+    <div class="post-meta">
+      <span title="post date">Published: 2017-11-25</span>
+      </br>
+      <span title="last modification date">Last Modification: 2020-08-14</span>
+      </br>
+      <span title="author" >Author: Xuancong Lee</span>
+    </div>
+    <section>
+      <h2>Comments</h2>
+        <div id="disqus_thread"></div>
+        <script type="text/javascript">
+        //var disqus_developer = 1;
+        var disqus_identifier = "/blog/2017/11/25/learn-you-some-erlang-for-great-goods-notes";
+        var disqus_url = "https://congleetea.github.io/blog/2017/11/25/learn-you-some-erlang-for-great-goods-notes";
+        var disqus_shortname = 'congleetea';
+        /* * * DON'T EDIT BELOW THIS LINE * * */
+        (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+        </script>
+        <noscript>Please enable JavaScript to view the <a href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+        <a href="//disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+    </section>
+  <script src="//code.jquery.com/jquery-latest.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.1.0/highlight.min.js"></script>
+  <script src="/media/js/main.js"></script>
+  <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  <div class="copyright">
+    <p>Generated by <a href="http://www.gnu.org/software/emacs/">Emacs</a> 25.x (<a href="http://orgmode.org">Org mode</a> 9.x)</p>
+    <p>
+      Copyright &copy; 2012 - <span id="footerYear"></span> <a href="mailto:congleetea &lt;at&gt; gmail &lt;dot&gt; com">Xuancong Lee</a>
+      &nbsp;&nbsp;-&nbsp;&nbsp;
+      Powered by <a href="https://github.com/kelvinh/org-page" target="_blank">org-page</a>
+      <script type="text/javascript">document.getElementById("footerYear").innerHTML = (new Date()).getFullYear();</script>
+    </p>
+  </div>
+</div>
+
+    </div>
+  </body>
+</html>
