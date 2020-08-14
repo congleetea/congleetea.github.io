@@ -1,0 +1,59 @@
+#+TITLE:       TOOL: 编写 USB rules 作为永久规则
+#+AUTHOR:      Clare Lee
+#+EMAIL:       congleetea@gmail.com
+#+DATE:        2019-03-16 Sat
+#+URI:         /blog/%y/%m/%d/udev-usb-rules
+#+KEYWORDS:    udevadmin,usb,rules
+#+TAGS:        tools 
+#+LANGUAGE:    en
+#+OPTIONS:     H:3 num:nil toc:nil \n:nil ::t |:t ^:nil -:nil f:t *:t <:t
+#+DESCRIPTION: <TODO: insert your description here>
+
+* 方法1
+  
+** 查找 ATTRS{devpath}
+  
+   依次插拔各个usb，执行下面指令找出 ATTRS{devpath}:
+
+   #+BEGIN_SRC shell
+     udevadm info -a -n /dev/ttyUSB0 | grep ATTRS{devpath}
+   #+END_SRC
+
+   选择第一个 ATTRS{devpath} 作为该usb的 devpath。
+
+
+** 编写xxx.rules
+ 
+   如下填入 devpath，得到最后的 xxx.rules： 
+   #+BEGIN_SRC text
+     KERNEL=="tty*", ATTRS{devpath}=="1.4",MODE="0666", GROUP:="dialout",  SYMLINK+="lidarup"
+     KERNEL=="tty*", ATTRS{devpath}=="1.1",MODE="0666", GROUP:="dialout",  SYMLINK+="lidardown"
+   #+END_SRC
+
+   #+BEGIN_SRC shell
+     chmod +x xxx.rules
+   #+END_SRC
+  
+   给该文件可执行权限。完成之后重新插拔usb线就可以生效。
+
+* 方法2
+
+  通过下面方法找到USB的ID_PATH_TAG: 
+  #+BEGIN_SRC shell
+   udevadm info --name=/dev/ttyUSB0 | grep ID_PATH_TAG
+  #+END_SRC
+
+  编写xxx.rules:
+  
+  #+BEGIN_SRC text
+    ACTION=="add",ENV{ID_BUS}=="usb",ENV{ID_PATH_TAG}=="pci-0000_00_14_0-usb-0_2_2_1_0",SYMLINK+="imu"
+    ACTION=="add",ENV{ID_BUS}=="usb",ENV{ID_PATH_TAG}=="pci-0000_00_14_0-usb-0_2_3_1_0",SYMLINK+="lidardown"
+  #+END_SRC
+ 
+  将文件放在/etc/udev/roles.d下面, sudo chmod +x /etc/udev/rules.d/xxx.rules。
+
+  如果用户权限不够：
+
+  #+BEGIN_SRC shell
+    sudo usermod -a -G dialout $USER
+  #+END_SRC

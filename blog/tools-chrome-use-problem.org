@@ -1,0 +1,32 @@
+#+TITLE:       TOOL: Chrome浏览器使用时遇到的问题
+#+AUTHOR:      Xuancong Lee
+#+EMAIL:       congleetea@gmail.com
+#+DATE:        2018-09-08 六
+#+URI:         /blog/%y/%m/%d/chrome-use-problem
+#+KEYWORDS:    tools,chrome,open link
+#+TAGS:        tools
+#+LANGUAGE:    en
+#+OPTIONS:     H:3 num:nil toc:nil \n:nil ::t |:t ^:nil -:nil f:t *:t <:t
+#+DESCRIPTION: 记录chrome使用中的一些小问题
+
+
+* 不能通过外部打开链接 
+
+  - 问题描述
+    在终端中通过 open link 打开链接的时候，可以启动 chrome，但是空白页面，不显示内容。
+
+  - 解决
+    
+    vim ./.local/share/applications/google-chrome.desktop, 将Exec修改为：
+
+    #+BEGIN_SRC text
+    Exec=/opt/google/chrome/chrome %u
+    #+END_SRC
+
+    就是在最后加上 %u，
+    
+    这个文件是Linux 的桌面入口(desktop entry)格式的文件，定义了桌面图标启动的形式。
+
+    refer1: https://www.ibm.com/developerworks/cn/linux/l-cn-dtef/index.html
+    
+    refer2: https://blog.csdn.net/Future_promise/article/details/78215201

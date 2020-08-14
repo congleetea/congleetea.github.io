@@ -1,0 +1,102 @@
+#+TITLE:       TOOL: 双网卡上内外网的路由设置
+#+AUTHOR:      Clare Lee
+#+EMAIL:       congleetea@gmail.com
+#+DATE:        2019-04-24 Wed
+#+URI:         /blog/%y/%m/%d/double-network-card-setting
+#+KEYWORDS:    tools,network,route
+#+TAGS:        tools
+#+LANGUAGE:    en
+#+OPTIONS:     H:3 num:nil toc:nil \n:nil ::t |:t ^:nil -:nil f:t *:t <:t
+#+DESCRIPTION: 双网卡上内外网的设置
+
+
+* 双网卡上内外网的设置
+
+  由于工作需要要经常连接一个内网的机器，内网不能上外网，查资料很不方便。因此买了
+  一个网卡，希望一个处理内网，一个处理外网。但是出现的问题时，连上内网之后就不能
+  上外网了，只能关掉之后才能上。下面对路由进行设置，使默认走外网网卡，
+  192.168.32.0 网段的走内网。
+
+  - ifconfig 查看两个网卡信息; 外网走 wlp2s0, 内网走wlx085700299283。
+    
+    #+BEGIN_SRC text
+      lo        Link encap:Local Loopback  
+      inet addr:127.0.0.1  Mask:255.0.0.0
+      inet6 addr: ::1/128 Scope:Host
+      UP LOOPBACK RUNNING  MTU:65536  Metric:1
+      RX packets:4960 errors:0 dropped:0 overruns:0 frame:0
+      TX packets:4960 errors:0 dropped:0 overruns:0 carrier:0
+      collisions:0 txqueuelen:1000 
+      RX bytes:8681516 (8.6 MB)  TX bytes:8681516 (8.6 MB)
+
+      wlp2s0    Link encap:Ethernet  HWaddr 20:16:b9:48:71:0a  
+      inet addr:192.168.111.177  Bcast:192.168.111.255  Mask:255.255.255.0
+      inet6 addr: fe80::134a:e8b8:2e58:aebc/64 Scope:Link
+      UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1
+      RX packets:323247 errors:0 dropped:99 overruns:0 frame:0
+      TX packets:127117 errors:0 dropped:0 overruns:0 carrier:0
+      collisions:0 txqueuelen:1000 
+      RX bytes:126203475 (126.2 MB)  TX bytes:22426944 (22.4 MB)
+
+      wlx085700299283 Link encap:Ethernet  HWaddr 08:57:00:29:92:83  
+      inet addr:192.168.31.102  Bcast:192.168.31.255  Mask:255.255.255.0
+      inet6 addr: fe80::86c7:ad2d:efc5:96a4/64 Scope:Link
+      UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1
+      RX packets:5777 errors:0 dropped:93822 overruns:0 frame:0
+      TX packets:223 errors:0 dropped:0 overruns:0 carrier:0
+      collisions:0 txqueuelen:1000 
+      RX bytes:5510774 (5.5 MB)  TX bytes:7343823 (7.3 MB)
+    #+END_SRC
+    
+  - 查看已有路由：
+    #+BEGIN_SRC shell
+      sudo route -v
+    #+END_SRC
+    
+    必要的时候清除默认网关：
+    
+    #+BEGIN_SRC shell
+      sudo route del default
+    #+END_SRC
+
+
+  - 设置默认网关，默认走外网：
+    
+    #+BEGIN_SRC shell
+     sudo route add default gw 192.168.111.1 
+    #+END_SRC
+
+  - 为内网设置内网转发特例
+    
+    #+BEGIN_SRC shell
+      route add -net 192.168.31.0 netmask 255.255.255.0 dev wlx085700299283
+    #+END_SRC
+
+    
+  这样就行了。
+
+  以上操作不能持久，开机之后又会回到默认情况，所以可以将上述命令保存到
+  /etc/rc.local中。
+
+
+* ubuntu 固定ip设置
+sudo vim /etc/network/interfaces
+
+#+BEGIN_SRC text
+auto lo
+iface lo inet loopback
+auto enp2s0 
+iface enp2s0 inet static
+address 192.168.1.2 
+netmask 255.255.255.0
+gateway 192.168.1.1
+#+END_SRC
+
+enp2s0 是网卡名称。
+
+* 参考
+  
+  [[https://blog.csdn.net/hshl1214/article/details/53103790][Linux 双网卡（内外网） 同时使用路由设置]]
+  
+  
+  
