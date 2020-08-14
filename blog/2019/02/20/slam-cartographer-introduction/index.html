@@ -42,11 +42,11 @@
   <h1>SLAM-cartographer 概述</h1>
 
 
-<div id="outline-container-org2d71e17" class="outline-2">
-<h2 id="org2d71e17">cartographer_ros</h2>
-<div class="outline-text-2" id="text-org2d71e17">
+<div id="outline-container-org2c550ad" class="outline-2">
+<h2 id="org2c550ad">cartographer_ros</h2>
+<div class="outline-text-2" id="text-org2c550ad">
 
-<div id="orgdad3e6d" class="figure">
+<div id="orgccf5b8b" class="figure">
 <p><img src="/assets/blog/2019/02/20/slam-cartographer-introduction/nodes_graph_demo_2d.jpg" alt="nodes_graph_demo_2d.jpg" />
 </p>
 <p><span class="figure-number">Figure 1: </span>cartographer_node</p>
@@ -65,13 +65,13 @@ map_builder.lua引用) 中。
 </div>
 </div>
 
-<div id="outline-container-org4196724" class="outline-2">
-<h2 id="org4196724">怎么理解cartographer_ros中的trajectory?</h2>
-<div class="outline-text-2" id="text-org4196724">
+<div id="outline-container-org85ae0e8" class="outline-2">
+<h2 id="org85ae0e8">怎么理解cartographer_ros中的trajectory?</h2>
+<div class="outline-text-2" id="text-org85ae0e8">
 </div>
-<div id="outline-container-org8441984" class="outline-3">
-<h3 id="org8441984">为什么使用多轨迹？topic是怎么订阅的？</h3>
-<div class="outline-text-3" id="text-org8441984">
+<div id="outline-container-org95bf4b6" class="outline-3">
+<h3 id="org95bf4b6">为什么使用多轨迹？topic是怎么订阅的？</h3>
+<div class="outline-text-3" id="text-org95bf4b6">
 <p>
 cartographer_ros 中我们看到在建图的节点 Node 中有 AddTrajectory 的接口，此外在
 Node 中还有一个Service，可以由节点外请求StartTrajectory，再添加一条Trajectory。
@@ -103,9 +103,9 @@ node_constants.h中，各个topic的数量在 backpack_2d.lua 中配置。
 </div>
 
 
-<div id="outline-container-orgc0db2eb" class="outline-3">
-<h3 id="orgc0db2eb">每条轨迹包含的资源</h3>
-<div class="outline-text-3" id="text-orgc0db2eb">
+<div id="outline-container-org9f098de" class="outline-3">
+<h3 id="org9f098de">每条轨迹包含的资源</h3>
+<div class="outline-text-3" id="text-org9f098de">
 <ul class="org-ul">
 <li>确定构建该轨迹需要订阅的topic，topic命名方式上面已经说明了。这些传感器资源
 组成 expected_sensor_ids。需要注意的是发 布topic的时候要按照这个名字发送。</li>
@@ -121,9 +121,9 @@ node_constants.h中，各个topic的数量在 backpack_2d.lua 中配置。
 </p>
 </div>
 
-<div id="outline-container-org7f2fa82" class="outline-4">
-<h4 id="org7f2fa82">根据配置确定传感器id</h4>
-<div class="outline-text-4" id="text-org7f2fa82">
+<div id="outline-container-orge6a0da9" class="outline-4">
+<h4 id="orge6a0da9">根据配置确定传感器id</h4>
+<div class="outline-text-4" id="text-orge6a0da9">
 <p>
 需要处理距离类(SensorType::RANGE)传感器(laser_scan，echo_laser_scan，
 point_clouds)，IMU(SensorType::IMU)传感器，Odometry(SensorType::ODOMETRY)，
@@ -141,9 +141,9 @@ GPS/nav_sat(SensorType::FIXED_FRAME_POSE), LandMark(SensorType::LANDMARK)。
 </div>
 </div>
 
-<div id="outline-container-org11788d3" class="outline-4">
-<h4 id="org11788d3">使用传感器配置信息初始化路径</h4>
-<div class="outline-text-4" id="text-org11788d3">
+<div id="outline-container-orga4178d7" class="outline-4">
+<h4 id="orga4178d7">使用传感器配置信息初始化路径</h4>
+<div class="outline-text-4" id="text-orga4178d7">
 <ul class="org-ul">
 <li>添加TrajectoryBuilder，并附带得到LocalSLAM结果的回调函数。
 TrajectoryBuilder包括一个LocalSLAM的 TrajectoryBuilder和一个GlobalSLAM的TrajectoryBuilder。
@@ -155,9 +155,9 @@ TrajectoryBuilder需要定义pose_graph，用来进行全局的优化。</li>
 </div>
 </div>
 
-<div id="outline-container-org421bd5c" class="outline-4">
-<h4 id="org421bd5c">为Trajectory添加Extrapolator</h4>
-<div class="outline-text-4" id="text-org421bd5c">
+<div id="outline-container-orgc9222be" class="outline-4">
+<h4 id="orgc9222be">为Trajectory添加Extrapolator</h4>
+<div class="outline-text-4" id="text-orgc9222be">
 <p>
 有两个位姿估计器：Node中有一个；LocalTrajectoryBuilder中有一个。
 LocalTrajectorybuilder中的估计器如果配置使用imu则只会在处理imu的时候初始化，
@@ -175,9 +175,9 @@ pose_queue_duration表示一个位姿要保存这么久，主要是用来估计�
 </div>
 
 
-<div id="outline-container-orgbcaba6d" class="outline-4">
-<h4 id="orgbcaba6d">为Trajectory添加 SensorSampler</h4>
-<div class="outline-text-4" id="text-orgbcaba6d">
+<div id="outline-container-org5c41aaf" class="outline-4">
+<h4 id="org5c41aaf">为Trajectory添加 SensorSampler</h4>
+<div class="outline-text-4" id="text-org5c41aaf">
 <p>
 一条轨迹只能有一个SensorSampler, 用来处理传感器数据。使用的参数都在配置文件
 中，主要是各种传感器的采样率。
@@ -186,16 +186,16 @@ pose_queue_duration表示一个位姿要保存这么久，主要是用来估计�
 </div>
 
 
-<div id="outline-container-org485927b" class="outline-4">
-<h4 id="org485927b">订阅各种topic并指定回调函数</h4>
+<div id="outline-container-org6121e30" class="outline-4">
+<h4 id="org6121e30">订阅各种topic并指定回调函数</h4>
 </div>
 </div>
 </div>
 
 
-<div id="outline-container-org2700e89" class="outline-2">
-<h2 id="org2700e89">参考</h2>
-<div class="outline-text-2" id="text-org2700e89">
+<div id="outline-container-org12ff132" class="outline-2">
+<h2 id="org12ff132">参考</h2>
+<div class="outline-text-2" id="text-org12ff132">
 <p>
 <a href="https://zhuanlan.zhihu.com/p/41054585">zhihu: 栅格地图和Scan to Scan上</a>
 <a href="https://zhuanlan.zhihu.com/p/41156743">zhihu: Scan to Scan 下</a>

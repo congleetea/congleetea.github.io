@@ -41,13 +41,13 @@
         
   <h1>TOOL: 编写 USB rules 作为永久规则</h1>
 
-<div id="outline-container-org04da56c" class="outline-2">
-<h2 id="org04da56c">方法1</h2>
-<div class="outline-text-2" id="text-org04da56c">
+<div id="outline-container-org19fcd57" class="outline-2">
+<h2 id="org19fcd57">方法1</h2>
+<div class="outline-text-2" id="text-org19fcd57">
 </div>
-<div id="outline-container-org64c7e8a" class="outline-3">
-<h3 id="org64c7e8a">查找 ATTRS{devpath}</h3>
-<div class="outline-text-3" id="text-org64c7e8a">
+<div id="outline-container-org971ae77" class="outline-3">
+<h3 id="org971ae77">查找 ATTRS{devpath}</h3>
+<div class="outline-text-3" id="text-org971ae77">
 <p>
 依次插拔各个usb，执行下面指令找出 ATTRS{devpath}:
 </p>
@@ -64,9 +64,9 @@
 </div>
 
 
-<div id="outline-container-org3ff5819" class="outline-3">
-<h3 id="org3ff5819">编写xxx.rules</h3>
-<div class="outline-text-3" id="text-org3ff5819">
+<div id="outline-container-org39d61ef" class="outline-3">
+<h3 id="org39d61ef">编写xxx.rules</h3>
+<div class="outline-text-3" id="text-org39d61ef">
 <p>
 如下填入 devpath，得到最后的 xxx.rules： 
 </p>
@@ -88,9 +88,9 @@ KERNEL=="tty*", ATTRS{devpath}=="1.1",MODE="0666", GROUP:="dialout",  SYMLINK+="
 </div>
 </div>
 
-<div id="outline-container-org2fb0d68" class="outline-2">
-<h2 id="org2fb0d68">方法2</h2>
-<div class="outline-text-2" id="text-org2fb0d68">
+<div id="outline-container-org9317443" class="outline-2">
+<h2 id="org9317443">方法2</h2>
+<div class="outline-text-2" id="text-org9317443">
 <p>
 通过下面方法找到USB的ID_PATH_TAG: 
 </p>

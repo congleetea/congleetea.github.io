@@ -42,13 +42,13 @@
   <h1>emqttd随笔</h1>
 
 
-<div id="outline-container-org95a2830" class="outline-2">
-<h2 id="org95a2830">结构</h2>
-<div class="outline-text-2" id="text-org95a2830">
+<div id="outline-container-org33f83c8" class="outline-2">
+<h2 id="org33f83c8">结构</h2>
+<div class="outline-text-2" id="text-org33f83c8">
 </div>
-<div id="outline-container-org6a4aa8a" class="outline-3">
-<h3 id="org6a4aa8a">emq-relx文件组织结构</h3>
-<div class="outline-text-3" id="text-org6a4aa8a">
+<div id="outline-container-orgf688233" class="outline-3">
+<h3 id="orgf688233">emq-relx文件组织结构</h3>
+<div class="outline-text-3" id="text-orgf688233">
 <div class="org-src-container">
 <pre class="src src-text">+_rel/                         # 编译发布之后的目标文件. 
 -bin/                         
@@ -86,13 +86,13 @@ vars.config                    # relx用于覆盖替换模板的文件.
 </div>
 </div>
 
-<div id="outline-container-orgeebfdb9" class="outline-3">
-<h3 id="orgeebfdb9">两条线</h3>
-<div class="outline-text-3" id="text-orgeebfdb9">
+<div id="outline-container-org3f42ff7" class="outline-3">
+<h3 id="org3f42ff7">两条线</h3>
+<div class="outline-text-3" id="text-org3f42ff7">
 </div>
-<div id="outline-container-org2911853" class="outline-4">
-<h4 id="org2911853">编译和发布</h4>
-<div class="outline-text-4" id="text-org2911853">
+<div id="outline-container-org562efa6" class="outline-4">
+<h4 id="org562efa6">编译和发布</h4>
+<div class="outline-text-4" id="text-org562efa6">
 <p>
 从执行make开始进行了什么操作?
 </p>
@@ -115,8 +115,8 @@ Makefile中首先定义了一些变量，这些变量包括PROJECT，PROJECT_DES
 </div>
 
 <ul class="org-ul">
-<li><a id="orgcb24f0f"></a>relx发布工具<br />
-<div class="outline-text-5" id="text-orgcb24f0f">
+<li><a id="org3970e2f"></a>relx发布工具<br />
+<div class="outline-text-5" id="text-org3970e2f">
 <p>
 主要时relx.config的配置问题。配置都是使用tuple格式, 每一项结尾用点号结尾。
 </p>
@@ -151,17 +151,17 @@ Defaults to permanent
 </div>
 
 
-<div id="outline-container-org617458b" class="outline-4">
-<h4 id="org617458b">emqttd的执行</h4>
-<div class="outline-text-4" id="text-org617458b">
+<div id="outline-container-orgcf41730" class="outline-4">
+<h4 id="orgcf41730">emqttd的执行</h4>
+<div class="outline-text-4" id="text-orgcf41730">
 <p>
 从执行bin/emqttd console开始进行了什么操作.
 </p>
 </div>
 
 <ul class="org-ul">
-<li><a id="org2184648"></a>配置信息<br />
-<div class="outline-text-5" id="text-org2184648">
+<li><a id="orgbb9e3ec"></a>配置信息<br />
+<div class="outline-text-5" id="text-orgbb9e3ec">
 <p>
 从2.0.3开始，emqttd的配置方式进行了更改，使用cuttlefish库将*.conf(包括插件中的conf文件)中的每行Key=Value的配
 置在启动emqttd的时候，临时转化为传统的app.config的格式, 启动的时候读取的配置信息其实还是传统的app.config的格
@@ -229,8 +229,8 @@ fi
 </li>
 
 
-<li><a id="org7547b55"></a>插件的加载<br />
-<div class="outline-text-5" id="text-org7547b55">
+<li><a id="org07e93ed"></a>插件的加载<br />
+<div class="outline-text-5" id="text-org07e93ed">
 <p>
 前面说了插件使用两种方式进行配置的参数加载方式。值得注意的是，在 emqttd_plugins:init/0中加载配置参数的时候，只要在
 etc/plugins中所有*.config的配置参数都会被加载到系统中，但是emqttd_plugins:load/0启动插件app的时候则是仅仅将loaded_plugins文件
@@ -244,13 +244,13 @@ etc/plugins中所有*.config的配置参数都会被加载到系统中，但是e
 </div>
 
 
-<div id="outline-container-org9cf41f4" class="outline-2">
-<h2 id="org9cf41f4">关于虚拟机的配置参数</h2>
-<div class="outline-text-2" id="text-org9cf41f4">
+<div id="outline-container-org693871f" class="outline-2">
+<h2 id="org693871f">关于虚拟机的配置参数</h2>
+<div class="outline-text-2" id="text-org693871f">
 </div>
-<div id="outline-container-orga3266c3" class="outline-3">
-<h3 id="orga3266c3">Flags</h3>
-<div class="outline-text-3" id="text-orga3266c3">
+<div id="outline-container-org484d795" class="outline-3">
+<h3 id="org484d795">Flags</h3>
+<div class="outline-text-3" id="text-org484d795">
 <ul class="org-ul">
 <li><p>
 heart
@@ -268,9 +268,9 @@ heart
 
 
 
-<div id="outline-container-org3150af1" class="outline-2">
-<h2 id="org3150af1">表结构</h2>
-<div class="outline-text-2" id="text-org3150af1">
+<div id="outline-container-orgc47661a" class="outline-2">
+<h2 id="orgc47661a">表结构</h2>
+<div class="outline-text-2" id="text-orgc47661a">
 <p>
 先列出emq所有的ets和mnesia表：
 </p>
@@ -518,13 +518,13 @@ heart
 </div>
 
 
-<div id="outline-container-org695884c" class="outline-2">
-<h2 id="org695884c">关于代码</h2>
-<div class="outline-text-2" id="text-org695884c">
+<div id="outline-container-orge3b9f1c" class="outline-2">
+<h2 id="orge3b9f1c">关于代码</h2>
+<div class="outline-text-2" id="text-orge3b9f1c">
 </div>
-<div id="outline-container-orgb3e7457" class="outline-3">
-<h3 id="orgb3e7457">关于esockd_listener_sup</h3>
-<div class="outline-text-3" id="text-orgb3e7457">
+<div id="outline-container-orgcac56bb" class="outline-3">
+<h3 id="orgcac56bb">关于esockd_listener_sup</h3>
+<div class="outline-text-3" id="text-orgcac56bb">
 <p>
 注意这个supervisor在启动的init中没有启动任何子进程，而且指定子进程的spec是：
 </p>
@@ -543,9 +543,9 @@ connection_sup, acceptor_sup, listener三个子进程一次启动，而先启动
 </div>
 
 
-<div id="outline-container-org8d1f0b6" class="outline-3">
-<h3 id="org8d1f0b6">关于esockd_connection_sup</h3>
-<div class="outline-text-3" id="text-org8d1f0b6">
+<div id="outline-container-orgaf7b0a4" class="outline-3">
+<h3 id="orgaf7b0a4">关于esockd_connection_sup</h3>
+<div class="outline-text-3" id="text-orgaf7b0a4">
 <p>
 esockd_connection_sup不是一个严格的supervisor。它只是一个gen_server。这是因为他的特殊性决定的。
 </p>
@@ -672,13 +672,13 @@ wait(Conn = ?CONN_MOD) -&gt;
 </div>
 
 
-<div id="outline-container-org850e994" class="outline-3">
-<h3 id="org850e994">关于emqttd_client</h3>
-<div class="outline-text-3" id="text-org850e994">
+<div id="outline-container-org4fcbf63" class="outline-3">
+<h3 id="org4fcbf63">关于emqttd_client</h3>
+<div class="outline-text-3" id="text-org4fcbf63">
 </div>
-<div id="outline-container-org41fdc61" class="outline-4">
-<h4 id="org41fdc61">emqttd_client进程启动</h4>
-<div class="outline-text-4" id="text-org41fdc61">
+<div id="outline-container-org95caf8a" class="outline-4">
+<h4 id="org95caf8a">emqttd_client进程启动</h4>
+<div class="outline-text-4" id="text-org95caf8a">
 <p>
 上一节中已经讲到 connection 进程是esockd_connection_sup调用 proc_lib:spawn_link 启动的。这个进程我们希望他是符合otp的通用服务器，
 因此，在do_init中使用了:
@@ -722,9 +722,9 @@ procedure  is needed than the gen_server process behavior provides.
 </div>
 </div>
 
-<div id="outline-container-org0bf49b9" class="outline-4">
-<h4 id="org0bf49b9">接收消息</h4>
-<div class="outline-text-4" id="text-org0bf49b9">
+<div id="outline-container-org41a8918" class="outline-4">
+<h4 id="org41a8918">接收消息</h4>
+<div class="outline-text-4" id="text-org41a8918">
 <p>
 首先，在esockd_listener.erl中创建监听socket的时候：
 </p>
@@ -803,9 +803,9 @@ run_socket(State = #client_state{connection = Conn}) -&gt;
 </div>
 
 
-<div id="outline-container-orgec86737" class="outline-3">
-<h3 id="orgec86737">emqttd_trie.</h3>
-<div class="outline-text-3" id="text-orgec86737">
+<div id="outline-container-org1d340b8" class="outline-3">
+<h3 id="org1d340b8">emqttd_trie.</h3>
+<div class="outline-text-3" id="text-org1d340b8">
 <p>
 如果topic中含有通配符，需要插入topic的字典树中。
 </p>
@@ -849,9 +849,9 @@ triples 依次获取路径，尾点，node_id(节点).
 </div>
 </div>
 
-<div id="outline-container-org941a096" class="outline-2">
-<h2 id="org941a096">相关模块</h2>
-<div class="outline-text-2" id="text-org941a096">
+<div id="outline-container-org714511d" class="outline-2">
+<h2 id="org714511d">相关模块</h2>
+<div class="outline-text-2" id="text-org714511d">
 <ul class="org-ul">
 <li>emqttd_app: 服务启动的总入口。</li>
 
@@ -876,13 +876,13 @@ triples 依次获取路径，尾点，node_id(节点).
 </div>
 </div>
 
-<div id="outline-container-orge8119c0" class="outline-2">
-<h2 id="orge8119c0">消息流</h2>
-<div class="outline-text-2" id="text-orge8119c0">
+<div id="outline-container-org54a9df3" class="outline-2">
+<h2 id="org54a9df3">消息流</h2>
+<div class="outline-text-2" id="text-org54a9df3">
 </div>
-<div id="outline-container-org560ed50" class="outline-3">
-<h3 id="org560ed50">subscribe</h3>
-<div class="outline-text-3" id="text-org560ed50">
+<div id="outline-container-orgcdbcc02" class="outline-3">
+<h3 id="orgcdbcc02">subscribe</h3>
+<div class="outline-text-3" id="text-orgcdbcc02">
 <ul class="org-ul">
 <li>session进程内部使用一个map(subscriptions)来保存所有订阅的topic，key为topic，value为qos。
 当一个sub发生时，带着TopicTable [{topic, SubOpts}] 到session进程中，</li>
@@ -903,9 +903,9 @@ triples 依次获取路径，尾点，node_id(节点).
 </div>
 
 
-<div id="outline-container-org34c5967" class="outline-2">
-<h2 id="org34c5967">Erlang设设计相关</h2>
-<div class="outline-text-2" id="text-org34c5967">
+<div id="outline-container-org9cd003f" class="outline-2">
+<h2 id="org9cd003f">Erlang设设计相关</h2>
+<div class="outline-text-2" id="text-org9cd003f">
 <ul class="org-ul">
 <li>1. 使用Pool, Pool, Pool... 推荐GProc库: <a href="https://github.com/uwiger/gproc">https://github.com/uwiger/gproc</a></li>
 <li>2. 异步,异步,异步消息...连接层到路由层异步消息,同步请求用于负载保护</li>

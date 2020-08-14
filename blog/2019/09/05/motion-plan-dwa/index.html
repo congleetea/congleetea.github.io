@@ -41,9 +41,9 @@
         
   <h1>机器人运动规划-动态窗口法(dwa)</h1>
 
-<div id="outline-container-org3e7eff2" class="outline-2">
-<h2 id="org3e7eff2">概述</h2>
-<div class="outline-text-2" id="text-org3e7eff2">
+<div id="outline-container-org6938dbc" class="outline-2">
+<h2 id="org6938dbc">概述</h2>
+<div class="outline-text-2" id="text-org6938dbc">
 <p>
 动态窗口法(Dynamic Windows Approach)
 有以下特点：
@@ -85,25 +85,25 @@
 </div>
 
 
-<div id="outline-container-org5710336" class="outline-2">
-<h2 id="org5710336">简要推导</h2>
-<div class="outline-text-2" id="text-org5710336">
+<div id="outline-container-orga7c1d4b" class="outline-2">
+<h2 id="orga7c1d4b">简要推导</h2>
+<div class="outline-text-2" id="text-orga7c1d4b">
 <p>
 因为窗口是线速度和角速度的窗口，因此，在推导的时候我们要把这些运动约束转化成线
 速度(v)和角速度(w)的关系，同时要基于当前的位置(x,y,theta)。
 </p>
 </div>
 
-<div id="outline-container-org77f0750" class="outline-3">
-<h3 id="org77f0750">运动方程</h3>
-<div class="outline-text-3" id="text-org77f0750">
+<div id="outline-container-org4b52285" class="outline-3">
+<h3 id="org4b52285">运动方程</h3>
+<div class="outline-text-3" id="text-org4b52285">
 <ul class="org-ul">
 <li><p>
 一般运动方程
 </p>
 
 
-<div id="orgb25a594" class="figure">
+<div id="org41de2ef" class="figure">
 <p><img src="/assets/blog/2019/09/05/motion-plan-dwa/dwa-general-motion-equation.png" alt="dwa-general-motion-equation.png" />
 </p>
 <p><span class="figure-number">Figure 1: </span>一般运动方程</p>
@@ -116,7 +116,7 @@
 </p>
 
 
-<div id="org78ebd29" class="figure">
+<div id="orgc7e8a9e" class="figure">
 <p><img src="/assets/blog/2019/09/05/motion-plan-dwa/dwa-motion-equation-with-acc.png" alt="dwa-motion-equation-with-acc.png" />
 </p>
 <p><span class="figure-number">Figure 2: </span>带加速度的运动方程</p>
@@ -128,7 +128,7 @@
 </p>
 
 
-<div id="org3109086" class="figure">
+<div id="org003fe1d" class="figure">
 <p><img src="/assets/blog/2019/09/05/motion-plan-dwa/dwa-constant-acc-motion-equation.png" alt="dwa-constant-acc-motion-equation.png" />
 </p>
 <p><span class="figure-number">Figure 3: </span>离散运动方程</p>
@@ -141,7 +141,7 @@
 以得到：
 </p>
 
-<div id="orgdab663d" class="figure">
+<div id="org9f3c168" class="figure">
 <p><img src="/assets/blog/2019/09/05/motion-plan-dwa/dwa-constant-vel-motion-equation.png" alt="dwa-constant-vel-motion-equation.png" />
 </p>
 <p><span class="figure-number">Figure 4: </span>均匀速度</p>
@@ -151,19 +151,19 @@
 进一步可以得到：
 </p>
 
-<div id="org78a8a76" class="figure">
+<div id="org8e8b2c2" class="figure">
 <p><img src="/assets/blog/2019/09/05/motion-plan-dwa/dwa-circle-motion-equation-x.png" alt="dwa-circle-motion-equation-x.png" />
 </p>
 <p><span class="figure-number">Figure 5: </span>线速度和角速度</p>
 </div>
 
-<div id="org4613720" class="figure">
+<div id="org54e3dfa" class="figure">
 <p><img src="/assets/blog/2019/09/05/motion-plan-dwa/dwa-circle-motion-equation-y.png" alt="dwa-circle-motion-equation-y.png" />
 </p>
 <p><span class="figure-number">Figure 6: </span>线速度和角速度</p>
 </div>
 
-<div id="org10778e0" class="figure">
+<div id="orgb7c4a71" class="figure">
 <p><img src="/assets/blog/2019/09/05/motion-plan-dwa/dwa-circle-motion-equation.png" alt="dwa-circle-motion-equation.png" />
 </p>
 <p><span class="figure-number">Figure 7: </span>圆形方程</p>
@@ -178,9 +178,9 @@
 </div>
 
 
-<div id="outline-container-org9b8d346" class="outline-3">
-<h3 id="org9b8d346">动态窗口</h3>
-<div class="outline-text-3" id="text-org9b8d346">
+<div id="outline-container-org3e580c0" class="outline-3">
+<h3 id="org3e580c0">动态窗口</h3>
+<div class="outline-text-3" id="text-org3e580c0">
 <p>
 确定速度窗口，根据三个步骤：
 </p>
@@ -190,7 +190,7 @@
 可允许的速度：要保证该该速度形式能在最近的障碍物前停下来。
 </p>
 
-<div id="org419ee11" class="figure">
+<div id="org087b484" class="figure">
 <p><img src="/assets/blog/2019/09/05/motion-plan-dwa/dwa-admissible-velocities.png" alt="dwa-admissible-velocities.png" />
 </p>
 <p><span class="figure-number">Figure 8: </span>可允许的速度</p>
@@ -201,7 +201,7 @@
 可以确定这是时间片段内能达到的速度边界。
 </p>
 
-<div id="orgf47ad4f" class="figure">
+<div id="org338dce2" class="figure">
 <p><img src="/assets/blog/2019/09/05/motion-plan-dwa/dwa-dynamic-window.png" alt="dwa-dynamic-window.png" />
 </p>
 <p><span class="figure-number">Figure 9: </span>动态窗口</p>
@@ -214,7 +214,7 @@
 </p>
 
 
-<div id="org1b430e6" class="figure">
+<div id="org4df64bc" class="figure">
 <p><img src="/assets/blog/2019/09/05/motion-plan-dwa/dwa-search-velocities.png" alt="dwa-search-velocities.png" />
 </p>
 <p><span class="figure-number">Figure 10: </span>最终的速度窗口</p>
@@ -223,9 +223,9 @@
 </div>
 
 
-<div id="outline-container-org818e549" class="outline-3">
-<h3 id="org818e549">速度的选择</h3>
-<div class="outline-text-3" id="text-org818e549">
+<div id="outline-container-org56d78fe" class="outline-3">
+<h3 id="org56d78fe">速度的选择</h3>
+<div class="outline-text-3" id="text-org56d78fe">
 <p>
 上面根据各种条件确定了一个以当前速度为中心的速度窗口，如何选择这些速度呢？根
 据一些约束条件，构建一个评价函数，对速度窗口里面的速度一次计算评价函数值，选
@@ -236,7 +236,7 @@
 评价函数怎么选择呢？
 </p>
 
-<div id="org310923f" class="figure">
+<div id="org213f8d3" class="figure">
 <p><img src="/assets/blog/2019/09/05/motion-plan-dwa/dwa-objective-function.png" alt="dwa-objective-function.png" />
 </p>
 <p><span class="figure-number">Figure 11: </span>评价函数,(v,w)都是Vr里面的速度。</p>
@@ -259,9 +259,9 @@
 </div>
 
 
-<div id="outline-container-orgf7fc8a4" class="outline-3">
-<h3 id="orgf7fc8a4">一些影响因素</h3>
-<div class="outline-text-3" id="text-orgf7fc8a4">
+<div id="outline-container-org2081d2c" class="outline-3">
+<h3 id="org2081d2c">一些影响因素</h3>
+<div class="outline-text-3" id="text-org2081d2c">
 <ul class="org-ul">
 <li>当前速度的影响：当前的速度决定了能走的空间。比如在靠近障碍物的地方要转弯，
 如果速度太快，可调的速度可能不能实现转弯。</li>
@@ -273,9 +273,9 @@
 
 
 
-<div id="outline-container-org7e785cc" class="outline-2">
-<h2 id="org7e785cc">references</h2>
-<div class="outline-text-2" id="text-org7e785cc">
+<div id="outline-container-org8fd6296" class="outline-2">
+<h2 id="org8fd6296">references</h2>
+<div class="outline-text-2" id="text-org8fd6296">
 <ul class="org-ul">
 <li>WIKI：<a href="https://en.wikipedia.org/wiki/Dynamic_window_approach">Dynamic window approach</a></li>
 <li>论文：The dynamic window approach to collision avoidance</li>
