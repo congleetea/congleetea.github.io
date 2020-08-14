@@ -42,9 +42,9 @@
   <h1>Kafka使用</h1>
 
 
-<div id="outline-container-org87fbbf2" class="outline-2">
-<h2 id="org87fbbf2">部署和使用</h2>
-<div class="outline-text-2" id="text-org87fbbf2">
+<div id="outline-container-org63969a1" class="outline-2">
+<h2 id="org63969a1">部署和使用</h2>
+<div class="outline-text-2" id="text-org63969a1">
 <p>
 一个生产的配置
 </p>
@@ -68,13 +68,13 @@ queued.max.requests=[number of concurrent requests]
 </div>
 </div>
 
-<div id="outline-container-orgaf9f7d0" class="outline-2">
-<h2 id="orgaf9f7d0">升级</h2>
+<div id="outline-container-org6942f5d" class="outline-2">
+<h2 id="org6942f5d">升级</h2>
 </div>
 
-<div id="outline-container-org53f4eba" class="outline-2">
-<h2 id="org53f4eba">集群之间迁移数据</h2>
-<div class="outline-text-2" id="text-org53f4eba">
+<div id="outline-container-org3b407c1" class="outline-2">
+<h2 id="org3b407c1">集群之间迁移数据</h2>
+<div class="outline-text-2" id="text-org3b407c1">
 <p>
 &gt; bin/kafka-mirror-maker.sh
 --consumer.config consumer.properties
@@ -83,9 +83,9 @@ queued.max.requests=[number of concurrent requests]
 </div>
 </div>
 
-<div id="outline-container-org3180ca2" class="outline-2">
-<h2 id="org3180ca2">扩大集群</h2>
-<div class="outline-text-2" id="text-org3180ca2">
+<div id="outline-container-org3d4f9a4" class="outline-2">
+<h2 id="org3d4f9a4">扩大集群</h2>
+<div class="outline-text-2" id="text-org3d4f9a4">
 <ul class="org-ul">
 <li>添加broker到集群很简单，就是分配一个独立的broker id并启动即可(connect同一个zk的都属于同一个cluster)。</li>
 <li>新增的broker不会自动分配任何数据的分区，除非分区本移动到新broker上，否则如果没有新的topic创建，他就什么也不做, 因此需要迁移已有数据到新broker上。</li>
@@ -94,9 +94,9 @@ queued.max.requests=[number of concurrent requests]
 </div>
 
 
-<div id="outline-container-orge2d1124" class="outline-2">
-<h2 id="orge2d1124">监控</h2>
-<div class="outline-text-2" id="text-orge2d1124">
+<div id="outline-container-org48a0c44" class="outline-2">
+<h2 id="org48a0c44">监控</h2>
+<div class="outline-text-2" id="text-org48a0c44">
 <ul class="org-ul">
 <li>建议监控服务器端的GC time，CPU使用，IO服务时间等。</li>
 <li>建议监控客户端的全局的和单个topic的消息byte rate，</li>
@@ -104,9 +104,9 @@ queued.max.requests=[number of concurrent requests]
 </div>
 </div>
 
-<div id="outline-container-orga613bfd" class="outline-2">
-<h2 id="orga613bfd">开始的问题</h2>
-<div class="outline-text-2" id="text-orga613bfd">
+<div id="outline-container-org60c4d68" class="outline-2">
+<h2 id="org60c4d68">开始的问题</h2>
+<div class="outline-text-2" id="text-org60c4d68">
 <p>
 一开始听人说 kafka 是一个很牛逼的消息系统，所以有下面的一些问题，带着问题去看可能好一点。
 </p>
@@ -139,9 +139,9 @@ kafka 有 Broker，Producer 和 Consumer，以及一个对整体进行管理的 
 </div>
 </div>
 
-<div id="outline-container-orgbbe0a44" class="outline-2">
-<h2 id="orgbbe0a44">kafka 概要</h2>
-<div class="outline-text-2" id="text-orgbbe0a44">
+<div id="outline-container-org5671282" class="outline-2">
+<h2 id="org5671282">kafka 概要</h2>
+<div class="outline-text-2" id="text-org5671282">
 <p>
 先要明白几个和消息相关的概念，明白这些概念也就对整体有个了解了：
 </p>
@@ -167,7 +167,7 @@ Topic获取消息进行处理。和其它大部分系统的topic一样，一个t
 </p>
 
 
-<div id="orgd6c4249" class="figure">
+<div id="org395ec0d" class="figure">
 <p><img src="/assets/blog/2016/11/07/kafka-usage/log_anatomy.png" alt="log_anatomy.png" />
 </p>
 <p><span class="figure-number">Figure 1: </span>Topic Partitions</p>
@@ -193,7 +193,7 @@ Producer首先要知道共有多少分区, zookeeper负责该功能)。这样通
 </p>
 
 
-<div id="org017884c" class="figure">
+<div id="org05a3fe8" class="figure">
 <p><img src="/assets/blog/2016/11/07/kafka-usage/log_segment.png" alt="log_segment.png" />
 </p>
 <p><span class="figure-number">Figure 2: </span>Topic partition 内的分段 segments 文件结构示例</p>
@@ -228,7 +228,7 @@ Consumer，所以不太会因为消息压力太大把Consumer搞挂。
 </p>
 
 
-<div id="orga43b174" class="figure">
+<div id="org717d1b1" class="figure">
 <p><img src="/assets/blog/2016/11/07/kafka-usage/log_consumer.png" alt="log_consumer.png" />
 </p>
 <p><span class="figure-number">Figure 3: </span>Consumer 带 offset 消费消息</p>
@@ -313,7 +313,7 @@ LEO差值大于某个值（通过replica.lag.max.messages设置）时，这个br
 </p>
 
 
-<div id="org7793155" class="figure">
+<div id="org673944f" class="figure">
 <p><img src="/assets/blog/2016/11/07/kafka-usage/isr.png" alt="isr.png" />
 </p>
 <p><span class="figure-number">Figure 4: </span>ISR 确认消息</p>
@@ -374,7 +374,7 @@ zookeeper用来注册consumer信息</b> ,其中包括consumer消费的partition�
 </p>
 
 
-<div id="orgeb478cc" class="figure">
+<div id="org6b0abe5" class="figure">
 <p><img src="/assets/blog/2016/11/07/kafka-usage/zookeeper_in_kafka.png" alt="zookeeper_in_kafka.png" />
 </p>
 <p><span class="figure-number">Figure 5: </span>zookeeper中的信息</p>
@@ -382,17 +382,17 @@ zookeeper用来注册consumer信息</b> ,其中包括consumer消费的partition�
 </div>
 </div>
 
-<div id="outline-container-orgde811da" class="outline-2">
-<h2 id="orgde811da">安装</h2>
-<div class="outline-text-2" id="text-orgde811da">
+<div id="outline-container-org6681213" class="outline-2">
+<h2 id="org6681213">安装</h2>
+<div class="outline-text-2" id="text-org6681213">
 <p>
 kafka 需要 java-jdk 提供支持，同时还需要 zookeeper 来对集群进行管理。因此需要安装这些东西。
 </p>
 </div>
 
-<div id="outline-container-org9d21bd5" class="outline-3">
-<h3 id="org9d21bd5">安装 java jdk</h3>
-<div class="outline-text-3" id="text-org9d21bd5">
+<div id="outline-container-org5445542" class="outline-3">
+<h3 id="org5445542">安装 java jdk</h3>
+<div class="outline-text-3" id="text-org5445542">
 <ul class="org-ul">
 <li>在<a href="http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html">这里</a> 下载 Linux 的 jdk，根据 Linux系统的位数选择，这里以后缀为.tar.gz的为例，.rpm的直接安装就是。</li>
 
@@ -429,17 +429,17 @@ $ javac   -version
 </div>
 </div>
 
-<div id="outline-container-org6db847d" class="outline-3">
-<h3 id="org6db847d">安装 zookeeper</h3>
-<div class="outline-text-3" id="text-org6db847d">
+<div id="outline-container-orgf1c7c18" class="outline-3">
+<h3 id="orgf1c7c18">安装 zookeeper</h3>
+<div class="outline-text-3" id="text-orgf1c7c18">
 <p>
 在<a href="http://apache.01link.hk/zookeeper/stable/zookeeper-3.4.9.tar.gz">zookeeper</a> 这里下载最新的 zookeeper 二进制文件，解压之后即可使用。
 </p>
 </div>
 </div>
-<div id="outline-container-org1e8639c" class="outline-3">
-<h3 id="org1e8639c">安装 kafka</h3>
-<div class="outline-text-3" id="text-org1e8639c">
+<div id="outline-container-orgb2497cd" class="outline-3">
+<h3 id="orgb2497cd">安装 kafka</h3>
+<div class="outline-text-3" id="text-orgb2497cd">
 <p>
 在<a href="https://mirrors.tuna.tsinghua.edu.cn/apache/kafka">这里</a> 选择最新版本的 kafka 二进制文件包下载，解压到你的某个文件即可使用。
 </p>
@@ -447,13 +447,13 @@ $ javac   -version
 </div>
 </div>
 
-<div id="outline-container-org1be8f2d" class="outline-2">
-<h2 id="org1be8f2d">使用概况</h2>
-<div class="outline-text-2" id="text-org1be8f2d">
+<div id="outline-container-org72adc2a" class="outline-2">
+<h2 id="org72adc2a">使用概况</h2>
+<div class="outline-text-2" id="text-org72adc2a">
 </div>
-<div id="outline-container-orga5fe360" class="outline-3">
-<h3 id="orga5fe360">Kafka 作为 messaging system</h3>
-<div class="outline-text-3" id="text-orga5fe360">
+<div id="outline-container-org92ec2fa" class="outline-3">
+<h3 id="org92ec2fa">Kafka 作为 messaging system</h3>
+<div class="outline-text-3" id="text-org92ec2fa">
 <p>
 传统的消息系统有两种模式：queuing 和 publish-subscribe。 在 queuing 中，Consumer 池子中只有一个 Consumer
 能得到这个消息，他得到消息之后，消息就会被删除，其他 Consumer 无法获得；而 publish-subscribe 模式则是所有
@@ -471,9 +471,9 @@ $ javac   -version
 </div>
 </div>
 
-<div id="outline-container-org17edb4b" class="outline-3">
-<h3 id="org17edb4b">Kafka 作为 storage system</h3>
-<div class="outline-text-3" id="text-org17edb4b">
+<div id="outline-container-org89c7054" class="outline-3">
+<h3 id="org89c7054">Kafka 作为 storage system</h3>
+<div class="outline-text-3" id="text-org89c7054">
 <p>
 消息队列可以作为一个飞行消息的存储系统，通过保存消息可以把消息的发布和消费进行解耦。Kafka是一个好的存储系统，
 他有什么不同呢？
@@ -487,9 +487,9 @@ $ javac   -version
 </div>
 </div>
 
-<div id="outline-container-orgdaaac43" class="outline-3">
-<h3 id="orgdaaac43">Kafka 作为消息处理系统</h3>
-<div class="outline-text-3" id="text-orgdaaac43">
+<div id="outline-container-orgbce621e" class="outline-3">
+<h3 id="orgbce621e">Kafka 作为消息处理系统</h3>
+<div class="outline-text-3" id="text-orgbce621e">
 <p>
 只有消息的读写和存储有时候还不够，还需要实现消息的实时处理。Kafka 是一个消息流处理器。它从输入 topics 上获得连续的
 数据流，执行一些处理之后产生连续的数据流到输出 topics。
@@ -502,9 +502,9 @@ $ javac   -version
 </div>
 </div>
 
-<div id="outline-container-org2bab555" class="outline-3">
-<h3 id="org2bab555">使用例子</h3>
-<div class="outline-text-3" id="text-org2bab555">
+<div id="outline-container-org2ac61b9" class="outline-3">
+<h3 id="org2ac61b9">使用例子</h3>
+<div class="outline-text-3" id="text-org2ac61b9">
 <p>
 <a href="https://engineering.linkedin.com/distributed-systems/log-what-every-software-engineer-should-know-about-real-time-datas-unifying">The Log: What every software engineer should know about real-time data's unifying abstraction</a>
 </p>
@@ -667,9 +667,9 @@ Topic: v1-r3-p3	Partition: 2	Leader: 2	Replicas: 2,0,1	Isr: 2,1
 </div>
 </div>
 
-<div id="outline-container-orga7e6de2" class="outline-2">
-<h2 id="orga7e6de2">Kakfa 的监控</h2>
-<div class="outline-text-2" id="text-orga7e6de2">
+<div id="outline-container-orga852695" class="outline-2">
+<h2 id="orga852695">Kakfa 的监控</h2>
+<div class="outline-text-2" id="text-orga852695">
 <p>
 目前对 kafka 的监控程序有好几个，
 </p>
@@ -798,13 +798,13 @@ preferred replica:
 </div>
 </div>
 
-<div id="outline-container-org4a1ddcc" class="outline-2">
-<h2 id="org4a1ddcc">重要的配置说明</h2>
-<div class="outline-text-2" id="text-org4a1ddcc">
+<div id="outline-container-orgf283537" class="outline-2">
+<h2 id="orgf283537">重要的配置说明</h2>
+<div class="outline-text-2" id="text-orgf283537">
 </div>
-<div id="outline-container-org9383de7" class="outline-3">
-<h3 id="org9383de7">kafka配置</h3>
-<div class="outline-text-3" id="text-org9383de7">
+<div id="outline-container-org0356b2c" class="outline-3">
+<h3 id="org0356b2c">kafka配置</h3>
+<div class="outline-text-3" id="text-org0356b2c">
 <p>
 必须要的配置：broker.id, log.dirs, zookeeper.connect
 </p>
@@ -1185,22 +1185,22 @@ preferred replica:
 </div>
 </div>
 
-<div id="outline-container-org9d15741" class="outline-2">
-<h2 id="org9d15741">名词</h2>
-<div class="outline-text-2" id="text-org9d15741">
+<div id="outline-container-org4c76101" class="outline-2">
+<h2 id="org4c76101">名词</h2>
+<div class="outline-text-2" id="text-org4c76101">
 </div>
-<div id="outline-container-org5cf21b0" class="outline-3">
-<h3 id="org5cf21b0">日志聚合 log aggregation</h3>
-<div class="outline-text-3" id="text-org5cf21b0">
+<div id="outline-container-org5593e67" class="outline-3">
+<h3 id="org5593e67">日志聚合 log aggregation</h3>
+<div class="outline-text-3" id="text-org5593e67">
 <p>
 日志聚合一般来说是从服务器上收集日志文件，然后放到一个集中的位置（文件服务器或 HDFS）进行处理。
 </p>
 </div>
 </div>
 
-<div id="outline-container-orgbe64ed4" class="outline-3">
-<h3 id="orgbe64ed4">页缓存 pagecache</h3>
-<div class="outline-text-3" id="text-orgbe64ed4">
+<div id="outline-container-orgc986422" class="outline-3">
+<h3 id="orgc986422">页缓存 pagecache</h3>
+<div class="outline-text-3" id="text-orgc986422">
 <p>
 将文件页缓存到内存中，方便下次直接从内存中读取。
 </p>
@@ -1241,9 +1241,9 @@ VFS 共存，而且也依靠 VFS 协同工作。
 </div>
 </div>
 
-<div id="outline-container-orgb2dbb6c" class="outline-2">
-<h2 id="orgb2dbb6c">reference</h2>
-<div class="outline-text-2" id="text-orgb2dbb6c">
+<div id="outline-container-org8445aad" class="outline-2">
+<h2 id="org8445aad">reference</h2>
+<div class="outline-text-2" id="text-org8445aad">
 <table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
 
 
@@ -1268,15 +1268,15 @@ VFS 共存，而且也依靠 VFS 协同工作。
 </div>
 
 
-<div id="outline-container-orge5e9529" class="outline-2">
-<h2 id="orge5e9529">kafka在zk中的目录</h2>
-<div class="outline-text-2" id="text-orge5e9529">
+<div id="outline-container-org23b5ad5" class="outline-2">
+<h2 id="org23b5ad5">kafka在zk中的目录</h2>
+<div class="outline-text-2" id="text-org23b5ad5">
 <p>
 zk中的目录结构和算法用于协调消费者和kafka节点。
 </p>
 
 
-<div id="org41b065e" class="figure">
+<div id="org6af8a37" class="figure">
 <p><img src="/assets/blog/2016/11/07/kafka-usage/zk_kafka_register.png" alt="zk_kafka_register.png" />
 </p>
 <p><span class="figure-number">Figure 6: </span>brokers in zk</p>
@@ -1288,9 +1288,9 @@ zk中的目录结构和算法用于协调消费者和kafka节点。
 </p>
 </div>
 
-<div id="outline-container-org007fb12" class="outline-3">
-<h3 id="org007fb12">brokers注册</h3>
-<div class="outline-text-3" id="text-org007fb12">
+<div id="outline-container-org1b9b846" class="outline-3">
+<h3 id="org1b9b846">brokers注册</h3>
+<div class="outline-text-3" id="text-org1b9b846">
 <ul class="org-ul">
 <li>或者的brokers列表，唯一的id，消费者从这里获取broker的信息。</li>
 <li>brokers启动是注册(创建目录)，shutdown和die时消失，消费者得到通知。（暂态的）</li>
@@ -1298,9 +1298,9 @@ zk中的目录结构和算法用于协调消费者和kafka节点。
 </div>
 </div>
 
-<div id="outline-container-orgffc09df" class="outline-3">
-<h3 id="orgffc09df">brokers上的topic注册</h3>
-<div class="outline-text-3" id="text-orgffc09df">
+<div id="outline-container-orgf25efd3" class="outline-3">
+<h3 id="orgf25efd3">brokers上的topic注册</h3>
+<div class="outline-text-3" id="text-orgf25efd3">
 <ul class="org-ul">
 <li>该broker上的topic信息。</li>
 <li>也是暂态的。</li>
@@ -1309,9 +1309,9 @@ zk中的目录结构和算法用于协调消费者和kafka节点。
 </div>
 </div>
 
-<div id="outline-container-org2d3898d" class="outline-3">
-<h3 id="org2d3898d">consumer Id注册</h3>
-<div class="outline-text-3" id="text-org2d3898d">
+<div id="outline-container-org9fe22c7" class="outline-3">
+<h3 id="org9fe22c7">consumer Id注册</h3>
+<div class="outline-text-3" id="text-org9fe22c7">
 <ul class="org-ul">
 <li>协调彼此，均衡数据的消费</li>
 <li>通过配置offsets.storage=zookeeper将offsets信息存在zookeepker上。但该机制会被废除，建议放到kafka上。</li>
@@ -1320,9 +1320,9 @@ zk中的目录结构和算法用于协调消费者和kafka节点。
 </div>
 </div>
 
-<div id="outline-container-orgfa5441f" class="outline-3">
-<h3 id="orgfa5441f">consumer offset</h3>
-<div class="outline-text-3" id="text-orgfa5441f">
+<div id="outline-container-org51894b2" class="outline-3">
+<h3 id="org51894b2">consumer offset</h3>
+<div class="outline-text-3" id="text-org51894b2">
 <ul class="org-ul">
 <li><i>consumers</i>[group_id]/offsets/[topic]/[partition_id] --&gt; offset_counter_value， 这个是永久值。</li>
 <li>记录某个消费组消费某个topic的某个分区的offset。</li>
@@ -1330,9 +1330,9 @@ zk中的目录结构和算法用于协调消费者和kafka节点。
 </div>
 </div>
 
-<div id="outline-container-org4659743" class="outline-3">
-<h3 id="org4659743">分区消费者注册</h3>
-<div class="outline-text-3" id="text-org4659743">
+<div id="outline-container-org746e3fa" class="outline-3">
+<h3 id="org746e3fa">分区消费者注册</h3>
+<div class="outline-text-3" id="text-org746e3fa">
 <ul class="org-ul">
 <li>一个分区只能被一个消费组的一个consumer消费。</li>
 <li><i>consumers</i>[group_id]/owners/[topic]/[partition_id] --&gt; consumer_node_id (ephemeral node)</li>
@@ -1341,9 +1341,9 @@ zk中的目录结构和算法用于协调消费者和kafka节点。
 </div>
 </div>
 
-<div id="outline-container-orgdfe6345" class="outline-3">
-<h3 id="orgdfe6345">Cluster Id</h3>
-<div class="outline-text-3" id="text-orgdfe6345">
+<div id="outline-container-org9ca670b" class="outline-3">
+<h3 id="org9ca670b">Cluster Id</h3>
+<div class="outline-text-3" id="text-org9ca670b">
 <ul class="org-ul">
 <li>/cluster/id</li>
 <li>每个kafka cluster再zk上有一个唯一不变的集群id。这个id集群第一次启动后自动产生。broker启动后会从/cluster/id这个znode上获取，如果没有就新建。</li>
@@ -1351,9 +1351,9 @@ zk中的目录结构和算法用于协调消费者和kafka节点。
 </div>
 </div>
 
-<div id="outline-container-org930e37c" class="outline-3">
-<h3 id="org930e37c">Broker node 注册</h3>
-<div class="outline-text-3" id="text-org930e37c">
+<div id="outline-container-orgfb384b2" class="outline-3">
+<h3 id="orgfb384b2">Broker node 注册</h3>
+<div class="outline-text-3" id="text-orgfb384b2">
 <ul class="org-ul">
 <li>前面broker下面的其实就是broker注册信息。</li>
 <li>broker本质上是独立的，他们只发布他们有点信息。</li>
@@ -1363,9 +1363,9 @@ zk中的目录结构和算法用于协调消费者和kafka节点。
 </div>
 </div>
 
-<div id="outline-container-org0e1856c" class="outline-3">
-<h3 id="org0e1856c">消费者注册算法</h3>
-<div class="outline-text-3" id="text-org0e1856c">
+<div id="outline-container-org0103434" class="outline-3">
+<h3 id="org0103434">消费者注册算法</h3>
+<div class="outline-text-3" id="text-org0103434">
 <p>
 步骤：
 </p>
@@ -1379,9 +1379,9 @@ zk中的目录结构和算法用于协调消费者和kafka节点。
 </div>
 </div>
 
-<div id="outline-container-org9965c69" class="outline-3">
-<h3 id="org9965c69">消费者再均衡算法</h3>
-<div class="outline-text-3" id="text-org9965c69">
+<div id="outline-container-orgbcab690" class="outline-3">
+<h3 id="orgbcab690">消费者再均衡算法</h3>
+<div class="outline-text-3" id="text-orgbcab690">
 <p>
 当出现broker的变化或者消费组内consumer的变化都会触发consumers的再均衡。对于一个给定的topic和已知的消费者，broker上的分区都会均衡的分配给组内的consumers消费。
 </p>
@@ -1433,9 +1433,9 @@ C4消费4*2~(4+1)*4-1，即empty；
 </div>
 </div>
 
-<div id="outline-container-orge0340a5" class="outline-3">
-<h3 id="orge0340a5">kafka broker的节点注册</h3>
-<div class="outline-text-3" id="text-orge0340a5">
+<div id="outline-container-org0c38583" class="outline-3">
+<h3 id="org0c38583">kafka broker的节点注册</h3>
+<div class="outline-text-3" id="text-org0c38583">
 <p>
 保存或者的broker信息。
 </p>
@@ -1518,9 +1518,9 @@ numChildren = 0
 </div>
 </div>
 
-<div id="outline-container-orge50e52a" class="outline-3">
-<h3 id="orge50e52a">broker topic的注册</h3>
-<div class="outline-text-3" id="text-orge50e52a">
+<div id="outline-container-orgcea0a8e" class="outline-3">
+<h3 id="orgcea0a8e">broker topic的注册</h3>
+<div class="outline-text-3" id="text-orgcea0a8e">
 <p>
 <i>brokers/topics</i>[topic]/partitions/[0...N]/state --&gt; {"controller_epoch":...,"leader":...,"version":...,"leader_epoch":...,"isr":[...]} (ephemeral node)
 </p>
@@ -1532,9 +1532,9 @@ numChildren = 0
 </div>
 </div>
 
-<div id="outline-container-orgcdea72e" class="outline-2">
-<h2 id="orgcdea72e">references</h2>
-<div class="outline-text-2" id="text-orgcdea72e">
+<div id="outline-container-org3abe3c0" class="outline-2">
+<h2 id="org3abe3c0">references</h2>
+<div class="outline-text-2" id="text-org3abe3c0">
 <ul class="org-ul">
 <li>Apache Kafka Best Practices 
 <a href="https://www.slideshare.net/HadoopSummit/apache-kafka-best-practices">https://www.slideshare.net/HadoopSummit/apache-kafka-best-practices</a></li>

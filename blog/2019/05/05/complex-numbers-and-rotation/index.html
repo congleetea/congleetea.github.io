@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  
+  <head>
+  <title>复数与旋转 - 清园索道</title>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
+  <meta name="author" content="Clare Lee" />
+    <meta name="description" content="描述虚数的原始意义" />
+    <meta name="keywords" content="complex,rotation" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+  <link rel="stylesheet" href="/media/css/main.css" type="text/css">
+  <link rel="stylesheet" href="/media/css/base16-ocean.light-min.css" type="text/css">
+  <link href='https://fonts.googleapis.com/css?family=Fira+Sans' rel='stylesheet' type='text/css'>
+  <link href='https://fonts.googleapis.com/css?family=Fira+Mono' rel='stylesheet' type='text/css'>
+</head>
+
+  <body>
+    <div id="page-wrap">
+      <div>
+  <header id="header">
+    <div class="logo">
+      <h1><a href="/"><span class="logo-black">清园索道</span></a></h1>
+    </div>
+    <div class="fortune">
+      <blockquote>
+        上下求索，识己识人识事
+      </blockquote>
+    </div>
+    <ul id="main-nav">
+        <li><a href="/blog/">Blog</a></li>
+      <li><a href="/tags/">分类</a></li>
+      <li><a href="/about/">关于我</a></li>
+      <li><a href="https://github.com/congleetea">GitHub</a></li>
+      <li><a href="/rss.xml">RSS</a></li>
+    </ul>
+  </header>
+</div>
+
+      <article id="content">
+        
+  <h1>复数与旋转</h1>
+
+
+<div id="outline-container-org5398dce" class="outline-2">
+<h2 id="org5398dce">虚数i表示什么？</h2>
+<div class="outline-text-2" id="text-org5398dce">
+<p>
+我们先从一个我们常用的等式说起:
+</p>
+
+\begin{equation}
+1x^{2} = 1
+\end{equation}
+
+<p>
+我们可以写成：
+</p>
+
+\begin{equation}
+ 1*x*x=1 
+\end{equation}
+<p>
+我们可以认为是1经过两次相同的运算之后又得到1.
+</p>
+
+<p>
+那么我们看虚数：
+</p>
+\begin{equation}
+1i^{2} = 1 * i * i = -1
+\end{equation}
+
+<p>
+我们也可以认为是1通过两次相同的运算得到-1，什么情况能够得到这种结果呢？
+如下图：一个坐标轴上原点两边分别1通过逆时针旋转两次90度就得到-1了。
+</p>
+
+
+<div id="org7105a4b" class="figure">
+<p><img src="/assets/blog/2019/05/05/complex-numbers-and-rotation/i2=-1.png" alt="i2=-1.png" />
+</p>
+<p><span class="figure-number">Figure 1: </span>1逆时针旋转两次得到-1</p>
+</div>
+
+<p>
+这样我们可以看出i其实表示的就是逆时针方向旋转90度。
+</p>
+
+<p>
+再看一个问题:
+</p>
+
+\begin{equation}
+(-1)^{99} = -1
+\end{equation}
+
+<p>
+我们都知道，-1每相乘两次就会变成+1，也就是他的结果其实是以2作为循环的。那么虚
+数相乘呢？
+</p>
+
+\begin{equation}
+1 = 1
+\end{equation}
+\begin{equation}
+i=i 
+\end{equation}
+\begin{equation}
+i^2= -1
+\end{equation}
+\begin{equation}
+i^3= -i
+\end{equation}
+\begin{equation}
+i^4= 1 
+\end{equation}
+
+<p>
+也就是说他们是以4作为循环的，乘四次之后又回到原来的结果。看看下面这个图就很好
+解释了：
+</p>
+
+
+<div id="org8f4cae3" class="figure">
+<p><img src="/assets/blog/2019/05/05/complex-numbers-and-rotation/imaginary_n.png" alt="imaginary_n.png" />
+</p>
+<p><span class="figure-number">Figure 2: </span>i表示的逆时针旋转</p>
+</div>
+
+<p>
+因为旋转4次90度之后又回到原来的位置了。
+</p>
+</div>
+</div>
+
+
+<div id="outline-container-org92e6f3b" class="outline-2">
+<h2 id="org92e6f3b">复数的运算</h2>
+<div class="outline-text-2" id="text-org92e6f3b">
+<p>
+进一步想，我们能不能既有虚数，又有实数呢？ 
+</p>
+</div>
+
+
+<div id="outline-container-orgb967223" class="outline-3">
+<h3 id="orgb967223">复数的加法</h3>
+</div>
+
+<div id="outline-container-org69e4893" class="outline-3">
+<h3 id="org69e4893">复数的大小（模）</h3>
+<div class="outline-text-3" id="text-org69e4893">
+<p>
+距离原点的距离。
+</p>
+</div>
+</div>
+
+<div id="outline-container-org27a29a5" class="outline-3">
+<h3 id="org27a29a5">乘法</h3>
+<div class="outline-text-3" id="text-org27a29a5">
+<p>
+乘一个复数表示旋转一个角度。
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org04fc72d" class="outline-2">
+<h2 id="org04fc72d">欧拉公式</h2>
+</div>
+
+
+<div id="outline-container-orgd78d2ac" class="outline-2">
+<h2 id="orgd78d2ac">参考</h2>
+<div class="outline-text-2" id="text-orgd78d2ac">
+<ul class="org-ul">
+<li>[1] <a href="http://www.ruanyifeng.com/blog/2012/09/imaginary_number.html">虚数的意义</a> <i><a href="https://betterexplained.com/articles/a-visual-intuitive-guide-to-imaginary-numbers">https://betterexplained.com/articles/a-visual-intuitive-guide-to-imaginary-numbers</a></i></li>
+</ul>
+</div>
+</div>
+
+
+      </article>
+      <div>
+    <ul id="tags">
+        <li><a href="/tags/math/">math</a></li>
+    </ul>
+    <div class="post-meta">
+      <span title="post date">Published: 2019-05-05</span>
+      </br>
+      <span title="last modification date">Last Modification: 2020-08-14</span>
+      </br>
+      <span title="author" >Author: Clare Lee</span>
+    </div>
+    <section>
+      <h2>Comments</h2>
+        <div id="disqus_thread"></div>
+        <script type="text/javascript">
+        //var disqus_developer = 1;
+        var disqus_identifier = "/blog/2019/05/05/complex-numbers-and-rotation";
+        var disqus_url = "https://congleetea.github.io/blog/2019/05/05/complex-numbers-and-rotation";
+        var disqus_shortname = 'congleetea';
+        /* * * DON'T EDIT BELOW THIS LINE * * */
+        (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+        </script>
+        <noscript>Please enable JavaScript to view the <a href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+        <a href="//disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+    </section>
+  <script src="//code.jquery.com/jquery-latest.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.1.0/highlight.min.js"></script>
+  <script src="/media/js/main.js"></script>
+  <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  <div class="copyright">
+    <p>Generated by <a href="http://www.gnu.org/software/emacs/">Emacs</a> 25.x (<a href="http://orgmode.org">Org mode</a> 9.x)</p>
+    <p>
+      Copyright &copy; 2012 - <span id="footerYear"></span> <a href="mailto:congleetea &lt;at&gt; gmail &lt;dot&gt; com">Clare Lee</a>
+      &nbsp;&nbsp;-&nbsp;&nbsp;
+      Powered by <a href="https://github.com/kelvinh/org-page" target="_blank">org-page</a>
+      <script type="text/javascript">document.getElementById("footerYear").innerHTML = (new Date()).getFullYear();</script>
+    </p>
+  </div>
+</div>
+
+    </div>
+  </body>
+</html>

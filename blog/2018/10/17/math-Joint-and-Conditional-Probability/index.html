@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  
+  <head>
+  <title>联合概率和条件概率 - 清园索道</title>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
+  <meta name="author" content="Xuancong Lee" />
+    <meta name="description" content="联合概率和条件概率" />
+    <meta name="keywords" content="math,joint,conditional,probability" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+  <link rel="stylesheet" href="/media/css/main.css" type="text/css">
+  <link rel="stylesheet" href="/media/css/base16-ocean.light-min.css" type="text/css">
+  <link href='https://fonts.googleapis.com/css?family=Fira+Sans' rel='stylesheet' type='text/css'>
+  <link href='https://fonts.googleapis.com/css?family=Fira+Mono' rel='stylesheet' type='text/css'>
+</head>
+
+  <body>
+    <div id="page-wrap">
+      <div>
+  <header id="header">
+    <div class="logo">
+      <h1><a href="/"><span class="logo-black">清园索道</span></a></h1>
+    </div>
+    <div class="fortune">
+      <blockquote>
+        上下求索，识己识人识事
+      </blockquote>
+    </div>
+    <ul id="main-nav">
+        <li><a href="/blog/">Blog</a></li>
+      <li><a href="/tags/">分类</a></li>
+      <li><a href="/about/">关于我</a></li>
+      <li><a href="https://github.com/congleetea">GitHub</a></li>
+      <li><a href="/rss.xml">RSS</a></li>
+    </ul>
+  </header>
+</div>
+
+      <article id="content">
+        
+  <h1>联合概率和条件概率</h1>
+
+<div id="outline-container-org094a51d" class="outline-2">
+<h2 id="org094a51d">概述</h2>
+<div class="outline-text-2" id="text-org094a51d">
+<p>
+有时候我们容易把联合概率和条件概率混淆。
+</p>
+
+<p>
+我们知道联合概率和条件概率的两个相关公式是：
+</p>
+<div class="org-src-container">
+<pre class="src src-text">P(AB) = P(A)P(B|A)
+      = P(B)P(A|B) 
+由于当A，B相互独立的时候，P(B|A) = P(B), P(A|B) = P(A)，因此:
+P(AB) = P(A)P(B)  (当A,B相互独立的时候)
+</pre>
+</div>
+</div>
+</div>
+
+
+<div id="outline-container-org50ed5da" class="outline-2">
+<h2 id="org50ed5da">题目</h2>
+<div class="outline-text-2" id="text-org50ed5da">
+<div class="org-src-container">
+<pre class="src src-text">全年级 100 名学生中, 有男生(以事件 A 表示)80 人, 女生 20 人; 来自北京的(以
+事件 B 表示)有 20 人, 其中男生 12 人, 女生 8 人; 免修英语的(用事件 C 表示)
+40 人, A和C相互独立. 试写出 P(A)、P(B)、P(B|A)、 P(A|B) 、P(AB)、P(C)、
+P(C|A)、P (~A|~B ) 、P(AC).
+</pre>
+</div>
+
+
+<p>
+我们经常出现混淆的就是P(AB)。因为常常会自以为是独立的就用P(A)P(B)来计算导致最后结果错误。
+</p>
+
+<p>
+比如，在这里，A和B显然不是独立的，因此P(AB)不能通过P(A)P(B)来计算。而因该通过其他信息来计算，
+这里的其他信息就是北京学生中的男女比例。这样我们就可以直接计算出联合概率密度P(AB),P(A~B),P(~AB)
+和P(~A~B)。
+</p>
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-left" />
+
+<col  class="org-left" />
+
+<col  class="org-left" />
+
+<col  class="org-left" />
+</colgroup>
+<thead>
+<tr>
+<th scope="col" class="org-left">&#xa0;</th>
+<th scope="col" class="org-left">总学生</th>
+<th scope="col" class="org-left">男生</th>
+<th scope="col" class="org-left">女生</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="org-left">&#xa0;</td>
+<td class="org-left">100  (1)</td>
+<td class="org-left">80 P(A)=0.8</td>
+<td class="org-left">20 P(B)=0.2</td>
+</tr>
+
+<tr>
+<td class="org-left">北京学生</td>
+<td class="org-left">20 P(B)=0.2</td>
+<td class="org-left">12 P(AB)=0.12</td>
+<td class="org-left">8 P(~AB)=0.08</td>
+</tr>
+
+<tr>
+<td class="org-left">非北京学生</td>
+<td class="org-left">80 P(A)=0.8</td>
+<td class="org-left">68 P(A~B)=0.68</td>
+<td class="org-left">12 P(~A~B)=0.12</td>
+</tr>
+</tbody>
+</table>
+
+<p>
+得到上面的结果，如果要计算A，B相关的条件概率，那么根据公式就可以很容易的计算出来了。
+</p>
+
+
+<p>
+但是我们看到A和C是无关的，也就是相互独立的，那么P(AC)=P(A)P(C)。
+</p>
+</div>
+</div>
+
+
+<div id="outline-container-orgfd02e14" class="outline-2">
+<h2 id="orgfd02e14">总结</h2>
+<div class="outline-text-2" id="text-orgfd02e14">
+<ul class="org-ul">
+<li>如果两事件A，B是相互独立的，那么联合概率P(AB)=P(A)P(B)计算。</li>
+<li>如果A，B不是相互独立的，那么则还需要依靠其他信息才能得到结果，否则无法计算P(AB)。</li>
+<li>条件概率都可以通过 P(B|A) = P(AB) / P(A) 来计算。</li>
+</ul>
+</div>
+</div>
+
+
+      </article>
+      <div>
+    <ul id="tags">
+        <li><a href="/tags/math/">math</a></li>
+    </ul>
+    <div class="post-meta">
+      <span title="post date">Published: 2018-10-17</span>
+      </br>
+      <span title="last modification date">Last Modification: 2020-08-14</span>
+      </br>
+      <span title="author" >Author: Xuancong Lee</span>
+    </div>
+    <section>
+      <h2>Comments</h2>
+        <div id="disqus_thread"></div>
+        <script type="text/javascript">
+        //var disqus_developer = 1;
+        var disqus_identifier = "/blog/2018/10/17/math-Joint-and-Conditional-Probability";
+        var disqus_url = "https://congleetea.github.io/blog/2018/10/17/math-Joint-and-Conditional-Probability";
+        var disqus_shortname = 'congleetea';
+        /* * * DON'T EDIT BELOW THIS LINE * * */
+        (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+        </script>
+        <noscript>Please enable JavaScript to view the <a href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+        <a href="//disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+    </section>
+  <script src="//code.jquery.com/jquery-latest.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.1.0/highlight.min.js"></script>
+  <script src="/media/js/main.js"></script>
+  <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  <div class="copyright">
+    <p>Generated by <a href="http://www.gnu.org/software/emacs/">Emacs</a> 25.x (<a href="http://orgmode.org">Org mode</a> 9.x)</p>
+    <p>
+      Copyright &copy; 2012 - <span id="footerYear"></span> <a href="mailto:congleetea &lt;at&gt; gmail &lt;dot&gt; com">Xuancong Lee</a>
+      &nbsp;&nbsp;-&nbsp;&nbsp;
+      Powered by <a href="https://github.com/kelvinh/org-page" target="_blank">org-page</a>
+      <script type="text/javascript">document.getElementById("footerYear").innerHTML = (new Date()).getFullYear();</script>
+    </p>
+  </div>
+</div>
+
+    </div>
+  </body>
+</html>
