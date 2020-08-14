@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  
+  <head>
+  <title>ROS下navigation的仿真 - 清园索道</title>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
+  <meta name="author" content="Clare Lee" />
+    <meta name="description" content="记录使用ros进行导航仿真" />
+    <meta name="keywords" content="ros,navigation,simulator,turtlebot3" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+  <link rel="stylesheet" href="/media/css/main.css" type="text/css">
+  <link rel="stylesheet" href="/media/css/base16-ocean.light-min.css" type="text/css">
+  <link href='https://fonts.googleapis.com/css?family=Fira+Sans' rel='stylesheet' type='text/css'>
+  <link href='https://fonts.googleapis.com/css?family=Fira+Mono' rel='stylesheet' type='text/css'>
+</head>
+
+  <body>
+    <div id="page-wrap">
+      <div>
+  <header id="header">
+    <div class="logo">
+      <h1><a href="/"><span class="logo-black">清园索道</span></a></h1>
+    </div>
+    <div class="fortune">
+      <blockquote>
+        上下求索，识己识人识事
+      </blockquote>
+    </div>
+    <ul id="main-nav">
+        <li><a href="/blog/">Blog</a></li>
+      <li><a href="/tags/">分类</a></li>
+      <li><a href="/about/">关于我</a></li>
+      <li><a href="https://github.com/congleetea">GitHub</a></li>
+      <li><a href="/rss.xml">RSS</a></li>
+    </ul>
+  </header>
+</div>
+
+      <article id="content">
+        
+  <h1>ROS下navigation的仿真</h1>
+
+
+<div id="outline-container-org01d3f95" class="outline-2">
+<h2 id="org01d3f95">使用gazebo和turtlebot仿真</h2>
+<div class="outline-text-2" id="text-org01d3f95">
+<p>
+在没有机器人的情况下，可以使用gazebo进行仿真，这里记录一下在ros kinetic中，使用
+gazebo进行仿真的步骤。
+</p>
+
+<ul class="org-ul">
+<li>首先安装ros，这就不必多说了。</li>
+<li>sudo apt-get install ros-kinetic-gazebo-ros ros-kinetic-turtlebot3-simulations ros-kinetic-turtlebot3</li>
+<li><p>
+建图
+</p>
+<div class="org-src-container">
+<pre class="src src-text">export TURTLEBOT3_MODEL=burger
+rosrun rviz rviz -d `rospack find turtlebot3_slam`/rviz/turtlebot3_slam.rviz
+
+export TURTLEBOT3_MODEL=burger
+roslaunch turtlebot3_gazebo turtlebot3_world.launch
+
+export TURTLEBOT3_MODEL=burger
+roslaunch turtlebot3_slam turtlebot3_slam.launch
+
+export TURTLEBOT3_MODEL=burger
+roslaunch turtlebot3_teleop turtlebot3_teleop_key.launch
+
+export TURTLEBOT3_MODEL=burger
+rosrun map_server map_saver -f $PWD/map
+</pre>
+</div></li>
+
+<li><p>
+导航
+</p>
+
+<div class="org-src-container">
+<pre class="src src-text">export TURTLEBOT3_MODEL=burger
+rosrun rviz rviz -d `rospack find turtlebot3_navigation`/rviz/turtlebot3_nav.rviz
+
+export TURTLEBOT3_MODEL=burger
+roslaunch turtlebot3_gazebo turtlebot3_world.launch
+
+export TURTLEBOT3_MODEL=burger
+roslaunch turtlebot3_navigation turtlebot3_navigation.launch map_file:=$PWD/map.yaml
+</pre>
+</div>
+
+<p>
+校正位置: 点击2D Pose Estimation，画出机器人大致的位置和方位，程序会自动确定位
+置。点击3D Nav Goal画出机器人的目标位置和方位。机器人就会到那个位置。
+</p></li>
+</ul>
+</div>
+</div>
+
+
+<div id="outline-container-org27bac44" class="outline-2">
+<h2 id="org27bac44">使用rbx1仿真</h2>
+<div class="outline-text-2" id="text-org27bac44">
+<p>
+如果已经有地图的话，不需要启动gazebo，直接在rviz中对导航进行仿真。
+</p>
+<ul class="org-ul">
+<li><p>
+git clone两个工程: arbotix_ros和rbx1，编译。
+</p>
+<div class="org-src-container">
+<pre class="src src-text">https://github.com/vanadiumlabs/arbotix_ros.git
+https://github.com/pirobot/rbx1.git
+</pre>
+</div></li>
+<li><p>
+启动
+</p>
+<div class="org-src-container">
+<pre class="src src-text">roslaunch rbx1_bringup fake_turtlebot.launch
+roslaunch rbx1_nav fake_amcl.launch map:=test_map.yaml
+rosrun rviz rviz -d `rospack find rbx1_nav`/nav.rviz
+</pre>
+</div>
+<p>
+然后直接在rviz中点击目标点就可以导航了。
+</p></li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-org4c986be" class="outline-2">
+<h2 id="org4c986be">取消当前导航</h2>
+<div class="outline-text-2" id="text-org4c986be">
+<p>
+move_base中可以通过发送消息到topic: /move_base/cancel　就可以取消当前的导航。
+</p>
+<div class="org-src-container">
+<pre class="src src-text">rostopic pub /move_base/cancel actionlib_msgs/GoalID -- {}
+</pre>
+</div>
+</div>
+</div>
+
+
+      </article>
+      <div>
+    <ul id="tags">
+        <li><a href="/tags/robotics/">robotics</a></li>
+    </ul>
+    <div class="post-meta">
+      <span title="post date">Published: 2019-11-22</span>
+      </br>
+      <span title="last modification date">Last Modification: 2020-08-14</span>
+      </br>
+      <span title="author" >Author: Clare Lee</span>
+    </div>
+    <section>
+      <h2>Comments</h2>
+        <div id="disqus_thread"></div>
+        <script type="text/javascript">
+        //var disqus_developer = 1;
+        var disqus_identifier = "/blog/2019/11/22/robotics-ros-navigation-simulator";
+        var disqus_url = "https://congleetea.github.io/blog/2019/11/22/robotics-ros-navigation-simulator";
+        var disqus_shortname = 'congleetea';
+        /* * * DON'T EDIT BELOW THIS LINE * * */
+        (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+        </script>
+        <noscript>Please enable JavaScript to view the <a href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+        <a href="//disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+    </section>
+  <script src="//code.jquery.com/jquery-latest.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.1.0/highlight.min.js"></script>
+  <script src="/media/js/main.js"></script>
+  <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  <div class="copyright">
+    <p>Generated by <a href="http://www.gnu.org/software/emacs/">Emacs</a> 25.x (<a href="http://orgmode.org">Org mode</a> 9.x)</p>
+    <p>
+      Copyright &copy; 2012 - <span id="footerYear"></span> <a href="mailto:congleetea &lt;at&gt; gmail &lt;dot&gt; com">Clare Lee</a>
+      &nbsp;&nbsp;-&nbsp;&nbsp;
+      Powered by <a href="https://github.com/kelvinh/org-page" target="_blank">org-page</a>
+      <script type="text/javascript">document.getElementById("footerYear").innerHTML = (new Date()).getFullYear();</script>
+    </p>
+  </div>
+</div>
+
+    </div>
+  </body>
+</html>

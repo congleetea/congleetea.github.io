@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  
+  <head>
+  <title>机器人运动规划-动态窗口法(dwa) - 清园索道</title>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
+  <meta name="author" content="Clare Lee" />
+    <meta name="description" content="dwa review" />
+    <meta name="keywords" content="motion plan,dwa,velocity windows" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+  <link rel="stylesheet" href="/media/css/main.css" type="text/css">
+  <link rel="stylesheet" href="/media/css/base16-ocean.light-min.css" type="text/css">
+  <link href='https://fonts.googleapis.com/css?family=Fira+Sans' rel='stylesheet' type='text/css'>
+  <link href='https://fonts.googleapis.com/css?family=Fira+Mono' rel='stylesheet' type='text/css'>
+</head>
+
+  <body>
+    <div id="page-wrap">
+      <div>
+  <header id="header">
+    <div class="logo">
+      <h1><a href="/"><span class="logo-black">清园索道</span></a></h1>
+    </div>
+    <div class="fortune">
+      <blockquote>
+        上下求索，识己识人识事
+      </blockquote>
+    </div>
+    <ul id="main-nav">
+        <li><a href="/blog/">Blog</a></li>
+      <li><a href="/tags/">分类</a></li>
+      <li><a href="/about/">关于我</a></li>
+      <li><a href="https://github.com/congleetea">GitHub</a></li>
+      <li><a href="/rss.xml">RSS</a></li>
+    </ul>
+  </header>
+</div>
+
+      <article id="content">
+        
+  <h1>机器人运动规划-动态窗口法(dwa)</h1>
+
+<div id="outline-container-org3e7eff2" class="outline-2">
+<h2 id="org3e7eff2">概述</h2>
+<div class="outline-text-2" id="text-org3e7eff2">
+<p>
+动态窗口法(Dynamic Windows Approach)
+有以下特点：
+</p>
+<ul class="org-ul">
+<li>考虑机器人动力学特性；</li>
+<li>考虑机器人惯性；</li>
+<li>可以实现高速行驶。</li>
+</ul>
+
+<p>
+根据运动方程的推导，可以把机器人的轨迹看成是两种形式：直线行走和弧线行走。前者
+没有角速度，后者有角速度。在此基础上考虑：
+</p>
+<ul class="org-ul">
+<li>机器人产生的可行的弧形轨迹；</li>
+<li>可允许的速度；</li>
+<li>动态窗口。</li>
+</ul>
+<p>
+最终形成了一些列可选择的速度（速度窗口），然后遍历这些速度，根据一个评价函数，
+计算这些速度对应的评价函数值，选择评价函数值最大的速度作为机器人的速度。
+</p>
+
+<p>
+评价函数包括三部分(每个部分都占一定的权重)：
+</p>
+<ul class="org-ul">
+<li>车头方向朝向目标点，与目标点的夹角越小，函数值越大。保证机器人总是往目标点行
+走，不至于中途徘徊。</li>
+<li>速度产生的弧线与最近障碍物距离越远，函数值越大。保证安全。</li>
+<li>速度大小。速度越大，值越大。保证以最快的速度行走。</li>
+</ul>
+<p>
+当然使用这还可以根据自己的需要增加各种约束条件。比如可以增加贴合全局路径的程度
+等等。
+</p>
+</div>
+</div>
+
+
+<div id="outline-container-org5710336" class="outline-2">
+<h2 id="org5710336">简要推导</h2>
+<div class="outline-text-2" id="text-org5710336">
+<p>
+因为窗口是线速度和角速度的窗口，因此，在推导的时候我们要把这些运动约束转化成线
+速度(v)和角速度(w)的关系，同时要基于当前的位置(x,y,theta)。
+</p>
+</div>
+
+<div id="outline-container-org77f0750" class="outline-3">
+<h3 id="org77f0750">运动方程</h3>
+<div class="outline-text-3" id="text-org77f0750">
+<ul class="org-ul">
+<li><p>
+一般运动方程
+</p>
+
+
+<div id="orgb25a594" class="figure">
+<p><img src="/assets/blog/2019/09/05/motion-plan-dwa/dwa-general-motion-equation.png" alt="dwa-general-motion-equation.png" />
+</p>
+<p><span class="figure-number">Figure 1: </span>一般运动方程</p>
+</div></li>
+</ul>
+
+
+<p>
+由于速度不能直接设置，使用加速度进一步得到：
+</p>
+
+
+<div id="org78ebd29" class="figure">
+<p><img src="/assets/blog/2019/09/05/motion-plan-dwa/dwa-motion-equation-with-acc.png" alt="dwa-motion-equation-with-acc.png" />
+</p>
+<p><span class="figure-number">Figure 2: </span>带加速度的运动方程</p>
+</div>
+
+<p>
+这里只依赖初始速度和位姿的加速度。我们假定一个时间片段内加速度是相同的，那
+么可以得到离散形式：
+</p>
+
+
+<div id="org3109086" class="figure">
+<p><img src="/assets/blog/2019/09/05/motion-plan-dwa/dwa-constant-acc-motion-equation.png" alt="dwa-constant-acc-motion-equation.png" />
+</p>
+<p><span class="figure-number">Figure 3: </span>离散运动方程</p>
+</div>
+
+<ul class="org-ul">
+<li><p>
+估计的运动方程
+我们进一步估计，当我们取的时间片段足够小的时候，可以认为速度是常数，这样可
+以得到：
+</p>
+
+<div id="orgdab663d" class="figure">
+<p><img src="/assets/blog/2019/09/05/motion-plan-dwa/dwa-constant-vel-motion-equation.png" alt="dwa-constant-vel-motion-equation.png" />
+</p>
+<p><span class="figure-number">Figure 4: </span>均匀速度</p>
+</div>
+
+<p>
+进一步可以得到：
+</p>
+
+<div id="org78a8a76" class="figure">
+<p><img src="/assets/blog/2019/09/05/motion-plan-dwa/dwa-circle-motion-equation-x.png" alt="dwa-circle-motion-equation-x.png" />
+</p>
+<p><span class="figure-number">Figure 5: </span>线速度和角速度</p>
+</div>
+
+<div id="org4613720" class="figure">
+<p><img src="/assets/blog/2019/09/05/motion-plan-dwa/dwa-circle-motion-equation-y.png" alt="dwa-circle-motion-equation-y.png" />
+</p>
+<p><span class="figure-number">Figure 6: </span>线速度和角速度</p>
+</div>
+
+<div id="org10778e0" class="figure">
+<p><img src="/assets/blog/2019/09/05/motion-plan-dwa/dwa-circle-motion-equation.png" alt="dwa-circle-motion-equation.png" />
+</p>
+<p><span class="figure-number">Figure 7: </span>圆形方程</p>
+</div>
+
+<p>
+可以看出，这是以线速度和角速度比值(也就是机器人行走的半径)为半径的，圆心为
+(Mx,My)的一个圆。
+</p></li>
+</ul>
+</div>
+</div>
+
+
+<div id="outline-container-org9b8d346" class="outline-3">
+<h3 id="org9b8d346">动态窗口</h3>
+<div class="outline-text-3" id="text-org9b8d346">
+<p>
+确定速度窗口，根据三个步骤：
+</p>
+<ul class="org-ul">
+<li>在当前位置，考虑各种速度（线速度和角速度），这些速度将构成一些列环形的轨迹。</li>
+<li><p>
+可允许的速度：要保证该该速度形式能在最近的障碍物前停下来。
+</p>
+
+<div id="org419ee11" class="figure">
+<p><img src="/assets/blog/2019/09/05/motion-plan-dwa/dwa-admissible-velocities.png" alt="dwa-admissible-velocities.png" />
+</p>
+<p><span class="figure-number">Figure 8: </span>可允许的速度</p>
+</div></li>
+
+<li><p>
+动态窗口：以当前速度为中心，一个确定的加速度（该加速度有限制）和时间窗口，
+可以确定这是时间片段内能达到的速度边界。
+</p>
+
+<div id="orgf47ad4f" class="figure">
+<p><img src="/assets/blog/2019/09/05/motion-plan-dwa/dwa-dynamic-window.png" alt="dwa-dynamic-window.png" />
+</p>
+<p><span class="figure-number">Figure 9: </span>动态窗口</p>
+</div></li>
+</ul>
+
+
+<p>
+上面三种考虑得到的速度的集合就是最终的速度窗口。
+</p>
+
+
+<div id="org1b430e6" class="figure">
+<p><img src="/assets/blog/2019/09/05/motion-plan-dwa/dwa-search-velocities.png" alt="dwa-search-velocities.png" />
+</p>
+<p><span class="figure-number">Figure 10: </span>最终的速度窗口</p>
+</div>
+</div>
+</div>
+
+
+<div id="outline-container-org818e549" class="outline-3">
+<h3 id="org818e549">速度的选择</h3>
+<div class="outline-text-3" id="text-org818e549">
+<p>
+上面根据各种条件确定了一个以当前速度为中心的速度窗口，如何选择这些速度呢？根
+据一些约束条件，构建一个评价函数，对速度窗口里面的速度一次计算评价函数值，选
+择评价函数值最大的速度。
+</p>
+
+<p>
+评价函数怎么选择呢？
+</p>
+
+<div id="org310923f" class="figure">
+<p><img src="/assets/blog/2019/09/05/motion-plan-dwa/dwa-objective-function.png" alt="dwa-objective-function.png" />
+</p>
+<p><span class="figure-number">Figure 11: </span>评价函数,(v,w)都是Vr里面的速度。</p>
+</div>
+
+<ul class="org-ul">
+<li>目标朝向：180-theta，theta是机器人方向与目标点的夹角。说明，偏角越小，该值
+就越大。这一项保证了机器人能尽可能地往目标点前进，不至于在某个地方徘徊。</li>
+<li>与最近障碍物的距离：每个速度都对应一条直线(角速度=0)或一个弧线，线条延长之
+后可能会与障碍物相交，说明照此速度一直走就会撞到障碍物，这个距离越远说明越
+安全。因此，距离越大，这个值越大。</li>
+<li>速度大小：尽量选择速度比较大的，这样可能保证以最快的速度到达目标点。</li>
+</ul>
+
+<p>
+每一项都有一个权重，代表他们的影响程度。
+除此之外，我们还可以加上其他的一些因素，比如所得路径是否贴合全局路径等等。
+</p>
+</div>
+</div>
+
+
+<div id="outline-container-orgf7fc8a4" class="outline-3">
+<h3 id="orgf7fc8a4">一些影响因素</h3>
+<div class="outline-text-3" id="text-orgf7fc8a4">
+<ul class="org-ul">
+<li>当前速度的影响：当前的速度决定了能走的空间。比如在靠近障碍物的地方要转弯，
+如果速度太快，可调的速度可能不能实现转弯。</li>
+<li>加速度的影响：加速度是认为选择的，加速度越大，速度窗口就会越大，反之依然。</li>
+</ul>
+</div>
+</div>
+</div>
+
+
+
+<div id="outline-container-org7e785cc" class="outline-2">
+<h2 id="org7e785cc">references</h2>
+<div class="outline-text-2" id="text-org7e785cc">
+<ul class="org-ul">
+<li>WIKI：<a href="https://en.wikipedia.org/wiki/Dynamic_window_approach">Dynamic window approach</a></li>
+<li>论文：The dynamic window approach to collision avoidance</li>
+<li>博客：<a href="http://adrianboeing.blogspot.com/2012/05/dynamic-window-algorithm-motion.html">Dynamic Window Algorithm motion planning</a></li>
+<li>讨论：<a href="https://answers.ros.org/question/274564/difference-between-dwa-local_planner-and-teb-local_planner/">Difference between DWA local_planner and TEB local_planner</a></li>
+</ul>
+</div>
+</div>
+
+
+      </article>
+      <div>
+    <ul id="tags">
+        <li><a href="/tags/robotics/">robotics</a></li>
+    </ul>
+    <div class="post-meta">
+      <span title="post date">Published: 2019-09-05</span>
+      </br>
+      <span title="last modification date">Last Modification: 2020-08-14</span>
+      </br>
+      <span title="author" >Author: Clare Lee</span>
+    </div>
+    <section>
+      <h2>Comments</h2>
+        <div id="disqus_thread"></div>
+        <script type="text/javascript">
+        //var disqus_developer = 1;
+        var disqus_identifier = "/blog/2019/09/05/motion-plan-dwa";
+        var disqus_url = "https://congleetea.github.io/blog/2019/09/05/motion-plan-dwa";
+        var disqus_shortname = 'congleetea';
+        /* * * DON'T EDIT BELOW THIS LINE * * */
+        (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+        </script>
+        <noscript>Please enable JavaScript to view the <a href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+        <a href="//disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+    </section>
+  <script src="//code.jquery.com/jquery-latest.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.1.0/highlight.min.js"></script>
+  <script src="/media/js/main.js"></script>
+  <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  <div class="copyright">
+    <p>Generated by <a href="http://www.gnu.org/software/emacs/">Emacs</a> 25.x (<a href="http://orgmode.org">Org mode</a> 9.x)</p>
+    <p>
+      Copyright &copy; 2012 - <span id="footerYear"></span> <a href="mailto:congleetea &lt;at&gt; gmail &lt;dot&gt; com">Clare Lee</a>
+      &nbsp;&nbsp;-&nbsp;&nbsp;
+      Powered by <a href="https://github.com/kelvinh/org-page" target="_blank">org-page</a>
+      <script type="text/javascript">document.getElementById("footerYear").innerHTML = (new Date()).getFullYear();</script>
+    </p>
+  </div>
+</div>
+
+    </div>
+  </body>
+</html>

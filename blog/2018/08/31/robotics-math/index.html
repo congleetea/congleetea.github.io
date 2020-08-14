@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  
+  <head>
+  <title>机器人数学基础 - 清园索道</title>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
+  <meta name="author" content="Xuancong Lee" />
+    <meta name="description" content="机器人学的数学基础" />
+    <meta name="keywords" content="robotics,matrix,probability,math" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+  <link rel="stylesheet" href="/media/css/main.css" type="text/css">
+  <link rel="stylesheet" href="/media/css/base16-ocean.light-min.css" type="text/css">
+  <link href='https://fonts.googleapis.com/css?family=Fira+Sans' rel='stylesheet' type='text/css'>
+  <link href='https://fonts.googleapis.com/css?family=Fira+Mono' rel='stylesheet' type='text/css'>
+</head>
+
+  <body>
+    <div id="page-wrap">
+      <div>
+  <header id="header">
+    <div class="logo">
+      <h1><a href="/"><span class="logo-black">清园索道</span></a></h1>
+    </div>
+    <div class="fortune">
+      <blockquote>
+        上下求索，识己识人识事
+      </blockquote>
+    </div>
+    <ul id="main-nav">
+        <li><a href="/blog/">Blog</a></li>
+      <li><a href="/tags/">分类</a></li>
+      <li><a href="/about/">关于我</a></li>
+      <li><a href="https://github.com/congleetea">GitHub</a></li>
+      <li><a href="/rss.xml">RSS</a></li>
+    </ul>
+  </header>
+</div>
+
+      <article id="content">
+        
+  <h1>机器人数学基础</h1>
+
+
+<div id="outline-container-orgdb0b89c" class="outline-2">
+<h2 id="orgdb0b89c">概率（概率机器人）</h2>
+<div class="outline-text-2" id="text-orgdb0b89c">
+</div>
+<div id="outline-container-org8dc3af5" class="outline-3">
+<h3 id="org8dc3af5">基本</h3>
+<div class="outline-text-3" id="text-org8dc3af5">
+<ul class="org-ul">
+<li>基本公理</li>
+</ul>
+
+
+<div id="org0598dfc" class="figure">
+<p><img src="/assets/blog/2018/08/31/robotics-math/probability_axioms_1.png" alt="probability_axioms_1.png" />
+</p>
+<p><span class="figure-number">Figure 1: </span>概率基本公理</p>
+</div>
+
+
+<ul class="org-ul">
+<li>变形和使用</li>
+</ul>
+
+
+<div id="org1a32836" class="figure">
+<p><img src="/assets/blog/2018/08/31/robotics-math/probability_axioms_1_using.png" alt="probability_axioms_1_using.png" />
+</p>
+<p><span class="figure-number">Figure 2: </span>概率基本公理变形和使用</p>
+</div>
+</div>
+</div>
+
+
+<div id="outline-container-org7cca3d2" class="outline-3">
+<h3 id="org7cca3d2">联合概率和条件概率</h3>
+<div class="outline-text-3" id="text-org7cca3d2">
+
+<div id="orgbcc38b6" class="figure">
+<p><img src="/assets/blog/2018/08/31/robotics-math/probability_joint_conditional.png" alt="probability_joint_conditional.png" />
+</p>
+<p><span class="figure-number">Figure 3: </span>联合概率和条件概率</p>
+</div>
+</div>
+</div>
+
+
+<div id="outline-container-orgf6b47f4" class="outline-3">
+<h3 id="orgf6b47f4">全概率公式</h3>
+<div class="outline-text-3" id="text-orgf6b47f4">
+
+<div id="orgeb2d466" class="figure">
+<p><img src="/assets/blog/2018/08/31/robotics-math/law_of_total_probability.png" alt="law_of_total_probability.png" />
+</p>
+<p><span class="figure-number">Figure 4: </span>全概率公式</p>
+</div>
+
+
+<div id="orga3fd977" class="figure">
+<p><img src="/assets/blog/2018/08/31/robotics-math/law_of_total_probability_conditional.png" alt="law_of_total_probability_conditional.png" />
+</p>
+<p><span class="figure-number">Figure 5: </span>全概率公式(条件)</p>
+</div>
+</div>
+</div>
+
+
+<div id="outline-container-orgc8a7b53" class="outline-3">
+<h3 id="orgc8a7b53">Bayes 公式</h3>
+<div class="outline-text-3" id="text-orgc8a7b53">
+
+<div id="org9b75521" class="figure">
+<p><img src="/assets/blog/2018/08/31/robotics-math/bayes_formula.png" alt="bayes_formula.png" />
+</p>
+<p><span class="figure-number">Figure 6: </span>Bayes公式</p>
+</div>
+
+
+<p>
+归一化：
+</p>
+
+
+<div id="orgf667155" class="figure">
+<p><img src="/assets/blog/2018/08/31/robotics-math/bayes_formula_normalization.png" alt="bayes_formula_normalization.png" />
+</p>
+<p><span class="figure-number">Figure 7: </span>Bayes公式归一化</p>
+</div>
+
+
+
+<div id="orgf34c68f" class="figure">
+<p><img src="/assets/blog/2018/08/31/robotics-math/bayes_rule.png" alt="bayes_rule.png" />
+</p>
+<p><span class="figure-number">Figure 8: </span>Bayes公式(多条件)</p>
+</div>
+</div>
+</div>
+
+
+<div id="outline-container-org2f36ff2" class="outline-3">
+<h3 id="org2f36ff2">条件独立</h3>
+<div class="outline-text-3" id="text-org2f36ff2">
+<p>
+如果x，y独立:
+</p>
+
+<div id="org10ebe65" class="figure">
+<p><img src="/assets/blog/2018/08/31/robotics-math/conditional_independence.png" alt="conditional_independence.png" />
+</p>
+<p><span class="figure-number">Figure 9: </span>条件独立</p>
+</div>
+</div>
+</div>
+
+
+<div id="outline-container-org6602090" class="outline-3">
+<h3 id="org6602090">正态分布</h3>
+<div class="outline-text-3" id="text-org6602090">
+
+<div id="orgfa6fb2c" class="figure">
+<p><img src="/assets/blog/2018/08/31/robotics-math/gaussian.png" alt="gaussian.png" />
+</p>
+<p><span class="figure-number">Figure 10: </span>一维及多维正态分布</p>
+</div>
+
+<p>
+多维正态分布属性：
+</p>
+
+
+<div id="org9a8c518" class="figure">
+<p><img src="/assets/blog/2018/08/31/robotics-math/gaussian_rules.png" alt="gaussian_rules.png" />
+</p>
+<p><span class="figure-number">Figure 11: </span>多维正态分布属性</p>
+</div>
+</div>
+</div>
+</div>
+
+
+<div id="outline-container-orgdef8a0f" class="outline-2">
+<h2 id="orgdef8a0f">迭代贝叶斯更新</h2>
+<div class="outline-text-2" id="text-orgdef8a0f">
+<ul class="org-ul">
+<li>Markov assumption (所有观测相互独立)</li>
+<li><p>
+迭代贝叶斯更新:
+</p>
+
+<div id="org2a6b84c" class="figure">
+<p><img src="/assets/blog/2018/08/31/robotics-math/RecursiveBayesianUpdating.png" alt="RecursiveBayesianUpdating.png" />
+</p>
+<p><span class="figure-number">Figure 12: </span>条件独立</p>
+</div></li>
+</ul>
+</div>
+</div>
+
+
+
+
+<div id="outline-container-org9f29a91" class="outline-2">
+<h2 id="org9f29a91">参考</h2>
+<div class="outline-text-2" id="text-org9f29a91">
+<p>
+<a href="https://www.zhihu.com/question/19725590">zhihu:理解贝叶斯</a>
+</p>
+
+<p>
+<a href="https://zhuanlan.zhihu.com/p/35034056">zhihu:置信区间和置信度</a>
+</p>
+
+<p>
+<a href="https://www.jianshu.com/p/6bf63f08ef52">闭合解/解析解，数值解</a>
+</p>
+</div>
+</div>
+
+
+      </article>
+      <div>
+    <ul id="tags">
+        <li><a href="/tags/robotics/">robotics</a></li>
+    </ul>
+    <div class="post-meta">
+      <span title="post date">Published: 2018-08-31</span>
+      </br>
+      <span title="last modification date">Last Modification: 2020-08-14</span>
+      </br>
+      <span title="author" >Author: Xuancong Lee</span>
+    </div>
+    <section>
+      <h2>Comments</h2>
+        <div id="disqus_thread"></div>
+        <script type="text/javascript">
+        //var disqus_developer = 1;
+        var disqus_identifier = "/blog/2018/08/31/robotics-math";
+        var disqus_url = "https://congleetea.github.io/blog/2018/08/31/robotics-math";
+        var disqus_shortname = 'congleetea';
+        /* * * DON'T EDIT BELOW THIS LINE * * */
+        (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+        </script>
+        <noscript>Please enable JavaScript to view the <a href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+        <a href="//disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+    </section>
+  <script src="//code.jquery.com/jquery-latest.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.1.0/highlight.min.js"></script>
+  <script src="/media/js/main.js"></script>
+  <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  <div class="copyright">
+    <p>Generated by <a href="http://www.gnu.org/software/emacs/">Emacs</a> 25.x (<a href="http://orgmode.org">Org mode</a> 9.x)</p>
+    <p>
+      Copyright &copy; 2012 - <span id="footerYear"></span> <a href="mailto:congleetea &lt;at&gt; gmail &lt;dot&gt; com">Xuancong Lee</a>
+      &nbsp;&nbsp;-&nbsp;&nbsp;
+      Powered by <a href="https://github.com/kelvinh/org-page" target="_blank">org-page</a>
+      <script type="text/javascript">document.getElementById("footerYear").innerHTML = (new Date()).getFullYear();</script>
+    </p>
+  </div>
+</div>
+
+    </div>
+  </body>
+</html>

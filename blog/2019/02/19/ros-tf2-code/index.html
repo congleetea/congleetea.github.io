@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  
+  <head>
+  <title>ROS tf2 实现  - 清园索道</title>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
+  <meta name="author" content="Clare Lee" />
+    <meta name="description" content="ROS tf2 通过源码解析实现过程" />
+    <meta name="keywords" content="ros,tf2,transform" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+  <link rel="stylesheet" href="/media/css/main.css" type="text/css">
+  <link rel="stylesheet" href="/media/css/base16-ocean.light-min.css" type="text/css">
+  <link href='https://fonts.googleapis.com/css?family=Fira+Sans' rel='stylesheet' type='text/css'>
+  <link href='https://fonts.googleapis.com/css?family=Fira+Mono' rel='stylesheet' type='text/css'>
+</head>
+
+  <body>
+    <div id="page-wrap">
+      <div>
+  <header id="header">
+    <div class="logo">
+      <h1><a href="/"><span class="logo-black">清园索道</span></a></h1>
+    </div>
+    <div class="fortune">
+      <blockquote>
+        上下求索，识己识人识事
+      </blockquote>
+    </div>
+    <ul id="main-nav">
+        <li><a href="/blog/">Blog</a></li>
+      <li><a href="/tags/">分类</a></li>
+      <li><a href="/about/">关于我</a></li>
+      <li><a href="https://github.com/congleetea">GitHub</a></li>
+      <li><a href="/rss.xml">RSS</a></li>
+    </ul>
+  </header>
+</div>
+
+      <article id="content">
+        
+  <h1>ROS tf2 实现 </h1>
+
+
+<div id="outline-container-org5b35962" class="outline-2">
+<h2 id="org5b35962">概述</h2>
+<div class="outline-text-2" id="text-org5b35962">
+<p>
+因为曾经考虑将 ROS 的tf2 移植到其他环境中使用。因此过了一下 ROS 的 tf2 代码。在这里做一下总结。
+关于 <a href="http://wiki.ros.org/tf2">tf2</a> 的介绍可以查看 ROS 网站。
+</p>
+
+<p>
+我们先从使用的方法作为入口来看。(这里只考虑tf，暂不考虑tf_static, 二者的不同也很好理解，后面再说)。
+使用 tf2 主要有一下三步：
+</p>
+
+<ul class="org-ul">
+<li>创建坐标变换发布器 Broadcaster，以某种方式不断发布坐标信息。坐标信息主要包括四要素: 父坐标，子坐标，
+平移和旋转变换，时间。</li>
+
+<li>需要获取坐标变换的地方创建坐标订阅器。该订阅器需要一个buffer，该buffer中会为每一个frame设置一个双向
+队列, 队列按照时间顺序保存转换到 child_frame 的所有转换。默认保存10s内的变换。</li>
+
+<li>需要使用变换的时候通过buffer调用lookupTransform，来查询两个坐标之间的某个时刻的变换。包含三个要素：
+父坐标，子坐标，时刻。</li>
+</ul>
+</div>
+</div>
+
+
+<div id="outline-container-org2768854" class="outline-2">
+<h2 id="org2768854">实现</h2>
+<div class="outline-text-2" id="text-org2768854">
+<p>
+这里就从上面的三个部分来将实现过程。最后简单说一下 tf_static。
+</p>
+</div>
+
+<div id="outline-container-org1beefb1" class="outline-3">
+<h3 id="org1beefb1">tf broadcaster</h3>
+<div class="outline-text-3" id="text-org1beefb1">
+<p>
+坐标变换发布器比较简单，就是组合父坐标和子坐标之间当前时刻的变换信息发布到 "/tf" 或者 "/tf_static" 话
+题上去。注意这个消息包含四要素：父坐标，子坐标，平移和旋转变换，时间。
+</p>
+</div>
+</div>
+
+<div id="outline-container-orged4e80c" class="outline-3">
+<h3 id="orged4e80c">tf listener</h3>
+<div class="outline-text-3" id="text-orged4e80c">
+<p>
+在需要使用变换的地方实例化一个订阅器 TransformListener，并定义一个 tf2_ros::Buffer 类型的buffer，用来
+保存一段时间的坐标变换信息。在订阅器 TransformListener 的构造函数中，会订阅两个topic: "/tf", "/tf_static"，
+并根据你的需要，设置是否需要单独的线程来处理这些订阅(默认是开启单独一个线程来处理订阅的).
+</p>
+
+<p>
+当收到这两个话题上来的变换信息时，会将起保存到buffer中去。这个buffer会为每个frame建立一个双向队列，保存
+所有子坐标是该frame的变换。这些信息都是按照时间顺序保存的，越靠近begin位置的消息越是最新的。每次保存之后
+都会清理一遍整个队列，将与最新的消息时间差超过10s的数据清除掉。
+</p>
+</div>
+</div>
+
+<div id="outline-container-org786dbe1" class="outline-3">
+<h3 id="org786dbe1">lookupTransform</h3>
+<div class="outline-text-3" id="text-org786dbe1">
+<p>
+当需要用到某两个坐标之间的变换时可以调用buffer的接口 lookupTransform 来查询。包含三个要素：父(source)坐标，
+子(target)坐标，时刻(查询离该时刻最近的转换，如果为0表示取最新的一个转换)。
+</p>
+
+<p>
+查询过程主要分两步，首先是确定两个坐标的共同时间，然后计算两个坐标之间的平移和旋转。
+</p>
+
+<p>
+由于/tf中得到的可能是其他所有坐标到该坐标的转换。因此source到target的转换可能需要经过几个坐标才能计算出来。
+因此共同时间的确定是选择source和target坐标经过的所有转换的时间的最小值。具体步骤是：
+</p>
+
+<ul class="org-ul">
+<li>定义一个map，key是本次查找的frame的父坐标，value是该转换对应的时间戳。</li>
+<li>从buffer中属于source frame的队列中选择时间最新的转换(这里只考虑查询时刻为0，即最近时刻的转换)，找到父坐标
+和时间，写入map中。如果父坐标不是target frame，则继续在该父坐标的队列中找最新的一次转换的父坐标和时间，将
+他们也写进map中。以此类推，直到父坐标是target frame或者找到root frame为止。</li>
+<li>如果上面一直找到root frame也没有找到target frame，那就从target frame使用上面的方法查找，每次找到父坐标和
+map中保存的父坐标比较，如果包含在其中，说明找到的就是source和target的共同祖先坐标。选择最小的时间作为共同
+时间即可。</li>
+<li>根据上面找到的信息计算平移和旋转即可。最后得到我们要的变换信息。</li>
+</ul>
+</div>
+</div>
+</div>
+
+
+<div id="outline-container-org41f161c" class="outline-2">
+<h2 id="org41f161c">tf 和 tf_static</h2>
+<div class="outline-text-2" id="text-org41f161c">
+<p>
+上面我们看出在接受到tf的转换之后在buffer中为子坐标设置双向队列。但是对于tf_static则不用设置双向队列，而是只
+保存一条变换。也就是说tf_static不会保存一段时间的变换，而只是保存最近的一条变换信息。其实tf_static主要是用来
+发布固定的坐标系之间的变换，因为这样的变换是不常变化的，没有必要设置队列来保存。
+</p>
+
+<p>
+以上就是ros中tf主要的内容。
+</p>
+</div>
+</div>
+
+
+      </article>
+      <div>
+    <ul id="tags">
+        <li><a href="/tags/robotics/">robotics</a></li>
+    </ul>
+    <div class="post-meta">
+      <span title="post date">Published: 2019-02-19</span>
+      </br>
+      <span title="last modification date">Last Modification: 2020-08-14</span>
+      </br>
+      <span title="author" >Author: Clare Lee</span>
+    </div>
+    <section>
+      <h2>Comments</h2>
+        <div id="disqus_thread"></div>
+        <script type="text/javascript">
+        //var disqus_developer = 1;
+        var disqus_identifier = "/blog/2019/02/19/ros-tf2-code";
+        var disqus_url = "https://congleetea.github.io/blog/2019/02/19/ros-tf2-code";
+        var disqus_shortname = 'congleetea';
+        /* * * DON'T EDIT BELOW THIS LINE * * */
+        (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+        </script>
+        <noscript>Please enable JavaScript to view the <a href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+        <a href="//disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+    </section>
+  <script src="//code.jquery.com/jquery-latest.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.1.0/highlight.min.js"></script>
+  <script src="/media/js/main.js"></script>
+  <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  <div class="copyright">
+    <p>Generated by <a href="http://www.gnu.org/software/emacs/">Emacs</a> 25.x (<a href="http://orgmode.org">Org mode</a> 9.x)</p>
+    <p>
+      Copyright &copy; 2012 - <span id="footerYear"></span> <a href="mailto:congleetea &lt;at&gt; gmail &lt;dot&gt; com">Clare Lee</a>
+      &nbsp;&nbsp;-&nbsp;&nbsp;
+      Powered by <a href="https://github.com/kelvinh/org-page" target="_blank">org-page</a>
+      <script type="text/javascript">document.getElementById("footerYear").innerHTML = (new Date()).getFullYear();</script>
+    </p>
+  </div>
+</div>
+
+    </div>
+  </body>
+</html>

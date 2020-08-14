@@ -1,0 +1,808 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  
+  <head>
+  <title>机器人运动规划-Dijkstra - 清园索道</title>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
+  <meta name="author" content="Clare Lee" />
+    <meta name="description" content="Dijkstra" />
+    <meta name="keywords" content="motion plan,dijkstra" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+  <link rel="stylesheet" href="/media/css/main.css" type="text/css">
+  <link rel="stylesheet" href="/media/css/base16-ocean.light-min.css" type="text/css">
+  <link href='https://fonts.googleapis.com/css?family=Fira+Sans' rel='stylesheet' type='text/css'>
+  <link href='https://fonts.googleapis.com/css?family=Fira+Mono' rel='stylesheet' type='text/css'>
+</head>
+
+  <body>
+    <div id="page-wrap">
+      <div>
+  <header id="header">
+    <div class="logo">
+      <h1><a href="/"><span class="logo-black">清园索道</span></a></h1>
+    </div>
+    <div class="fortune">
+      <blockquote>
+        上下求索，识己识人识事
+      </blockquote>
+    </div>
+    <ul id="main-nav">
+        <li><a href="/blog/">Blog</a></li>
+      <li><a href="/tags/">分类</a></li>
+      <li><a href="/about/">关于我</a></li>
+      <li><a href="https://github.com/congleetea">GitHub</a></li>
+      <li><a href="/rss.xml">RSS</a></li>
+    </ul>
+  </header>
+</div>
+
+      <article id="content">
+        
+  <h1>机器人运动规划-Dijkstra</h1>
+
+<div id="outline-container-org6e3ebda" class="outline-2">
+<h2 id="org6e3ebda">概述</h2>
+<div class="outline-text-2" id="text-org6e3ebda">
+<ul class="org-ul">
+<li>单源最短路径法: 就是从某一个节点到 <b>其他所有节点</b> 的最短路径的计算。</li>
+<li>不能处理负权边，但是可以将负权边全部加上一个数变成正数。</li>
+<li>适合有向无环图。</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-org2969990" class="outline-2">
+<h2 id="org2969990">执行步骤</h2>
+<div class="outline-text-2" id="text-org2969990">
+</div>
+<div id="outline-container-org2e7f68f" class="outline-3">
+<h3 id="org2e7f68f">需要的数据结构</h3>
+<div class="outline-text-3" id="text-org2e7f68f">
+<ul class="org-ul">
+<li>一个保存图的结构，用于保存节点的邻居关系；</li>
+<li>一个保存节点是否已经得到最短路径，找到最短路劲的节点标记为已处理节点；</li>
+<li>保存节点目前获得的最短路径值(默认为最大值inf)及其父节点(便于后面反推路径)。</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-orgbee0238" class="outline-3">
+<h3 id="orgbee0238">步骤</h3>
+<div class="outline-text-3" id="text-orgbee0238">
+<ul class="org-ul">
+<li>从起点开始，从邻居中找出代价最低的节点，那么最短时间到达这个节点的代价就求出
+来了。标记该节点为已处理节点，更新该节点的最小代价值。</li>
+<li>找出未处理的所有节点中，代价值最小的节点，计算这个节点到其邻居的代价值。将
+代价值和这些邻居原有的代价值比较，选择较小的代价值并更新其代价值和父节点。
+重复该过程，直到对图中每个节点都这么做了(实际使用时，只要目标点标记为已处理
+就可以停止了)。</li>
+<li>计算最终路径: 从目标点开始，依次寻找其父节点，最终连成线，就是最短路径了。</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-orgf4769ed" class="outline-3">
+<h3 id="orgf4769ed">例子</h3>
+<div class="outline-text-3" id="text-orgf4769ed">
+<p>
+如下图的树状图，线段数值表示代价值，节点0是起点。
+</p>
+
+
+<div id="org913d964" class="figure">
+<p><img src="/assets/blog/2019/09/06/dijkstra/motion-plan-graph.jpg" alt="motion-plan-graph.jpg" />
+</p>
+<p><span class="figure-number">Figure 1: </span>图</p>
+</div>
+
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-left" />
+
+<col  class="org-right" />
+
+<col  class="org-right" />
+
+<col  class="org-right" />
+
+<col  class="org-right" />
+
+<col  class="org-right" />
+
+<col  class="org-right" />
+
+<col  class="org-right" />
+
+<col  class="org-right" />
+</colgroup>
+<thead>
+<tr>
+<th scope="col" class="org-left">节点</th>
+<th scope="col" class="org-right">0</th>
+<th scope="col" class="org-right">1</th>
+<th scope="col" class="org-right">2</th>
+<th scope="col" class="org-right">3</th>
+<th scope="col" class="org-right">4</th>
+<th scope="col" class="org-right">5</th>
+<th scope="col" class="org-right">6</th>
+<th scope="col" class="org-right">7</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="org-left">当前最小代价值</td>
+<td class="org-right">0</td>
+<td class="org-right">inf</td>
+<td class="org-right">inf</td>
+<td class="org-right">inf</td>
+<td class="org-right">inf</td>
+<td class="org-right">inf</td>
+<td class="org-right">inf</td>
+<td class="org-right">inf</td>
+</tr>
+
+<tr>
+<td class="org-left">当前父节点</td>
+<td class="org-right">&#xa0;</td>
+<td class="org-right">&#xa0;</td>
+<td class="org-right">&#xa0;</td>
+<td class="org-right">&#xa0;</td>
+<td class="org-right">&#xa0;</td>
+<td class="org-right">&#xa0;</td>
+<td class="org-right">&#xa0;</td>
+<td class="org-right">&#xa0;</td>
+</tr>
+
+<tr>
+<td class="org-left">是否已处理</td>
+<td class="org-right">true</td>
+<td class="org-right">false</td>
+<td class="org-right">false</td>
+<td class="org-right">false</td>
+<td class="org-right">false</td>
+<td class="org-right">false</td>
+<td class="org-right">false</td>
+<td class="org-right">false</td>
+</tr>
+</tbody>
+</table>
+
+<p>
+初始时有上表，算法中不断更新该表。
+</p>
+
+<ul class="org-ul">
+<li><p>
+a) 找出节点0的邻居(1,2)，计算对应代价值(1,5)，代价值比默认inf小，于是更新代价
+值和父节点，找出未处理的节点中最小的代价值是1，将其标记为已处理：
+</p>
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-left" />
+
+<col  class="org-right" />
+
+<col  class="org-right" />
+
+<col  class="org-right" />
+
+<col  class="org-right" />
+
+<col  class="org-right" />
+
+<col  class="org-right" />
+
+<col  class="org-right" />
+
+<col  class="org-right" />
+</colgroup>
+<thead>
+<tr>
+<th scope="col" class="org-left">节点</th>
+<th scope="col" class="org-right">0</th>
+<th scope="col" class="org-right">1</th>
+<th scope="col" class="org-right">2</th>
+<th scope="col" class="org-right">3</th>
+<th scope="col" class="org-right">4</th>
+<th scope="col" class="org-right">5</th>
+<th scope="col" class="org-right">6</th>
+<th scope="col" class="org-right">7</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="org-left">当前最小代价值</td>
+<td class="org-right">0</td>
+<td class="org-right">1</td>
+<td class="org-right">5</td>
+<td class="org-right">inf</td>
+<td class="org-right">inf</td>
+<td class="org-right">inf</td>
+<td class="org-right">inf</td>
+<td class="org-right">inf</td>
+</tr>
+
+<tr>
+<td class="org-left">当前父节点</td>
+<td class="org-right">&#xa0;</td>
+<td class="org-right">0</td>
+<td class="org-right">0</td>
+<td class="org-right">&#xa0;</td>
+<td class="org-right">&#xa0;</td>
+<td class="org-right">&#xa0;</td>
+<td class="org-right">&#xa0;</td>
+<td class="org-right">&#xa0;</td>
+</tr>
+
+<tr>
+<td class="org-left">是否已处理</td>
+<td class="org-right">true</td>
+<td class="org-right">true</td>
+<td class="org-right">false</td>
+<td class="org-right">false</td>
+<td class="org-right">false</td>
+<td class="org-right">false</td>
+<td class="org-right">false</td>
+<td class="org-right">false</td>
+</tr>
+</tbody>
+</table></li>
+
+<li><p>
+b) 最小代价值是节点1，找出其邻居(3,4)，更新代价值(11,10)和父节点(代价值比原有
+值大就忽略):
+</p>
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-left" />
+
+<col  class="org-right" />
+
+<col  class="org-right" />
+
+<col  class="org-right" />
+
+<col  class="org-right" />
+
+<col  class="org-right" />
+
+<col  class="org-right" />
+
+<col  class="org-right" />
+
+<col  class="org-right" />
+</colgroup>
+<thead>
+<tr>
+<th scope="col" class="org-left">节点</th>
+<th scope="col" class="org-right">0</th>
+<th scope="col" class="org-right">1</th>
+<th scope="col" class="org-right">2</th>
+<th scope="col" class="org-right">3</th>
+<th scope="col" class="org-right">4</th>
+<th scope="col" class="org-right">5</th>
+<th scope="col" class="org-right">6</th>
+<th scope="col" class="org-right">7</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="org-left">当前最小代价值</td>
+<td class="org-right">0</td>
+<td class="org-right">1</td>
+<td class="org-right">5</td>
+<td class="org-right">11</td>
+<td class="org-right">10</td>
+<td class="org-right">inf</td>
+<td class="org-right">inf</td>
+<td class="org-right">inf</td>
+</tr>
+
+<tr>
+<td class="org-left">当前父节点</td>
+<td class="org-right">&#xa0;</td>
+<td class="org-right">0</td>
+<td class="org-right">0</td>
+<td class="org-right">1</td>
+<td class="org-right">1</td>
+<td class="org-right">&#xa0;</td>
+<td class="org-right">&#xa0;</td>
+<td class="org-right">&#xa0;</td>
+</tr>
+
+<tr>
+<td class="org-left">是否已处理</td>
+<td class="org-right">true</td>
+<td class="org-right">true</td>
+<td class="org-right">false</td>
+<td class="org-right">false</td>
+<td class="org-right">false</td>
+<td class="org-right">false</td>
+<td class="org-right">false</td>
+<td class="org-right">false</td>
+</tr>
+</tbody>
+</table></li>
+
+<li><p>
+c) 找出未处理节点(2,3,4)中代价最小的节点2，将其标记为已处理, 再找出节点2的邻居
+重复步骤2, 直到所有节点都已标记为已处理(或者目标点标记为已处理):
+</p>
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-left" />
+
+<col  class="org-right" />
+
+<col  class="org-right" />
+
+<col  class="org-right" />
+
+<col  class="org-right" />
+
+<col  class="org-right" />
+
+<col  class="org-right" />
+
+<col  class="org-right" />
+
+<col  class="org-right" />
+</colgroup>
+<thead>
+<tr>
+<th scope="col" class="org-left">节点</th>
+<th scope="col" class="org-right">0</th>
+<th scope="col" class="org-right">1</th>
+<th scope="col" class="org-right">2</th>
+<th scope="col" class="org-right">3</th>
+<th scope="col" class="org-right">4</th>
+<th scope="col" class="org-right">5</th>
+<th scope="col" class="org-right">6</th>
+<th scope="col" class="org-right">7</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="org-left">当前最小代价值</td>
+<td class="org-right">0</td>
+<td class="org-right">1</td>
+<td class="org-right">5</td>
+<td class="org-right">11</td>
+<td class="org-right">10</td>
+<td class="org-right">inf</td>
+<td class="org-right">inf</td>
+<td class="org-right">inf</td>
+</tr>
+
+<tr>
+<td class="org-left">当前父节点</td>
+<td class="org-right">&#xa0;</td>
+<td class="org-right">0</td>
+<td class="org-right">0</td>
+<td class="org-right">1</td>
+<td class="org-right">1</td>
+<td class="org-right">&#xa0;</td>
+<td class="org-right">&#xa0;</td>
+<td class="org-right">&#xa0;</td>
+</tr>
+
+<tr>
+<td class="org-left">是否已处理</td>
+<td class="org-right">true</td>
+<td class="org-right">true</td>
+<td class="org-right">true</td>
+<td class="org-right">false</td>
+<td class="org-right">false</td>
+<td class="org-right">false</td>
+<td class="org-right">false</td>
+<td class="org-right">false</td>
+</tr>
+</tbody>
+</table>
+
+<p>
+下面将所有步骤进行完：
+</p>
+<ul class="org-ul">
+<li><p>
+节点2的邻居(5,6)，更新代价值及父节点(6/p=2,7/p=2), 未处理的最小代价是节点
+5标记为已处理:
+</p>
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-left" />
+
+<col  class="org-right" />
+
+<col  class="org-right" />
+
+<col  class="org-right" />
+
+<col  class="org-right" />
+
+<col  class="org-right" />
+
+<col  class="org-right" />
+
+<col  class="org-right" />
+
+<col  class="org-right" />
+</colgroup>
+<thead>
+<tr>
+<th scope="col" class="org-left">节点</th>
+<th scope="col" class="org-right">0</th>
+<th scope="col" class="org-right">1</th>
+<th scope="col" class="org-right">2</th>
+<th scope="col" class="org-right">3</th>
+<th scope="col" class="org-right">4</th>
+<th scope="col" class="org-right">5</th>
+<th scope="col" class="org-right">6</th>
+<th scope="col" class="org-right">7</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="org-left">当前最小代价值</td>
+<td class="org-right">0</td>
+<td class="org-right">1</td>
+<td class="org-right">5</td>
+<td class="org-right">11</td>
+<td class="org-right">10</td>
+<td class="org-right">6</td>
+<td class="org-right">7</td>
+<td class="org-right">inf</td>
+</tr>
+
+<tr>
+<td class="org-left">当前父节点</td>
+<td class="org-right">&#xa0;</td>
+<td class="org-right">0</td>
+<td class="org-right">0</td>
+<td class="org-right">1</td>
+<td class="org-right">1</td>
+<td class="org-right">2</td>
+<td class="org-right">2</td>
+<td class="org-right">&#xa0;</td>
+</tr>
+
+<tr>
+<td class="org-left">是否已处理</td>
+<td class="org-right">true</td>
+<td class="org-right">true</td>
+<td class="org-right">true</td>
+<td class="org-right">false</td>
+<td class="org-right">false</td>
+<td class="org-right">true</td>
+<td class="org-right">false</td>
+<td class="org-right">false</td>
+</tr>
+</tbody>
+</table></li>
+<li><p>
+节点5的邻居(7)，更新代价值及父节点(11/p=5), 未处理的最小代价是节点6标记为
+已处理:
+</p>
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-left" />
+
+<col  class="org-right" />
+
+<col  class="org-right" />
+
+<col  class="org-right" />
+
+<col  class="org-right" />
+
+<col  class="org-right" />
+
+<col  class="org-right" />
+
+<col  class="org-right" />
+
+<col  class="org-right" />
+</colgroup>
+<thead>
+<tr>
+<th scope="col" class="org-left">节点</th>
+<th scope="col" class="org-right">0</th>
+<th scope="col" class="org-right">1</th>
+<th scope="col" class="org-right">2</th>
+<th scope="col" class="org-right">3</th>
+<th scope="col" class="org-right">4</th>
+<th scope="col" class="org-right">5</th>
+<th scope="col" class="org-right">6</th>
+<th scope="col" class="org-right">7</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="org-left">当前最小代价值</td>
+<td class="org-right">0</td>
+<td class="org-right">1</td>
+<td class="org-right">5</td>
+<td class="org-right">11</td>
+<td class="org-right">10</td>
+<td class="org-right">6</td>
+<td class="org-right">7</td>
+<td class="org-right">11</td>
+</tr>
+
+<tr>
+<td class="org-left">当前父节点</td>
+<td class="org-right">&#xa0;</td>
+<td class="org-right">0</td>
+<td class="org-right">0</td>
+<td class="org-right">1</td>
+<td class="org-right">1</td>
+<td class="org-right">2</td>
+<td class="org-right">2</td>
+<td class="org-right">5</td>
+</tr>
+
+<tr>
+<td class="org-left">是否已处理</td>
+<td class="org-right">true</td>
+<td class="org-right">true</td>
+<td class="org-right">true</td>
+<td class="org-right">false</td>
+<td class="org-right">false</td>
+<td class="org-right">true</td>
+<td class="org-right">true</td>
+<td class="org-right">false</td>
+</tr>
+</tbody>
+</table></li>
+
+<li><p>
+节点6的邻居(7)，更新代价值及父节点(13&gt;11不更新), 未处理的最小代价是节点4标记为
+已处理:
+</p>
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-left" />
+
+<col  class="org-right" />
+
+<col  class="org-right" />
+
+<col  class="org-right" />
+
+<col  class="org-right" />
+
+<col  class="org-right" />
+
+<col  class="org-right" />
+
+<col  class="org-right" />
+
+<col  class="org-right" />
+</colgroup>
+<thead>
+<tr>
+<th scope="col" class="org-left">节点</th>
+<th scope="col" class="org-right">0</th>
+<th scope="col" class="org-right">1</th>
+<th scope="col" class="org-right">2</th>
+<th scope="col" class="org-right">3</th>
+<th scope="col" class="org-right">4</th>
+<th scope="col" class="org-right">5</th>
+<th scope="col" class="org-right">6</th>
+<th scope="col" class="org-right">7</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="org-left">当前最小代价值</td>
+<td class="org-right">0</td>
+<td class="org-right">1</td>
+<td class="org-right">5</td>
+<td class="org-right">11</td>
+<td class="org-right">10</td>
+<td class="org-right">6</td>
+<td class="org-right">7</td>
+<td class="org-right">11</td>
+</tr>
+
+<tr>
+<td class="org-left">当前父节点</td>
+<td class="org-right">&#xa0;</td>
+<td class="org-right">0</td>
+<td class="org-right">0</td>
+<td class="org-right">1</td>
+<td class="org-right">1</td>
+<td class="org-right">2</td>
+<td class="org-right">2</td>
+<td class="org-right">5</td>
+</tr>
+
+<tr>
+<td class="org-left">是否已处理</td>
+<td class="org-right">true</td>
+<td class="org-right">true</td>
+<td class="org-right">true</td>
+<td class="org-right">false</td>
+<td class="org-right">true</td>
+<td class="org-right">true</td>
+<td class="org-right">true</td>
+<td class="org-right">false</td>
+</tr>
+</tbody>
+</table>
+<ul class="org-ul">
+<li><p>
+节点4的邻居(5,7)，更新代价值及父节点(13&gt;6不更新,14&gt;11不更新), 未处理的最
+ 小代价是节点3和7标记为
+已处理:
+</p>
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-left" />
+
+<col  class="org-right" />
+
+<col  class="org-right" />
+
+<col  class="org-right" />
+
+<col  class="org-right" />
+
+<col  class="org-right" />
+
+<col  class="org-right" />
+
+<col  class="org-right" />
+
+<col  class="org-right" />
+</colgroup>
+<thead>
+<tr>
+<th scope="col" class="org-left">节点</th>
+<th scope="col" class="org-right">0</th>
+<th scope="col" class="org-right">1</th>
+<th scope="col" class="org-right">2</th>
+<th scope="col" class="org-right">3</th>
+<th scope="col" class="org-right">4</th>
+<th scope="col" class="org-right">5</th>
+<th scope="col" class="org-right">6</th>
+<th scope="col" class="org-right">7</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="org-left">当前最小代价值</td>
+<td class="org-right">0</td>
+<td class="org-right">1</td>
+<td class="org-right">5</td>
+<td class="org-right">11</td>
+<td class="org-right">10</td>
+<td class="org-right">6</td>
+<td class="org-right">7</td>
+<td class="org-right">11</td>
+</tr>
+
+<tr>
+<td class="org-left">当前父节点</td>
+<td class="org-right">&#xa0;</td>
+<td class="org-right">0</td>
+<td class="org-right">0</td>
+<td class="org-right">1</td>
+<td class="org-right">1</td>
+<td class="org-right">2</td>
+<td class="org-right">2</td>
+<td class="org-right">5</td>
+</tr>
+
+<tr>
+<td class="org-left">是否已处理</td>
+<td class="org-right">true</td>
+<td class="org-right">true</td>
+<td class="org-right">true</td>
+<td class="org-right">true</td>
+<td class="org-right">true</td>
+<td class="org-right">true</td>
+<td class="org-right">true</td>
+<td class="org-right">true</td>
+</tr>
+</tbody>
+</table>
+
+<p>
+所有节点都已处理，结束。
+</p></li>
+</ul></li>
+</ul>
+<ul class="org-ul">
+<li>d) 查找路径，从目标点依次找父节点，知道起始点，得到路径。比如要查询到节点7
+的路径： 7-&gt;5-&gt;2-&gt;0(得到路径0,2,5,7)。如果找到节点4的：4-&gt;1-&gt;0(路径0,1,4)。</li>
+</ul></li>
+</ul>
+</div>
+</div>
+</div>
+
+
+<div id="outline-container-org25c660a" class="outline-2">
+<h2 id="org25c660a">总结</h2>
+<div class="outline-text-2" id="text-org25c660a">
+<ul class="org-ul">
+<li>Dijkstra 保证当前选出的代价最小的节点与起点之间的路径总是最优的，(不管后面)，
+所以到目标点时可以保证起点和目标点的路径也是最优的。</li>
+<li>Dijkstra 其实是以 breadth-first 的方法。</li>
+<li>Dijkstra 不能处理负权边的情况, 这时候可以先将所有节点的权重加上一个值使权重变
+为正数，或者使用 Bellman-Ford 算法。</li>
+<li>在Grid-map中使用</li>
+<li>A* 算法的比较</li>
+<li>Dijkstra 算法简称D算法，D* 算法全称是Dynamic A* 算法(是D算法和A*算法的结合)。</li>
+</ul>
+</div>
+</div>
+
+
+      </article>
+      <div>
+    <ul id="tags">
+        <li><a href="/tags/robotics/">robotics</a></li>
+    </ul>
+    <div class="post-meta">
+      <span title="post date">Published: 2019-09-06</span>
+      </br>
+      <span title="last modification date">Last Modification: 2020-08-14</span>
+      </br>
+      <span title="author" >Author: Clare Lee</span>
+    </div>
+    <section>
+      <h2>Comments</h2>
+        <div id="disqus_thread"></div>
+        <script type="text/javascript">
+        //var disqus_developer = 1;
+        var disqus_identifier = "/blog/2019/09/06/dijkstra";
+        var disqus_url = "https://congleetea.github.io/blog/2019/09/06/dijkstra";
+        var disqus_shortname = 'congleetea';
+        /* * * DON'T EDIT BELOW THIS LINE * * */
+        (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+        </script>
+        <noscript>Please enable JavaScript to view the <a href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+        <a href="//disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+    </section>
+  <script src="//code.jquery.com/jquery-latest.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.1.0/highlight.min.js"></script>
+  <script src="/media/js/main.js"></script>
+  <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  <div class="copyright">
+    <p>Generated by <a href="http://www.gnu.org/software/emacs/">Emacs</a> 25.x (<a href="http://orgmode.org">Org mode</a> 9.x)</p>
+    <p>
+      Copyright &copy; 2012 - <span id="footerYear"></span> <a href="mailto:congleetea &lt;at&gt; gmail &lt;dot&gt; com">Clare Lee</a>
+      &nbsp;&nbsp;-&nbsp;&nbsp;
+      Powered by <a href="https://github.com/kelvinh/org-page" target="_blank">org-page</a>
+      <script type="text/javascript">document.getElementById("footerYear").innerHTML = (new Date()).getFullYear();</script>
+    </p>
+  </div>
+</div>
+
+    </div>
+  </body>
+</html>

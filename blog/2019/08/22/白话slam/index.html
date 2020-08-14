@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  
+  <head>
+  <title>白话SLAM - 清园索道</title>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
+  <meta name="author" content="Clare Lee" />
+    <meta name="description" content="&lt;TODO: insert your description here&gt;" />
+    <meta name="keywords" content="slam" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+  <link rel="stylesheet" href="/media/css/main.css" type="text/css">
+  <link rel="stylesheet" href="/media/css/base16-ocean.light-min.css" type="text/css">
+  <link href='https://fonts.googleapis.com/css?family=Fira+Sans' rel='stylesheet' type='text/css'>
+  <link href='https://fonts.googleapis.com/css?family=Fira+Mono' rel='stylesheet' type='text/css'>
+</head>
+
+  <body>
+    <div id="page-wrap">
+      <div>
+  <header id="header">
+    <div class="logo">
+      <h1><a href="/"><span class="logo-black">清园索道</span></a></h1>
+    </div>
+    <div class="fortune">
+      <blockquote>
+        上下求索，识己识人识事
+      </blockquote>
+    </div>
+    <ul id="main-nav">
+        <li><a href="/blog/">Blog</a></li>
+      <li><a href="/tags/">分类</a></li>
+      <li><a href="/about/">关于我</a></li>
+      <li><a href="https://github.com/congleetea">GitHub</a></li>
+      <li><a href="/rss.xml">RSS</a></li>
+    </ul>
+  </header>
+</div>
+
+      <article id="content">
+        
+  <h1>白话SLAM</h1>
+
+
+<div id="outline-container-orgc99520b" class="outline-2">
+<h2 id="orgc99520b">概述</h2>
+<div class="outline-text-2" id="text-orgc99520b">
+<p>
+看了书，闭上书，啥都没了。有时候觉得还是要关上书自己能复述一遍，或者跟旁人讲一
+次，如果对方能听懂，还能经得住对方的问题轰炸，你应该就算理解一些了。所以我想用
+自己的话把别人的东西再说一遍。要非常感谢那些走在前面的人。
+</p>
+</div>
+</div>
+
+<div id="outline-container-orga1f4b4a" class="outline-2">
+<h2 id="orga1f4b4a">SLAM是什么</h2>
+<div class="outline-text-2" id="text-orga1f4b4a">
+<p>
+SLAM就是机器人通过传感器测量结果估计出自己的姿态和周围环境的情况。如果传感器是
+绝对精确的，那么直接通过传感器我们就可以得出结果，SLAM也就完美解决了。但是现实
+中，任何传感器都有误差，测量机器人运动的码盘有误差，测量周围物体距离的激光或者
+摄像头也有误差，随着时间推移，累计误差增大，最终得到的结果可能就风马牛不相及了。
+所以可以说SLAM就是处理传感器误差的。
+</p>
+
+<p>
+目前SLAM根据传感器主要分为激光SLAM和视觉SLAM，根据方法可以大致分为基于滤波的
+SLAM和基于图优化的SLAM(前者叫online SLAM，得到最终的位置，后者full SLAM通过前
+端得到一个大致的信息，然后通过后端对这些信息进行优化，得到最优的轨迹和环境测量)。
+</p>
+</div>
+</div>
+
+
+<div id="outline-container-org4d26670" class="outline-2">
+<h2 id="org4d26670">SLAM的大致步骤</h2>
+<div class="outline-text-2" id="text-org4d26670">
+<ul class="org-ul">
+<li>通过传感器信息估计一个结果；</li>
+<li>通过其他信息优化机器人位置和测量结果。</li>
+</ul>
+</div>
+
+<div id="outline-container-org012422c" class="outline-3">
+<h3 id="org012422c">基于滤波的SLAM</h3>
+<div class="outline-text-3" id="text-org012422c">
+<p>
+基于滤波的SLAM，主要是EKF SLAM，大致步骤是通过控制量(比如码盘记录的轮子偏移量)得
+到一个机器人估计的位姿，然后通过测量的结果对这个位姿进行一个修正，前一步叫预
+测，后一步叫校正。前一步通常比较简单，就是当前估计的位姿加上控制量得到的偏移
+值就得到一个粗糙的位姿了。后一步则同样要通过计算两侧位姿下得到的测量结果的比
+较，这就涉及到两次测量的特征点的提取，通过两次特征点的偏移反推机器人的移动，
+通过这个结果既对机器人位姿进行了修正，同时也使特征点的位置也得到了修正。这个
+过程叫data association(就是找到不同时刻观测到的特征点的对应关系)。在2D SLAM中，
+比如gmapping，cartographer等，并没有特征 提取的过程，这是因为大部分2DSLAM 算
+法使用了Grid Map，通过概率珊格来表示空间位置，(当然也可以把每一个珊格都看成是
+一个特征点)，可以认为概率珊格地图的data assiciation过程就是计算当前观测所有测
+量值和已有的地图中距离最近的障碍物的距离总和，和越小说明匹配越好。
+</p>
+
+<p>
+基于滤波的SLAM有一个问题是表示位姿和特征点需要的空间是二次的。计算起来比较复
+杂。基于优化的SLAM目前越来越受到了欢迎。
+</p>
+</div>
+</div>
+
+<div id="outline-container-org0ec9a6c" class="outline-3">
+<h3 id="org0ec9a6c">基于优化的SLAM</h3>
+<div class="outline-text-3" id="text-org0ec9a6c">
+<p>
+基于优化的SLAM分为前端和后端两部分。前端通过特征提取等方式得到一个结果，后端
+将这个结果和前面测量的结果一起优化，最后优化得到一个最优的轨迹和环境测量值。
+cartographer就是使用了这种方法的，目前的视觉SLAM也是使用基于优化的方法。下面
+大致说说视觉SLAM的步骤。
+</p>
+
+<p>
+首先摄像头得到两帧图片，通过两张图片中特征的偏移反推机器人的移动，这里就必须
+要用到图像的特征提取算法(比如SIFT，SURF等算法)得到同一个特征在不同帧图像中的
+变化，进而得到机器人的移动。如前所述，如果传感器没有误差，SLAM就算完结了，正
+由于摄像头的误差，才有了后面的事情。由于摄像头的累计误差，最终的结果可能完全
+变得谬之千里。因此我们用一个图(节点和边)表示测量的约束关系。节点包括机器人位
+姿和特征点位置，边表示他们的约束关系。机器人之间的关系通过控制信息建立，机器
+人和特征点的关系通过测量建立，但是由于相关行，最终的约束可能比这个复杂。建立
+约束之后使用梯度下降法，调整约束变量(这里就是机器人位姿和特征点的位置)使误差
+最小。
+</p>
+
+<p>
+最开始，大家担心这个计算量很大，最后发现，很多特征点不是一直都被观测到，只在
+某些某些帧中观测到，这样最终的约束矩阵是一个稀疏矩阵，计算就成了可能。但是随
+着时间推移，约束依然很大，计算还是很复杂，所以策略是没必要把所有包含特征点的
+图像帧都建立约束，只取一定的关键帧也可。最好的情况就是机器人走了一段时间之后
+又回到之前走过的地方，这样建立的约束更好。这就涉及闭环检测的问题，闭环检测也
+是很重要的研究方向，为了简化，有的SLAM就在每一帧匹配的时候随机选取之前的一定
+数量的特征来匹配，如果匹配上了就说明可能出现了闭环。
+</p>
+</div>
+</div>
+</div>
+
+
+      </article>
+      <div>
+    <ul id="tags">
+        <li><a href="/tags/robotics/">robotics</a></li>
+    </ul>
+    <div class="post-meta">
+      <span title="post date">Published: 2019-08-22</span>
+      </br>
+      <span title="last modification date">Last Modification: 2020-08-14</span>
+      </br>
+      <span title="author" >Author: Clare Lee</span>
+    </div>
+    <section>
+      <h2>Comments</h2>
+        <div id="disqus_thread"></div>
+        <script type="text/javascript">
+        //var disqus_developer = 1;
+        var disqus_identifier = "/blog/2019/08/22/白话slam";
+        var disqus_url = "https://congleetea.github.io/blog/2019/08/22/白话slam";
+        var disqus_shortname = 'congleetea';
+        /* * * DON'T EDIT BELOW THIS LINE * * */
+        (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+        </script>
+        <noscript>Please enable JavaScript to view the <a href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+        <a href="//disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+    </section>
+  <script src="//code.jquery.com/jquery-latest.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.1.0/highlight.min.js"></script>
+  <script src="/media/js/main.js"></script>
+  <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  <div class="copyright">
+    <p>Generated by <a href="http://www.gnu.org/software/emacs/">Emacs</a> 25.x (<a href="http://orgmode.org">Org mode</a> 9.x)</p>
+    <p>
+      Copyright &copy; 2012 - <span id="footerYear"></span> <a href="mailto:congleetea &lt;at&gt; gmail &lt;dot&gt; com">Clare Lee</a>
+      &nbsp;&nbsp;-&nbsp;&nbsp;
+      Powered by <a href="https://github.com/kelvinh/org-page" target="_blank">org-page</a>
+      <script type="text/javascript">document.getElementById("footerYear").innerHTML = (new Date()).getFullYear();</script>
+    </p>
+  </div>
+</div>
+
+    </div>
+  </body>
+</html>

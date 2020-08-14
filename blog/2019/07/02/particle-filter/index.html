@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  
+  <head>
+  <title>粒子滤波 - 清园索道</title>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
+  <meta name="author" content="Clare Lee" />
+    <meta name="description" content="&lt;TODO: insert your description here&gt;" />
+    <meta name="keywords" content="particle-filter" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+  <link rel="stylesheet" href="/media/css/main.css" type="text/css">
+  <link rel="stylesheet" href="/media/css/base16-ocean.light-min.css" type="text/css">
+  <link href='https://fonts.googleapis.com/css?family=Fira+Sans' rel='stylesheet' type='text/css'>
+  <link href='https://fonts.googleapis.com/css?family=Fira+Mono' rel='stylesheet' type='text/css'>
+</head>
+
+  <body>
+    <div id="page-wrap">
+      <div>
+  <header id="header">
+    <div class="logo">
+      <h1><a href="/"><span class="logo-black">清园索道</span></a></h1>
+    </div>
+    <div class="fortune">
+      <blockquote>
+        上下求索，识己识人识事
+      </blockquote>
+    </div>
+    <ul id="main-nav">
+        <li><a href="/blog/">Blog</a></li>
+      <li><a href="/tags/">分类</a></li>
+      <li><a href="/about/">关于我</a></li>
+      <li><a href="https://github.com/congleetea">GitHub</a></li>
+      <li><a href="/rss.xml">RSS</a></li>
+    </ul>
+  </header>
+</div>
+
+      <article id="content">
+        
+  <h1>粒子滤波</h1>
+
+<div id="outline-container-org0312218" class="outline-2">
+<h2 id="org0312218">粒子滤波的四个误差来源</h2>
+<div class="outline-text-2" id="text-org0312218">
+</div>
+<div id="outline-container-orgefa3789" class="outline-3">
+<h3 id="orgefa3789">第一种误差</h3>
+<div class="outline-text-3" id="text-orgefa3789">
+<ul class="org-ul">
+<li>原因分析
+使用有限个粒子，对后验估计引入系统偏差。考虑极端情况：只有一个粒子，这时候
+重采样就没有意义，观测就不会在更新中起作用。</li>
+<li>解决思路
+<ul class="org-ul">
+<li>增加粒子数目，但是同时也增加了计算量。</li>
+</ul></li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-orgc7a84d7" class="outline-3">
+<h3 id="orgc7a84d7">第二种误差</h3>
+<div class="outline-text-3" id="text-orgc7a84d7">
+<ul class="org-ul">
+<li>原因分析
+重采样时候引入的随机误差。考虑计算情况：机器人不运动。这时候运动模型没变，
+但是观测依然会在重采样时候起作用。重采样会导致粒子多样性的损失。重采样的时
+候尽管粒子集本身方差在减小，但是粒子作为真实置信度的估计却在增加。因此，在
+实际运用中，控制好方差/偏差对PF很重要。也就是不要让方差变得太小，因为方差太
+小，粒子的多样性损失就越严重。</li>
+<li>解决思路
+确定什么时候应该重采样：确定是否重采样的标准是重要性权重的变化，如果权重一
+样，说明变化为0，不用重采样；如果权重几种在少数粒子上，那说明权重的变化较大，
+这时候应该进行重采样(或者说权重偏向少数粒子的时候应该进行重采样)。
+<ul class="org-ul">
+<li>减少重采样频率，不运动不重采样；</li>
+<li>分层采样/低方差采样(能将权重拉回平均值的粒子所采样几次)。</li>
+</ul></li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-org5b70739" class="outline-3">
+<h3 id="org5b70739">第三个误差</h3>
+<div class="outline-text-3" id="text-org5b70739">
+<ul class="org-ul">
+<li>原因分析
+建议分布和目标分布的收敛性产生，PF的效率依赖于建议分布和目标分布的匹配程度。
+<ul class="org-ul">
+<li>目标分布和建议分布不应该偏差太大，太大之后可能很难收敛，而且效率也不高。</li>
+<li>传感器太准确反而不适合粒子滤波, p(z|x)只在很少的状态有值，导致其他状态为0，
+最终造成退化问题。</li>
+</ul></li>
+<li>解决思路
+<ul class="org-ul">
+<li>最简单的就是在观测的时候人为增加噪声，这样很多时候可以解决PF的准确性；</li>
+<li>引入观测来修改建议分布。</li>
+</ul></li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-orga95804e" class="outline-3">
+<h3 id="orga95804e">第四种误差</h3>
+<div class="outline-text-3" id="text-orga95804e">
+<ul class="org-ul">
+<li>原因分析
+粒子退化导致，空间中状态很多，真实状态附近反而没有粒子。</li>
+<li>解决思路
+<ul class="org-ul">
+<li>重采样之后再随机撒一定数量的粒子。</li>
+</ul></li>
+</ul>
+</div>
+</div>
+</div>
+
+
+<div id="outline-container-orgc14a579" class="outline-2">
+<h2 id="orgc14a579">粒子数目</h2>
+<div class="outline-text-2" id="text-orgc14a579">
+<p>
+粒子数目的确定：根据状态空间的维度大小和分布的不确定性。
+</p>
+</div>
+</div>
+
+
+      </article>
+      <div>
+    <ul id="tags">
+        <li><a href="/tags/robotics/">robotics</a></li>
+    </ul>
+    <div class="post-meta">
+      <span title="post date">Published: 2019-07-02</span>
+      </br>
+      <span title="last modification date">Last Modification: 2020-08-14</span>
+      </br>
+      <span title="author" >Author: Clare Lee</span>
+    </div>
+    <section>
+      <h2>Comments</h2>
+        <div id="disqus_thread"></div>
+        <script type="text/javascript">
+        //var disqus_developer = 1;
+        var disqus_identifier = "/blog/2019/07/02/particle-filter";
+        var disqus_url = "https://congleetea.github.io/blog/2019/07/02/particle-filter";
+        var disqus_shortname = 'congleetea';
+        /* * * DON'T EDIT BELOW THIS LINE * * */
+        (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+        </script>
+        <noscript>Please enable JavaScript to view the <a href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+        <a href="//disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+    </section>
+  <script src="//code.jquery.com/jquery-latest.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.1.0/highlight.min.js"></script>
+  <script src="/media/js/main.js"></script>
+  <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  <div class="copyright">
+    <p>Generated by <a href="http://www.gnu.org/software/emacs/">Emacs</a> 25.x (<a href="http://orgmode.org">Org mode</a> 9.x)</p>
+    <p>
+      Copyright &copy; 2012 - <span id="footerYear"></span> <a href="mailto:congleetea &lt;at&gt; gmail &lt;dot&gt; com">Clare Lee</a>
+      &nbsp;&nbsp;-&nbsp;&nbsp;
+      Powered by <a href="https://github.com/kelvinh/org-page" target="_blank">org-page</a>
+      <script type="text/javascript">document.getElementById("footerYear").innerHTML = (new Date()).getFullYear();</script>
+    </p>
+  </div>
+</div>
+
+    </div>
+  </body>
+</html>

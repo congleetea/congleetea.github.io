@@ -41,9 +41,9 @@
         
   <h1>C++ const 总结</h1>
 
-<div id="outline-container-orgb608717" class="outline-2">
-<h2 id="orgb608717">const 修饰指针</h2>
-<div class="outline-text-2" id="text-orgb608717">
+<div id="outline-container-org4307100" class="outline-2">
+<h2 id="org4307100">const 修饰指针</h2>
+<div class="outline-text-2" id="text-org4307100">
 <p>
 主要看const位于*的哪一边。位于*左边则限制内容，位于右边则限制指针。
 </p>
@@ -87,13 +87,13 @@ p = &amp;j;   // error, 修改指针不行。
 </div>
 
 
-<div id="outline-container-orge25a6f0" class="outline-2">
-<h2 id="orge25a6f0">const 修饰类的对象和成员函数</h2>
-<div class="outline-text-2" id="text-orge25a6f0">
+<div id="outline-container-org10b8ba0" class="outline-2">
+<h2 id="org10b8ba0">const 修饰类的对象和成员函数</h2>
+<div class="outline-text-2" id="text-org10b8ba0">
 </div>
-<div id="outline-container-org3b72810" class="outline-3">
-<h3 id="org3b72810">const 类对象和成员函数的调用关系</h3>
-<div class="outline-text-3" id="text-org3b72810">
+<div id="outline-container-org2ee3f79" class="outline-3">
+<h3 id="org2ee3f79">const 类对象和成员函数的调用关系</h3>
+<div class="outline-text-3" id="text-org2ee3f79">
 <p>
 类对象的常亮性决定了调用哪一个函数(是否尾部为const限制的)。
 </p>
@@ -134,9 +134,9 @@ int main(int argc, char **argv) {
 </div>
 
 
-<div id="outline-container-org9b31912" class="outline-3">
-<h3 id="org9b31912">const成员函数和变量的关系</h3>
-<div class="outline-text-3" id="text-org9b31912">
+<div id="outline-container-org73efa6c" class="outline-3">
+<h3 id="org73efa6c">const成员函数和变量的关系</h3>
+<div class="outline-text-3" id="text-org73efa6c">
 <ul class="org-ul">
 <li>在成员函数后面加上const，则该函数不能修改类的任何成员变量。</li>
 <li>形参如果带有const，则带入的参数不能被修改。</li>

@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  
+  <head>
+  <title>SLAM: Grid Map 模型和工程实现 - 清园索道</title>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
+  <meta name="author" content="Clare Lee" />
+    <meta name="description" content="描述SLAM中概率珊格地图是怎么建模，以及cartographer中不需要任何计算如何快速更新概率值的." />
+    <meta name="keywords" content="slam,probability grid map,cartographer" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+  <link rel="stylesheet" href="/media/css/main.css" type="text/css">
+  <link rel="stylesheet" href="/media/css/base16-ocean.light-min.css" type="text/css">
+  <link href='https://fonts.googleapis.com/css?family=Fira+Sans' rel='stylesheet' type='text/css'>
+  <link href='https://fonts.googleapis.com/css?family=Fira+Mono' rel='stylesheet' type='text/css'>
+</head>
+
+  <body>
+    <div id="page-wrap">
+      <div>
+  <header id="header">
+    <div class="logo">
+      <h1><a href="/"><span class="logo-black">清园索道</span></a></h1>
+    </div>
+    <div class="fortune">
+      <blockquote>
+        上下求索，识己识人识事
+      </blockquote>
+    </div>
+    <ul id="main-nav">
+        <li><a href="/blog/">Blog</a></li>
+      <li><a href="/tags/">分类</a></li>
+      <li><a href="/about/">关于我</a></li>
+      <li><a href="https://github.com/congleetea">GitHub</a></li>
+      <li><a href="/rss.xml">RSS</a></li>
+    </ul>
+  </header>
+</div>
+
+      <article id="content">
+        
+  <h1>SLAM: Grid Map 模型和工程实现</h1>
+
+
+<div id="outline-container-orgc230f6e" class="outline-2">
+<h2 id="orgc230f6e">概述</h2>
+<div class="outline-text-2" id="text-orgc230f6e">
+<p>
+Grid map是SLAM中地图表示的一种常用方式。我们大概都知道这种表示方式就是把地图的
+一个点用一个概率值[0,1]来表示这个点被障碍物占据的概率。但是具体研究和使用的时
+候有发现对它的理解似乎有点偏差。这里对Grid map进行一个总结，希望看完能理解其原
+理和使用方法。
+</p>
+</div>
+</div>
+
+
+<div id="outline-container-orge6ce1ec" class="outline-2">
+<h2 id="orge6ce1ec">Grid 是怎么表示地图的？</h2>
+<div class="outline-text-2" id="text-orge6ce1ec">
+<p>
+测距传感器(scan)得到的是一个射线的点，点是射线打到障碍物上返回的地方，这个地方
+最有可能是有障碍物的地方，之所以说可能是因为测量会有误差，所以总是不能完全确定
+有障碍物的就是返回的那个点，加上传感器本身就有误差，所以一定存在不确定行。因此，
+对一个点的状态就有概率来表示吧。
+</p>
+
+<p>
+一个问题是如何表示一个点呢？scan得到的是一个点，地图上显然不能精确的表示这个点，
+只能采用离散的方式，将一个空间划分成固定边长(分辨率)一个一个的格子，叫做像素。
+这个像素包含了scan点附近一定范围的很多点。具体就是如果scan的点在这个格子里面，
+就认为这个格子(cell)是被障碍物占据了，而从scan原点到scan点之间线段经过的cell则
+认为是空白的(free)。
+</p>
+</div>
+
+
+<div id="outline-container-org4cfa581" class="outline-3">
+<h3 id="org4cfa581">概率表示</h3>
+<div class="outline-text-3" id="text-org4cfa581">
+<p>
+我们用 \(p(x=1)\) 和 \(p(x=0)\) 分别表示一个cell是障碍物(occupied)或者空白(free)的
+概率。当引入一个新的scan之后，由于存在上述的不确定性，我们不会就这样就断定相关
+点概率为1或者0。通常是根据传感器的特性会给出一个值表示occupied( \(p(hit)\) )，另
+一个值表示free(\(p(miss)\))。当又有scan经过这些点之后这样我们要对相关的cell进行
+更新。而原则就是如果一 个cell <b>多次确定</b> 是occupied或者free，那么他们的概率就
+会越接近1或者0。
+</p>
+
+
+<p>
+默认情况下，一个cell是occupied和free概率相同，也就是 \(p(x=1)=p(x=0)=0.5\) ，新的
+scan观测信息 \(z\) 经过这些点之后就会更新，这时候相当于是计算 \(p(x|z)\) ：
+</p>
+
+\begin{equation}
+p(x|z)=\frac{p(x)p(z|x)}{p(z)}
+\end{equation}
+</div>
+</div>
+
+
+<div id="outline-container-org75d2d65" class="outline-3">
+<h3 id="org75d2d65">概率比表示</h3>
+<div class="outline-text-3" id="text-org75d2d65">
+<p>
+如果每个点都要进行这些乘除运算会比较浪费资源，那么我们用另一种更方便的表示方法
+来处理，引入概率比\(odd(x)\) ：
+</p>
+
+\begin{equation}
+odd(x)=\frac{p(x=1)}{p(x=0)}
+\end{equation}
+
+<p>
+我们会设置一个概率的最大最小值，防止分母出现0的情况，比如[0.1,0.9]。
+</p>
+<ul class="org-ul">
+<li>初始情况下:
+一个cell的状态没有任何信息，occupied和free的概率都是0.5，那
+\(odd(x)=0.5/0.5=1\) 。当一个cell是障碍物可能性更大的时候，分子大于分母，
+\(odd(x)>1\) ，反之 \(0 < odd(x) < 1\)</li>
+</ul>
+
+
+<ul class="org-ul">
+<li><p>
+当一个cell第一次被scan更新:
+</p>
+
+\begin{cases}odd(x)=\frac{p(hit)}{1-p(hit)} & x \ is \ occupied\\odd(x)=\frac{p(miss)}{1-p(miss)} & x \ is\ free \end{cases}</li>
+
+<li><p>
+当一个cell再次被更新时：
+</p>
+
+\begin{equation}
+odd_{new}(x) = odd(x|z) = \frac{p(x=1|z)}{p(x=0|z)}=\frac{\frac{p(z|x=1)p(x=1)}{p(z)}}{\frac{p(z|x=1)p(x=1)}{p(z)}}=\frac{p(z|x=1)p(x=1)}{p(z|x=0)p(x=0)}=odd_{old}(x)\frac{p(z|x=1)}{p(z|x=0)}
+\end{equation}
+
+<p>
+其中 \(odd_{new}(x)\) 表示更新后的状态， \(odd_{old}(x)\) 表示上次更新的状态。
+\(\frac{p(z|x=1)}{p(z|x=0)}\) 是传感器的观测模型，由传感器自身决定，是一个常数。
+结果为：
+</p>
+
+\begin{equation}
+\frac{p(z|x=1)}{p(z|x=1)} = \begin{cases}\frac{p(z=1|x=1)}{p(z=1|x=0)} & p(hit)\\\frac{p(z=0|x=1)}{p(z=0|x=0)} & p(miss)\end{cases}
+\end{equation}</li>
+</ul>
+</div>
+</div>
+
+
+
+<div id="outline-container-org41b6630" class="outline-3">
+<h3 id="org41b6630">概率比的对数表示</h3>
+<div class="outline-text-3" id="text-org41b6630">
+<p>
+上面的计算依然是有几个乘除运算，更了更加简单，我们可以使用对数，将其转化为加
+减运算。对上式两边取对数：
+</p>
+
+\begin{equation}
+\lg{odd_{new}(x)} = \lg{odd_{old}(x)} + \lg{\frac{p(z|x=1)}{p(z|x=0)}}
+\end{equation}
+<p>
+当一个cell倾向于是occupied的时候，对数&gt;0，反之则&lt;0。
+</p>
+
+<p>
+其中加号左侧是上一次更新的结果，后边依然是随传感器本身确定的常数，相应的这个
+cell被确定为occupied或者free对应两个常数，我们分别定义为 \(looccu\) 和 \(lofree\) 。
+这样更新结果就简单了。
+</p>
+
+
+<p>
+加入 \(looccu=0.9\) ，\(lofree=-0.7\) ，看看下面的更新结果。
+</p>
+
+
+<div id="orgcf86ccd" class="figure">
+<p><img src="/assets/blog/2019/05/16/slam-grid-map/grid_map.png" alt="grid_map.png" />
+</p>
+<p><span class="figure-number">Figure 1: </span>更新例子</p>
+</div>
+</div>
+</div>
+
+
+<div id="outline-container-org8371787" class="outline-3">
+<h3 id="org8371787">工程中直接查表不计算就更新结果</h3>
+<div class="outline-text-3" id="text-org8371787">
+<p>
+在看cartographer的代码的时候，发现它预先保存了两个表，将概率区间 [pmin, pmax]
+直接通过查表就可以更新结果。
+</p>
+
+<p>
+因为前面说了更新的实质就是这个cell状态被确定的次数越多，状态确定性越大。上式
+中加号右边是两种值，那么就可以创建两个表 hit_tables 和 miss_table，加号坐标的
+值范围也是确定的，那么我们就将这个范围按照足够小的步长分别计算出结果存在两个
+表中。这样每一个 \(\lg{odd_{old}(x)}\) 在两个表中分别对应一个结果。根据上次更新
+的结果直接在两个表中查询就得到了更新的结果了。一次计算都不用。
+</p>
+
+<p>
+cartographer中为了效率更高，将[pmin,pmax]的浮点数全部映射到uint16的整数区间，
+两个表都是一个数组，index就代表概率的大小，其实更加简单了。
+</p>
+</div>
+</div>
+</div>
+
+
+<div id="outline-container-org87e4aa5" class="outline-2">
+<h2 id="org87e4aa5">参考</h2>
+<div class="outline-text-2" id="text-org87e4aa5">
+<p>
+[1] <a href="https://zhuanlan.zhihu.com/p/21738718">zhihu: 占据栅格地图</a>
+</p>
+</div>
+</div>
+
+
+      </article>
+      <div>
+    <ul id="tags">
+        <li><a href="/tags/robotics/">robotics</a></li>
+    </ul>
+    <div class="post-meta">
+      <span title="post date">Published: 2019-05-16</span>
+      </br>
+      <span title="last modification date">Last Modification: 2020-08-14</span>
+      </br>
+      <span title="author" >Author: Clare Lee</span>
+    </div>
+    <section>
+      <h2>Comments</h2>
+        <div id="disqus_thread"></div>
+        <script type="text/javascript">
+        //var disqus_developer = 1;
+        var disqus_identifier = "/blog/2019/05/16/slam-grid-map";
+        var disqus_url = "https://congleetea.github.io/blog/2019/05/16/slam-grid-map";
+        var disqus_shortname = 'congleetea';
+        /* * * DON'T EDIT BELOW THIS LINE * * */
+        (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+        </script>
+        <noscript>Please enable JavaScript to view the <a href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+        <a href="//disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+    </section>
+  <script src="//code.jquery.com/jquery-latest.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.1.0/highlight.min.js"></script>
+  <script src="/media/js/main.js"></script>
+  <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  <div class="copyright">
+    <p>Generated by <a href="http://www.gnu.org/software/emacs/">Emacs</a> 25.x (<a href="http://orgmode.org">Org mode</a> 9.x)</p>
+    <p>
+      Copyright &copy; 2012 - <span id="footerYear"></span> <a href="mailto:congleetea &lt;at&gt; gmail &lt;dot&gt; com">Clare Lee</a>
+      &nbsp;&nbsp;-&nbsp;&nbsp;
+      Powered by <a href="https://github.com/kelvinh/org-page" target="_blank">org-page</a>
+      <script type="text/javascript">document.getElementById("footerYear").innerHTML = (new Date()).getFullYear();</script>
+    </p>
+  </div>
+</div>
+
+    </div>
+  </body>
+</html>

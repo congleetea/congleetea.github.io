@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  
+  <head>
+  <title>广度优先搜索的工程实现 - 清园索道</title>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
+  <meta name="author" content="Clare Lee" />
+    <meta name="description" content="总结广度优先搜索的工程实现" />
+    <meta name="keywords" content="Breadth-First-Search,plan,dqueue" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+  <link rel="stylesheet" href="/media/css/main.css" type="text/css">
+  <link rel="stylesheet" href="/media/css/base16-ocean.light-min.css" type="text/css">
+  <link href='https://fonts.googleapis.com/css?family=Fira+Sans' rel='stylesheet' type='text/css'>
+  <link href='https://fonts.googleapis.com/css?family=Fira+Mono' rel='stylesheet' type='text/css'>
+</head>
+
+  <body>
+    <div id="page-wrap">
+      <div>
+  <header id="header">
+    <div class="logo">
+      <h1><a href="/"><span class="logo-black">清园索道</span></a></h1>
+    </div>
+    <div class="fortune">
+      <blockquote>
+        上下求索，识己识人识事
+      </blockquote>
+    </div>
+    <ul id="main-nav">
+        <li><a href="/blog/">Blog</a></li>
+      <li><a href="/tags/">分类</a></li>
+      <li><a href="/about/">关于我</a></li>
+      <li><a href="https://github.com/congleetea">GitHub</a></li>
+      <li><a href="/rss.xml">RSS</a></li>
+    </ul>
+  </header>
+</div>
+
+      <article id="content">
+        
+  <h1>广度优先搜索的工程实现</h1>
+
+
+<div id="outline-container-org7cc2720" class="outline-2">
+<h2 id="org7cc2720">概述</h2>
+<div class="outline-text-2" id="text-org7cc2720">
+<p>
+搜索算法主要有广度优先和深度优先算法。这里主要讲广度优先算法及其工程上的实现。
+主要从以下几个方面来说明：
+</p>
+
+<ul class="org-ul">
+<li>图：保存待搜索数据的数据结构。</li>
+<li>广度优先搜索的搜索方法。</li>
+<li>广度优先搜索的实现方法。</li>
+</ul>
+</div>
+</div>
+
+
+<div id="outline-container-org7feabc0" class="outline-2">
+<h2 id="org7feabc0">图(graph)</h2>
+<div class="outline-text-2" id="text-org7feabc0">
+<p>
+图包括有向图和无向图，都包括节点和边组成。而搜索就是从一个节点顺着边到下一个节
+点，这里的下一个对象就是节点的邻居。有向图只有箭头所指算是该节点的邻居，而无向
+图则是边的两边互为邻居。
+</p>
+
+<p>
+在移动机器人规划的时候，地图通常是使用二维数组表示的，每个像素的周围四个或者八
+个像素都是邻居。这其实就是一个无向图了。也就是说地图导航搜索路径我们使用一个二
+维数组来表示节点信息。
+</p>
+</div>
+</div>
+
+
+<div id="outline-container-orgbef00dc" class="outline-2">
+<h2 id="orgbef00dc">广度优先搜索</h2>
+<div class="outline-text-2" id="text-orgbef00dc">
+<p>
+先比较一下广度优先搜索和深度优先搜索。
+</p>
+
+<p>
+广度优先搜索是从起始节点开始，先搜索最近的节点(一级节点)，如果节点不满足要求就
+把该节点的其他节点(邻居)加入待搜索的表中，最近的所有节点都没有搜索到需要的结果，
+再搜索每一一级节点的下一级节点(二级节点)。以此方法直到得到需要的结果，或者搜索
+完全部的节点。
+</p>
+
+<p>
+而深度优先搜索则是从起始节点开始顺着一个方向一直搜索到最后，然后在退回下一级继
+续往下搜索，直到得到最终结果或者搜索完所有节点。
+</p>
+
+
+<div id="orgdb0bc53" class="figure">
+<p><img src="/assets/blog/2019/03/31/Breadth-First-Search/bfsearch-graph.png" alt="bfsearch-graph.png" />
+</p>
+<p><span class="figure-number">Figure 1: </span>一个呆搜索的graph例子</p>
+</div>
+
+<p>
+用上面的图举个粒子：
+</p>
+
+<p>
+如果是广度优先，那么搜索的顺序就是：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-text">you -&gt; Claire -&gt; Alice -&gt; Bob -&gt; Thom -&gt; Jonny -&gt; Peggy -&gt; Anuj
+</pre>
+</div>
+
+
+<p>
+如果是深度优先，那么搜索的顺序就是：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-text">you -&gt; Claire -&gt; Thom -&gt; Jonny -&gt; Alice -&gt; Peggy -&gt; Bob -&gt; Anuj
+</pre>
+</div>
+
+<p>
+对比两种方法可以发现，广度优先是起始点开始按圈搜索，深度优先则是针一样的搜索。
+前者可以得到和起始节点最近的结果。而后者得到的结果可能不会是离起始节点最近的结
+果。
+</p>
+
+<p>
+如果要直到得到搜索结果才停止，那么两者都可以通过搜索确定是否有符合要求的结果存
+在，只是前者可以得到最短，最近的结果，后者则不一定。因此广度搜索可以完成两个任
+务：
+</p>
+
+<ul class="org-ul">
+<li>是否存在符合结果的搜索路径；</li>
+<li>如果存在符合的路径，那么广度搜索可以找到最近的结果。</li>
+</ul>
+</div>
+</div>
+
+
+<div id="outline-container-org98de53a" class="outline-2">
+<h2 id="org98de53a">广度搜索的实现</h2>
+<div class="outline-text-2" id="text-org98de53a">
+<p>
+在工程实现上(比如ROS导航中的costmap代价地图规划路径)，需要几个要素：
+</p>
+
+<ul class="org-ul">
+<li>图(保存节点和边的信息)： costmap中实现二维数组来表示。这是搜索的原始信息。</li>
+<li>队列(双向队列)：保存需要搜索的节点。每次查完一个节点之后，如果不符合要求就要把该节点的
+下一级节点加入队列。队列是先入先出的，查完一个节点之后就将这个节点从队列中弹
+出。</li>
+<li>为了避免查找到已查过的节点，需要一个标记每个节点是否被查过的表。这样避免出现
+死循环。在costmap中使用一个和地图一样大小的数组来标记，如果某个节点被查过就
+在对应的index的位置做个标记。每次将一个节点加入队列的时候都先查一下这个表，
+如果已经查过就不用加入队列。</li>
+</ul>
+
+<p>
+当然costmap里面还涉及了权重(代价值)，那是进一步要讲的东西。只是大体上是一样的。
+</p>
+</div>
+</div>
+
+
+<div id="outline-container-orgc645d6c" class="outline-2">
+<h2 id="orgc645d6c">参考</h2>
+<div class="outline-text-2" id="text-orgc645d6c">
+<p>
+<a id="org9e8c281"></a>
+</p>
+</div>
+</div>
+
+
+      </article>
+      <div>
+    <ul id="tags">
+        <li><a href="/tags/robotics/">robotics</a></li>
+    </ul>
+    <div class="post-meta">
+      <span title="post date">Published: 2019-03-31</span>
+      </br>
+      <span title="last modification date">Last Modification: 2020-08-14</span>
+      </br>
+      <span title="author" >Author: Clare Lee</span>
+    </div>
+    <section>
+      <h2>Comments</h2>
+        <div id="disqus_thread"></div>
+        <script type="text/javascript">
+        //var disqus_developer = 1;
+        var disqus_identifier = "/blog/2019/03/31/Breadth-First-Search";
+        var disqus_url = "https://congleetea.github.io/blog/2019/03/31/Breadth-First-Search";
+        var disqus_shortname = 'congleetea';
+        /* * * DON'T EDIT BELOW THIS LINE * * */
+        (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+        </script>
+        <noscript>Please enable JavaScript to view the <a href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+        <a href="//disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+    </section>
+  <script src="//code.jquery.com/jquery-latest.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.1.0/highlight.min.js"></script>
+  <script src="/media/js/main.js"></script>
+  <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  <div class="copyright">
+    <p>Generated by <a href="http://www.gnu.org/software/emacs/">Emacs</a> 25.x (<a href="http://orgmode.org">Org mode</a> 9.x)</p>
+    <p>
+      Copyright &copy; 2012 - <span id="footerYear"></span> <a href="mailto:congleetea &lt;at&gt; gmail &lt;dot&gt; com">Clare Lee</a>
+      &nbsp;&nbsp;-&nbsp;&nbsp;
+      Powered by <a href="https://github.com/kelvinh/org-page" target="_blank">org-page</a>
+      <script type="text/javascript">document.getElementById("footerYear").innerHTML = (new Date()).getFullYear();</script>
+    </p>
+  </div>
+</div>
+
+    </div>
+  </body>
+</html>

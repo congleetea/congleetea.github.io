@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  
+  <head>
+  <title>AMCL定位 - 清园索道</title>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
+  <meta name="author" content="Clare Lee" />
+    <meta name="description" content="&lt;TODO: insert your description here&gt;" />
+    <meta name="keywords" content="robotics,amcl,localization,particle filter,resample" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+  <link rel="stylesheet" href="/media/css/main.css" type="text/css">
+  <link rel="stylesheet" href="/media/css/base16-ocean.light-min.css" type="text/css">
+  <link href='https://fonts.googleapis.com/css?family=Fira+Sans' rel='stylesheet' type='text/css'>
+  <link href='https://fonts.googleapis.com/css?family=Fira+Mono' rel='stylesheet' type='text/css'>
+</head>
+
+  <body>
+    <div id="page-wrap">
+      <div>
+  <header id="header">
+    <div class="logo">
+      <h1><a href="/"><span class="logo-black">清园索道</span></a></h1>
+    </div>
+    <div class="fortune">
+      <blockquote>
+        上下求索，识己识人识事
+      </blockquote>
+    </div>
+    <ul id="main-nav">
+        <li><a href="/blog/">Blog</a></li>
+      <li><a href="/tags/">分类</a></li>
+      <li><a href="/about/">关于我</a></li>
+      <li><a href="https://github.com/congleetea">GitHub</a></li>
+      <li><a href="/rss.xml">RSS</a></li>
+    </ul>
+  </header>
+</div>
+
+      <article id="content">
+        
+  <h1>AMCL定位</h1>
+
+
+
+<div id="outline-container-org474b57b" class="outline-2">
+<h2 id="org474b57b">概述</h2>
+</div>
+
+<div id="outline-container-org75b3f0f" class="outline-2">
+<h2 id="org75b3f0f">代码实现</h2>
+<div class="outline-text-2" id="text-org75b3f0f">
+</div>
+<div id="outline-container-org6fd9354" class="outline-3">
+<h3 id="org6fd9354">一些概念</h3>
+<div class="outline-text-3" id="text-org6fd9354">
+</div>
+<div id="outline-container-orgc7aad57" class="outline-4">
+<h4 id="orgc7aad57">粒子/样本</h4>
+<div class="outline-text-4" id="text-orgc7aad57">
+<p>
+一个位姿和权重。
+</p>
+</div>
+</div>
+
+<div id="outline-container-org48f9219" class="outline-4">
+<h4 id="org48f9219">cluster/聚类</h4>
+<div class="outline-text-4" id="text-org48f9219">
+<p>
+表示一些位置比较接近的粒子的统计信息，包括聚类的粒子个数，包含的粒子的权重和，均值和
+协方差，区域。
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgdf4616f" class="outline-4">
+<h4 id="orgdf4616f">kdtree</h4>
+<div class="outline-text-4" id="text-orgdf4616f">
+<p>
+包含root节点地址，节点个数和最大数量，节点地址，叶子节点个数。
+每个node包含叶子和深度，转轴维数编号，节点key，value，cluster标签，两个子nodes。
+</p>
+</div>
+</div>
+
+<div id="outline-container-org31f0e1c" class="outline-4">
+<h4 id="org31f0e1c">集合set</h4>
+<div class="outline-text-4" id="text-org31f0e1c">
+<p>
+set里面包含samples和cluster的信息，同时还包括该集合总的粒子个数，所有粒子的
+指针，一个用来保存粒子位置的kdtree，cluster的个数/最大个数，cluster的指针，
+统计信息包括所有粒子的位置均值和协方差，收敛情况。
+</p>
+</div>
+</div>
+
+<div id="outline-container-org74367cf" class="outline-4">
+<h4 id="org74367cf">粒子滤波器pf</h4>
+<div class="outline-text-4" id="text-org74367cf">
+<p>
+包含最大最小粒子个数限制，用于调整粒子个数的参数，当前使用的两个set和活跃的
+set编号，采样函数和采样需要的地图数据，用于判断收敛情况的距离值及最终的收敛情况。
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgbfa4809" class="outline-3">
+<h3 id="orgbfa4809">流程图</h3>
+<div class="outline-text-3" id="text-orgbfa4809">
+<p>
+初始化滤波器流程图：
+</p>
+
+<div class="figure">
+<p><img src="../../gimages/amcl.png" alt="amcl.png" />
+</p>
+</div>
+</div>
+</div>
+</div>
+
+
+<div id="outline-container-orgbe986d8" class="outline-2">
+<h2 id="orgbe986d8">理解</h2>
+<div class="outline-text-2" id="text-orgbe986d8">
+</div>
+<div id="outline-container-org5c4a15f" class="outline-3">
+<h3 id="org5c4a15f">kdtree是如何插入的?</h3>
+<div class="outline-text-3" id="text-org5c4a15f">
+<p>
+首先我们要知道，amcl中有两个set 来保存粒子和聚类。每次重采样就会激活另一个set，
+将粒子从原来的集合中复制到新的set中。具体插入是怎么做的呢？
+</p>
+
+<ul class="org-ul">
+<li><p>
+首先将位姿通过分辨率转换成一个整数。然后执行插入，返回node左右kdtree的root。
+</p>
+<div class="org-src-container">
+<pre class="src src-c">void pf_kdtree_insert(pf_kdtree_t *self, pf_vector_t pose, double value) {
+  int key[3];
+  key[0] = floor(pose.v[0] / self-&gt;size[0]);
+  key[1] = floor(pose.v[1] / self-&gt;size[1]);
+  key[2] = floor(pose.v[2] / self-&gt;size[2]);
+  self-&gt;root = pf_kdtree_insert_node(self, NULL, self-&gt;root, key, value);
+</pre>
+</div></li>
+
+<li><p>
+将节点插入kdtree.
+</p>
+<div class="org-src-container">
+<pre class="src src-c">pf_kdtree_node_t *pf_kdtree_insert_node(pf_kdtree_t *self,
+            pf_kdtree_node_t *parent, pf_kdtree_node_t *node, int key[], double value) {
+  int i;  // 用来记录维度信息，也就是转轴。
+  int split, max_split;  // 用来记录当前节点和上一个节点各个维度的差值。
+
+  /* 分三种情况：
+   * 1. node为空的时候: 这时候要么是kdtree的第一个插入的node；要么是在叶子节点上
+   * 插入新的节点(这时候会将该节点返回作为上一层节点的子节点，这样就建立了父子关
+   * 系)；
+   * 2. node是叶子节点的时候: 直接在该节点下插入新节点，同时复制当前节点作为另一
+   * 个子节点;
+   * 3. node不为空，但不是叶子节点，也就是说是枝节点，这时候要继续往子节点出插
+   * 入，但是可能下一级还是有节点，就有可能递归的继续再往下插入了直到称为叶子节
+   * 点。
+   */
+  if (node == NULL) {
+    /* 1. 当这个这个kdtree第一次插入的时候，node就是空的。
+     * 2. 后面要在参数node下插入叶子节点的时候也是空的。
+     */
+    assert(self-&gt;node_count &lt; self-&gt;node_max_count);
+    node = self-&gt;nodes + self-&gt;node_count++;
+    memset(node, 0, sizeof(pf_kdtree_node_t));
+    // 每个node的leaf只会是0和1,1表示是叶子节点，当在该节点插入子节点之后就变为0.
+    node-&gt;leaf = 1; 
+
+    if (parent == NULL) {
+      node-&gt;depth = 0;
+    } else {
+      node-&gt;depth = parent-&gt;depth + 1;
+    }
+
+    for (i = 0; i &lt; 3; i++) {
+      node-&gt;key[i] = key[i];
+    }
+
+    node-&gt;value = value;
+    self-&gt;leaf_count += 1;
+  } else if (node-&gt;leaf) {
+    // If the node exists, and it is a leaf node...
+    // If the keys are equal, increment the value
+    if (pf_kdtree_equal(self, key, node-&gt;key)) {
+      node-&gt;value += value;
+    } else {
+      // The keys are not equal, so split this node
+      // Find the dimension with the largest variance and do a mean
+      // split
+      max_split = 0;
+      node-&gt;pivot_dim = -1;
+
+      for (i = 0; i &lt; 3; i++) {
+        split = abs(key[i] - node-&gt;key[i]);
+
+        if (split &gt; max_split) {
+          max_split = split;
+          node-&gt;pivot_dim = i;
+        }
+      }
+
+      assert(node-&gt;pivot_dim &gt;= 0);
+      node-&gt;pivot_value = (key[node-&gt;pivot_dim] + node-&gt;key[node-&gt;pivot_dim]) / 2.0;
+
+      /* 返回新节点的指针为该节点的子节点。这样建立父子关系。 */
+      if (key[node-&gt;pivot_dim] &lt; node-&gt;pivot_value) {
+        node-&gt;children[0] = pf_kdtree_insert_node(self, node, NULL, key, value);
+        node-&gt;children[1] = pf_kdtree_insert_node(self, node, NULL, node-&gt;key,
+                                                  node-&gt;value);
+      } else {
+        node-&gt;children[0] = pf_kdtree_insert_node(self, node, NULL, node-&gt;key,
+                                                  node-&gt;value);
+        node-&gt;children[1] = pf_kdtree_insert_node(self, node, NULL, key, value);
+      }
+
+      node-&gt;leaf = 0;
+      self-&gt;leaf_count -= 1;
+    }
+  } else {
+    // If the node exists, and it has children...
+    assert(node-&gt;children[0] != NULL);
+    assert(node-&gt;children[1] != NULL);
+    if (key[node-&gt;pivot_dim] &lt; node-&gt;pivot_value) {
+      pf_kdtree_insert_node(self, node, node-&gt;children[0], key, value);
+    } else {
+      pf_kdtree_insert_node(self, node, node-&gt;children[1], key, value);
+    }
+  }
+
+  return node;
+}
+</pre>
+</div></li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-org7b02be5" class="outline-3">
+<h3 id="org7b02be5">叶子节点的个数意味着什么?</h3>
+<div class="outline-text-3" id="text-org7b02be5">
+<p>
+没插入一个节点，叶子节点就会增加一个，但是并不是有多少粒子就有多少叶子节点，
+因为在插入的时候会将粒子的位姿计算在一定的分辨率内的整数结果，如果一样就只会
+将权重相加，而不是新增节点。这样只有在粒子分散很大的时候，叶子节点才会很多，
+因此叶子节点越少说明定位结果越收敛。
+</p>
+</div>
+</div>
+
+<div id="outline-container-orge20aa5a" class="outline-3">
+<h3 id="orge20aa5a">如何判断是否收敛?</h3>
+<div class="outline-text-3" id="text-orge20aa5a">
+<p>
+计算所有粒子的位置，在求均值，在遍历所
+有的粒子和均值的距离，如果任何一个粒子和均值的偏差大于设定值 dist_threshold，
+那就认为不收敛。反之则为收敛。 dist_threshold 默认 0.5m。
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgca157a4" class="outline-2">
+<h2 id="orgca157a4">实际使用的问题</h2>
+<div class="outline-text-2" id="text-orgca157a4">
+<ul class="org-ul">
+<li>粒子数目太多造成重采样的时候，插入node时需要很长时间，导致长时间卡在这里，无
+法发布位姿，造成导航等出现问题。所以粒子数也不能盲目增加，amcl默认是100~5000，
+后来被改成了3000到5000，因此导致隔一段时间就卡一次。</li>
+</ul>
+</div>
+</div>
+
+
+      </article>
+      <div>
+    <ul id="tags">
+        <li><a href="/tags/robotics/">robotics</a></li>
+    </ul>
+    <div class="post-meta">
+      <span title="post date">Published: 2019-08-14</span>
+      </br>
+      <span title="last modification date">Last Modification: 2020-08-14</span>
+      </br>
+      <span title="author" >Author: Clare Lee</span>
+    </div>
+    <section>
+      <h2>Comments</h2>
+        <div id="disqus_thread"></div>
+        <script type="text/javascript">
+        //var disqus_developer = 1;
+        var disqus_identifier = "/blog/2019/08/14/amcl-localization";
+        var disqus_url = "https://congleetea.github.io/blog/2019/08/14/amcl-localization";
+        var disqus_shortname = 'congleetea';
+        /* * * DON'T EDIT BELOW THIS LINE * * */
+        (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+        })();
+        </script>
+        <noscript>Please enable JavaScript to view the <a href="//disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+        <a href="//disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+    </section>
+  <script src="//code.jquery.com/jquery-latest.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.1.0/highlight.min.js"></script>
+  <script src="/media/js/main.js"></script>
+  <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  <div class="copyright">
+    <p>Generated by <a href="http://www.gnu.org/software/emacs/">Emacs</a> 25.x (<a href="http://orgmode.org">Org mode</a> 9.x)</p>
+    <p>
+      Copyright &copy; 2012 - <span id="footerYear"></span> <a href="mailto:congleetea &lt;at&gt; gmail &lt;dot&gt; com">Clare Lee</a>
+      &nbsp;&nbsp;-&nbsp;&nbsp;
+      Powered by <a href="https://github.com/kelvinh/org-page" target="_blank">org-page</a>
+      <script type="text/javascript">document.getElementById("footerYear").innerHTML = (new Date()).getFullYear();</script>
+    </p>
+  </div>
+</div>
+
+    </div>
+  </body>
+</html>
