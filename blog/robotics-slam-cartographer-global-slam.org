@@ -1,0 +1,334 @@
+#+TITLE:       SLAM-cartographer: Global SLAM
+#+AUTHOR:      Clare Lee
+#+EMAIL:       congleetea@gmail.com
+#+DATE:        2019-05-09 Thu
+#+URI:         /blog/%y/%m/%d/cartographer-slam-global-slam
+#+KEYWORDS:    cartographer,pose_graph,loop closure,optimization
+#+TAGS:        robotics
+#+LANGUAGE:    en
+#+OPTIONS:     H:3 num:nil toc:nil \n:nil ::t |:t ^:nil -:nil f:t *:t <:t
+#+DESCRIPTION: 描述cartographer Global SLAM
+
+* 概述
+  cartographer 在 Local SLAM 中通过imu，odometry等插入初值，结合scan信息进行scan
+  match，最后得到一个robot的pose和一系列submap。在 Global SLAM 中将对这些数据进
+  行优化，得到更好的位姿和地图。
+
+
+ | MapBuilder(map_builder_) | One of TrajectoryBuilder(GlobalTrajectoryBuilder) |
+ |                          | PoseGraph(pose_graph_)                            |
+
+
+ | TrajectoryBuilder(GlobalTrajectoryBuilder) | LocalTrajectoryBuilder |
+ |                                            | pose_graph_指针传入    |
+
+
+* 一些概念
+
+** PoseGraph2D (继承PoseGraph -> PoseGraphInterface)
+   MapBuilder 在创建 GlobalTrajectoryBuilder 时中会实例化 PoseGraph 对象, 并作为
+   GlobalTrajectoryBuilder 的成员。
+
+   cartographer 使用叫 Sparse Pose Adjustment(SPA) (论文：Efficient sparse pose
+   adjustment for 2d mapping) 的方法做 loop closure。在cartographer中， *每个node
+   都会匹配一个或多个submaps中做匹配， 每次匹配会添加对应的约束* 。submap中的所
+   有节点的位姿都会被优化，任意submap和任意node之间都可能会建立约束。
+
+   - optimization::OptimizationProblem2D
+   - ThreadPool
+
+*** 线程池及任务的执行
+
+- 每次收到SLAM需要的信息都会生成一个work，这个work都会保存到PoseGraph的
+  work_queue_队列中，适当的时候会执行DrainWorkQueue从队列中取出work进行处理，每
+  次执行DrainWorkQueue叫做Task.
+- [校正]task通过SetWorkItem进一步执行DrainWorkQueue，DrainWorkItem函数从
+  work_queue_中取出WorkItem执行。这些WorkItem是由pose_graph添加各种传感器数据和
+  Node的时候加入到该队列的。WorkItem执行之后返回结果是WorkItem::Result，这是一个
+  enum类型，只有在AddNode的WorkItem中可能返回WorkItem::Result::kRunOptimization。
+
+
+
+    PoseGraph有一个线程池，配置一定数量的线程来执行优化任务。线程池在map_builder
+    中创建，作为参数给PoseGraph对象，PoseGraph将其作为
+    constraints::ConstraintBuilder2D的初始化使用。
+
+    map_server在创建线程的时候一次性创建num_threads(在map_builder.lua中
+    num_background_threads确定)个std::thread线程，放在vector中，每个线程执行
+    ThreadPool::DoWork()函数。DoWork()函数会一直循环遍历一个std::deque队列中的
+    Task任务。每次执行完一个Task，就会从队列弹出。
+
+    任务执行状态由 DEPENDENCIES_COMPLETED 变成 COMPLETED。在Task::Execute中，最
+    终执行work_item_(WorkItem = std::function<void()>)。那任务是怎么加入到队列的
+    呢？这里有两个步骤，Task首先加到线程池的tasks_not_ready_队列中，当PoseGraph
+    调用ThreadPool::Schedule(Task)做适当处理，当Task的状态变成
+    DEPENDENCIES_COMPLETED后才加入到可执行的队列中。这时候才被线程池中的线程后台
+    执行。
+
+    Task的状态enum State { NEW, DISPATCHED, DEPENDENCIES_COMPLETED, RUNNING, COMPLETED };
+    - NEW: 新的task, 刚创建是的状态.
+    - DISPATCHED: 分发, 调用线程池Schedule之后变为该状态。
+    - DEPENDENCIES_COMPLETED: 线程池Schedule之后如果未完成的依赖为0，就变为该状
+      态。变为该状态之后就会发出通知，告诉线程池依赖已完成，线程池就会将该任务从
+      tasks_not_ready_队列中移动到task_queue_中。等待执行。
+    - RUNNING: 正在执行，后台线程从task_queue_中取出Task执行, 此时变为此状态。
+    - COMPLETED: 任务执行结束.
+
+
+** Node
+
+    #+BEGIN_SRC c++
+     struct TrajectoryNode {
+       struct Data {
+         common::Time time;
+
+         // Transform to approximately gravity align the tracking frame as
+         // determined by local SLAM.
+         Eigen::Quaterniond gravity_alignment;
+
+         // Used for loop closure in 2D: voxel filtered returns in the
+         // 'gravity_alignment' frame.
+         sensor::PointCloud filtered_gravity_aligned_point_cloud;
+
+         // Used for loop closure in 3D.
+         sensor::PointCloud high_resolution_point_cloud;
+         sensor::PointCloud low_resolution_point_cloud;
+         Eigen::VectorXf rotational_scan_matcher_histogram;
+
+         // The node pose in the local SLAM frame.
+         transform::Rigid3d local_pose;
+       };
+
+       common::Time time() const { return constant_data->time; }
+
+       // This must be a shared_ptr. If the data is used for visualization while the
+       // node is being trimmed, it must survive until all use finishes.
+       std::shared_ptr<const Data> constant_data;
+
+       // The node pose in the global SLAM frame.
+       transform::Rigid3d global_pose;
+     };
+   #+END_SRC
+
+
+** Constraints (TrajectoryNode::Data)
+
+   #+BEGIN_SRC c++
+     struct Constraint {
+       struct Pose {
+         transform::Rigid3d zbar_ij;
+         double translation_weight;
+         double rotation_weight;
+       };
+
+       SubmapId submap_id;  // 'i' in the paper.
+       NodeId node_id;      // 'j' in the paper.
+
+       // Pose of the node 'j' relative to submap 'i'.
+       Pose pose;
+
+       // Differentiates between intra-submap (where node 'j' was inserted into
+       // submap 'i') and inter-submap constraints (where node 'j' was not inserted
+       // into submap 'i').
+       enum Tag { INTRA_SUBMAP, INTER_SUBMAP } tag;
+     };
+   #+END_SRC
+
+
+** FixedRatioSampler(global_localization_sampler_)
+   LocalTrajectoryBuilder也有一个采样器，不过那是针对某个轨迹的每个类型的传感器
+   数据的。而这里的是每个轨迹都有一个采样器，目的是我们通过它只进行每个轨迹上的
+   一部分节点的定位。
+
+
+** 坐标变化
+  - local map frame: 固定坐标系，是local slam的坐标系，不要理解成submap的坐标系。
+  - global map frame: 固定坐标系，是glbal slam的坐标系，可以通过添加轨迹时设置
+    的 *轨迹初始位姿* 和local map frame进行变换。
+  - 将node转化到submap坐标系下面:
+    我们知道submap通过submap的local_pose转化到local_map_frame中,
+    而node的local_pose就是node在local_map_frame中的位姿,也就是：
+    P_in_local = frame_in_local * P_in_submap =>
+    P_in_submap = frame_in_local.inv() * P_in_local.
+
+
+** 轨迹的状态
+   包括两个部分：
+   - 轨迹状态：ACTIVE, FINISHED, FROZEN, DELETED
+   - 轨迹的删除状态：NORMAL, SCHEDULED_FOR_DELETION, WAIT_FOR_DELETION
+
+   #+BEGIN_SRC c++
+     enum class TrajectoryState { ACTIVE, FINISHED, FROZEN, DELETED };
+
+     struct InternalTrajectoryState {
+       enum class DeletionState {
+         NORMAL,
+         SCHEDULED_FOR_DELETION,
+         WAIT_FOR_DELETION
+       };
+
+       PoseGraphInterface::TrajectoryState state =
+           PoseGraphInterface::TrajectoryState::ACTIVE;
+       DeletionState deletion_state = DeletionState::NORMAL;
+     };
+   #+END_SRC
+
+
+
+* PoseGraphData
+
+
+* Local to Global: GetLocalToGlobalTransform(trajectory_id)
+  该函数得到的结果是local map frame到global map frame之间的转换，有了这个转换，
+  就可以将local map中的位姿转换到global map中了。
+
+  PoseGraphData中有一个保存各个submap在此刻的global_pose: MapById<SubmapId, optimization::SubmapSpec2D> global_submap_poses_2d;
+  还有一个所有轨迹的初始位姿列表data_.initial_trajectory_poses.
+  还有各个节点的信息(如果是优化过的节点中有global_pose)。
+
+  主要就是从这两个地方查找信息得到local 到global的转换。
+
+  首先从global_submap_poses_2d中找出属于该轨迹的所有submap信息，那就找出上一个优
+  化过的submap的全局位姿global_pose和局部位姿local_pose，通过这两个位姿就可以得
+  到local和global坐标系的转换矩阵。
+
+  如果在global_submap_poses_2d没有找到该轨迹的submap信息，那就说明该轨迹还没有产
+  生submap，那就从data_.initial_trajectory_poses中查找该轨迹的初始位姿，如果找到
+  了初始位姿，就根据该轨迹初始位姿的时间去节点列表中找改时间点最近的节点，根据该
+  节点的global_pose找到local和global的转换信息。
+
+  如果initial_trajectory_poses中也没有找到该轨迹的初始位姿，就直接返回单位转换矩
+  阵，认为二者重合。
+
+
+* SubmapState
+  - kNoConstraintSearch:
+  - kFinished:
+
+  表示submap在后台线程中此刻的状态。当转换到kFinished状态之后，所有的node(包括新
+  的nodes)都匹配这个submap。而kNoConstraintSearch的submap只有内部node(就是直接关
+  联的node)回去匹配。
+
+
+* Constraint
+
+  #+BEGIN_SRC c++
+    struct Constraint {
+      struct Pose {
+        transform::Rigid3d zbar_ij;
+        double translation_weight;
+        double rotation_weight;
+      };
+
+      SubmapId submap_id;  // 'i' in the paper.
+      NodeId node_id;      // 'j' in the paper.
+
+      // Pose of the node 'j' relative to submap 'i'.
+      // pose表示node在该submap坐标系中的位姿，计算方法是：
+      // 我们知道submap通过submap的local_pose转化到local_map_frame中,
+      // 而node的local_pose就是node在local_map_frame中的位姿,也就是：
+      // P_in_local = frame_in_local * P_in_submap =>
+      // P_in_submap = frame_in_local.inv() * P_in_local.
+       Pose pose;
+
+       // Differentiates between intra-submap (where node 'j' was inserted into
+       // submap 'i') and inter-submap constraints (where node 'j' was not inserted
+       // into submap 'i').
+       enum Tag { INTRA_SUBMAP, INTER_SUBMAP } tag;
+     };
+  #+END_SRC
+
+
+* ConstraintBuilder2D
+
+
+
+* 过程
+
+** PoseGraph 处理 Imu,odometry,landmark
+   将数据加入到 optimization_problem_的对应传感器队列中，并按时间排列。
+
+** Ranges
+ - 添加轨迹的时候设置轨迹的初始值。
+ - 将LocalSLAM的matching result加入pose graph的节点中：
+   - 添加Node：将node的位姿转化到global map frame中，组建node加入到trajectory_nodes列表中；
+   - 添加Submap：如果是insertion_result的最新一个submap是首次到PoseGraph的
+     data_.submap_data中，给该Submap分配id并将其加入其中。注意，这时候的submap
+     还没有计算global pose(所以，后面要初始化submap的global pose).
+ - 找出该node有关的已经完成的submap，计算Node的约束。
+   - 初步确定该node相关的已完成的submap的global pose，并添加到优化问题中。之所
+     以叫初步确定是因为后面优化之后会修正这个位姿。
+     - 如果insertion_submaps中只有一张submap，说明这是该trajectory的第一张
+       submap，计算该submap在的global_pose(查找轨迹的初始位姿来计算), 后加入优化问题。
+     - 如果insertion_submaps中有两张submap，那么计算第一张submap的global_pose
+       并加入优化问题中。这时候global_pose是通过前一张submap得到的global_pose
+       计算得到新的submap的global_pose.
+     - 如果不是上面两种情况，那就返回上次的结果。
+ - 计算node的global_pose, 将node加入优化问题；
+ - 计算node的约束关系
+   - 计算node和insertion_submaps的约束关系，约束的定义前面已经有了。并把约束加
+     入到data_.constraints中, 此时该node和submap的约束类型是
+     Constraint::INTRA_SUBMAP类型。
+   - 计算node和所有已完成的submap之间的约束。
+     - ConstraintBuilder2D判断是否添加约束: node和submap原点距离超过规定距离；
+       或者采样率略过都不会添加约束, 满足条件继续执行下面：
+     - 每个submap都要一个Scanmatcher(FastCorrelativeScanMatcher)，将计算约束的
+       Task加入后台线程池运行。后台执行ConstraintBuilder2D::ComputeConstraint():
+     - 通过该submap将node的位姿转化到local map frame下，作为初始位姿进行node在
+       submap里面的使用FastCorrelativeScanMatcher进行scanmatch得到一个初步校正
+       的位姿pose_estimation。使用的方法scanmatcher方法是Branch-and-bound(分支
+       界定法). 这些约束都是Constraint::INTER_SUBMAP类型的。
+     - 再次使用pose_estimation进行scanmatch，对位姿进一步校正。
+     - 将计算约束的Task:ConstraintBuilder2D::ComputeConstraint加入
+       finish_node_task_任务的依赖中，也就是后面要执行finish_node_task_必须确
+       保Task:ConstraintBuilder2D::ComputeConstraint已经完成。
+   - insertion_submaps中的第一个submap可能是新完成的submap，变成了kFinished状
+     态，这时候要计算所有node和该sumbap之间的约束。计算方法和上面一样。这些约
+     束都是Constraint::INTER_SUBMAP类型的。将该Task作为finish_node_task_的依赖，
+     只有该task完成才能执行finish_node_task_。
+   - 执行finish_node_task_任务，该任务只有一个作用，就是++num_finished_nodes_。
+   - 将finish_node_task_任务作为when_done_task_任务的依赖。
+   - 记录num_nodes_since_last_loop_closure_, 超过规定数目(默认90)，返回
+     WorkItem::Result::kRunOptimization状态，否则返回WorkItem::Result::kFinished。
+ - 当新增node个数超过规定数量(default=80)时，调用constraint_builder_.WhenDone()。
+   WhenDone参数是函数PoseGraph2D::HandleWorkQueue(作为WhenDone的回调),在
+   constraint中变成when_done_task_执行。
+   - 从ConstraintBuilder2D的constraints_中取出所有约束，作为
+     PoseGraph2D::HandleWOrkQueue的参数，执行该函数。constraint_builder中清除
+     现有的所有约束。
+   - 将所有内部约束和所有外部约束合并在一起执行RunOptimization()。
+     - 遍历所有submap，建立参数块；遍历所有node，建立参数块。
+     - 根据约束，添加残差函数；
+     - 处理里程计问题，添加可能的残差；
+     - 求解返回结果;
+   - 得到的结果已经修正了node和submap的global_pose, 用他们修改优化问题和
+     PoseGraph2D里面的submap和node的global_pose.
+   - 由于使用采样器建立约束，有的node没有建立约束，其pose就不会被优化，因此，要
+     通过已经优化的位姿转换关系来修正所有的node。
+   - 继续生成任务，继续优化。直到结束。
+   - 执行最后的优化RunFinalOptimization()。
+     
+   
+
+#+BEGIN_SRC txt
+[ INFO] [1557820562.577519102, 1432648915.544895420]: I0514 15:56:02.000000   404 constraint_builder_2d.cc:281] 449 computations resulted in 137 additional constraints.
+[ INFO] [1557820562.578130577, 1432648915.544895420]: I0514 15:56:02.000000   404 constraint_builder_2d.cc:283] Score histogram:
+Count: 21541  Min: 0.550002  Max: 0.883866  Mean: 0.629324
+[0.550002, 0.583388)	              ######	Count: 6271 (29.111927%)	Total: 6271 (29.111927%)
+[0.583388, 0.616775)	                ####	Count: 4808 (22.320227%)	Total: 11079 (51.432152%)
+[0.616775, 0.650161)	                 ###	Count: 3666 (17.018709%)	Total: 14745 (68.450859%)
+[0.650161, 0.683547)	                  ##	Count: 2593 (12.037510%)	Total: 17338 (80.488373%)
+[0.683547, 0.716934)	                  ##	Count: 1790 (8.309735%)	Total: 19128 (88.798103%)
+[0.716934, 0.750320)	                   #	Count: 1272 (5.905018%)	Total: 20400 (94.703125%)
+[0.750320, 0.783706)	                   #	Count: 630 (2.924655%)	Total: 21030 (97.627777%)
+[0.783706, 0.817093)	                    	Count: 323 (1.499466%)	Total: 21353 (99.127243%)
+[0.817093, 0.850479)	                    	Count: 163 (0.756697%)	Total: 21516 (99.883942%)
+[0.850479, 0.883866]	                    	Count: 25 (0.116058%)	Total: 21541 (100.000000%)
+#+END_SRC
+这段log是什么意思：constraint_builder_2d中constraints_有449个约束，不为nullptr的
+约束有137个(大概是1/3，这是为什么呢？因为我们配置了
+constraint_builder.sampling_ratio=0.3)。所有匹配的分数有21541个，最小/最大/平均
+分数是0.55002，0.883866，0.69324。下面的10行数据是将最大最小分数分成10段，队列表
+示分数均等区间，第二列用#个数表示大概占比，Count表示该区间的node个数和占比，
+Total表示该区间及以下的所有node个数和比重。
+

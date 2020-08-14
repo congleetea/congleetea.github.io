@@ -1,0 +1,13 @@
+#+TITLE:       机器人运动规划-A*
+#+AUTHOR:      Clare Lee
+#+EMAIL:       congleetea@gmail.com
+#+DATE:        2019-09-09 Mon
+#+URI:         /blog/%y/%m/%d/robotics-astar
+#+KEYWORDS:    A*,motion plan
+#+TAGS:        robotics
+#+LANGUAGE:    en
+#+OPTIONS:     H:3 num:nil toc:nil \n:nil ::t |:t ^:nil -:nil f:t *:t <:t
+#+DESCRIPTION: <TODO: insert your description here>
+
+
+https://blog.csdn.net/hitwhylz/article/details/23089415

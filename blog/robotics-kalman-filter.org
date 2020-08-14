@@ -1,0 +1,11 @@
+#+TITLE:       卡尔曼滤波
+#+AUTHOR:      Xuancong Lee
+#+EMAIL:       congleetea@gmail.com
+#+DATE:        2018-11-04 Sun
+#+URI:         /blog/%y/%m/%d/kalman-filter
+#+KEYWORDS:    卡尔曼滤波
+#+TAGS:        robotics
+#+LANGUAGE:    en
+#+OPTIONS:     H:3 num:nil toc:nil \n:nil ::t |:t ^:nil -:nil f:t *:t <:t
+#+DESCRIPTION: KF,EKF,UKF
+

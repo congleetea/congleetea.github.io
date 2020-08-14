@@ -1,0 +1,106 @@
+#+TITLE:       机器人数学基础
+#+AUTHOR:      Xuancong Lee
+#+EMAIL:       congleetea@gmail.com
+#+DATE:        2018-08-31 Fri
+#+URI:         /blog/%y/%m/%d/robotics-math
+#+KEYWORDS:    robotics,matrix,probability,math
+#+TAGS:        robotics
+#+LANGUAGE:    en
+#+OPTIONS:     H:3 num:nil toc:nil \n:nil ::t |:t ^:nil -:nil f:t *:t <:t
+#+DESCRIPTION: 机器人学的数学基础
+
+
+* 概率（概率机器人）
+  
+** 基本 
+
+- 基本公理
+  
+#+CAPTION: 概率基本公理 
+#+LABEL: fig:SED-HR4049
+[[./images/probability_axioms_1.png]]
+
+
+- 变形和使用
+ 
+#+CAPTION: 概率基本公理变形和使用 
+#+LABEL: fig:SED-HR4049
+[[./images/probability_axioms_1_using.png]]
+
+
+** 联合概率和条件概率
+
+#+CAPTION: 联合概率和条件概率
+#+LABEL: fig:SED-HR4049
+[[./images/probability_joint_conditional.png]]
+
+
+** 全概率公式
+
+#+CAPTION: 全概率公式 
+#+LABEL: fig:SED-HR4049
+[[./images/law_of_total_probability.png]]
+
+#+CAPTION: 全概率公式(条件) 
+#+LABEL: fig:SED-HR4049
+[[./images/law_of_total_probability_conditional.png]]
+
+
+** Bayes 公式
+
+#+CAPTION: Bayes公式 
+#+LABEL: fig:SED-HR4049
+[[./images/bayes_formula.png]]
+
+
+归一化：
+
+#+CAPTION: Bayes公式归一化 
+#+LABEL: fig:SED-HR4049
+[[./images/bayes_formula_normalization.png]]
+
+
+#+CAPTION: Bayes公式(多条件)
+#+LABEL: fig:SED-HR4049
+[[./images/bayes_rule.png]]
+
+
+** 条件独立
+
+如果x，y独立:
+#+CAPTION: 条件独立 
+#+LABEL: fig:SED-HR4049
+[[./images/conditional_independence.png]]
+
+
+** 正态分布
+
+#+CAPTION: 一维及多维正态分布 
+#+LABEL: fig:SED-HR4049
+[[./images/gaussian.png]]
+
+多维正态分布属性：
+
+#+CAPTION: 多维正态分布属性 
+#+LABEL: fig:SED-HR4049
+[[./images/gaussian_rules.png]]
+
+
+* 迭代贝叶斯更新
+
+- Markov assumption (所有观测相互独立)
+- 迭代贝叶斯更新:
+  #+CAPTION: 条件独立 
+  #+LABEL: fig:SED-HR4049
+  [[./images/RecursiveBayesianUpdating.png]]
+
+
+
+
+* 参考
+
+[[https://www.zhihu.com/question/19725590][zhihu:理解贝叶斯]]
+
+[[https://zhuanlan.zhihu.com/p/35034056][zhihu:置信区间和置信度]]
+
+[[https://www.jianshu.com/p/6bf63f08ef52][闭合解/解析解，数值解]]

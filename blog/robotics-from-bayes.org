@@ -1,0 +1,76 @@
+#+TITLE:       从贝叶斯滤波开始
+#+AUTHOR:      Xuancong Lee
+#+EMAIL:       congleetea@gmail.com
+#+DATE:        2018-11-04 Sun
+#+URI:         /blog/%y/%m/%d/from-bayes
+#+KEYWORDS:    Bayes,KF,EKF,UKF
+#+TAGS:        robotics
+#+LANGUAGE:    en
+#+OPTIONS:     H:3 num:nil toc:nil \n:nil ::t |:t ^:nil -:nil f:t *:t <:t
+#+DESCRIPTION: 从贝叶斯滤波开始谈起
+
+
+* 概述
+
+在看<<Probabilitics Robotics>>一书中，理论要求很强。为了能够理清楚前后的关系，所以不断更新了这篇文章。
+就从Bayes讲起吧。这里尽量不涉及公式，只做线条式的描述。
+
+
+* Bayes
+
+** Bayes的推导
+   
+   Bayes是概率机器人中最基础的一个概念。它的产生其实很简单，就是基于联合概率密度，条件概率密度等概念产生的。
+
+   #+CAPTION: 贝叶斯公式 
+   #+LABEL: fig:SED-HR4049
+   [[./images/bayes_formula.png]]
+
+   这就是贝叶斯公式。在概率机器人中P(x|y)可以理解为获得外界观测信息y之后机器人状态x的概率。P(y|x)是似然函数，
+   最终可以将贝叶斯理解为观测信息的加入，进一步改变了/修正了状态x的概率。
+
+   由于P(y)是常数，所以常常写成：
+
+   #+CAPTION: 贝叶斯归一化 
+   #+LABEL: fig:SED-HR4049
+   [[./images/bayes_formula_normalization.png]]
+
+
+** Bayes的扩展
+
+   上面给出了一个条件下的Bayes公式，在实际运用中我们可以增加不同的条件。比如SLAM中需要的观测信息，于是就有了：
+
+   #+BEGIN_SRC text
+   P(x|z1, z2, z3, ..., zn) 
+   #+END_SRC
+
+   这是引入多个观测信息的情况，实际中状态还会受到驱动的影响，所以还会加入驱动信息，于是就有了：
+
+   #+BEGIN_SRC text
+   P(x|u1,z1, u2,z2, u3,z3, ..., un,zn) 
+   #+END_SRC
+   上式就是Bel(xt)表示状态的置信度。
+
+
+** Markov假设
+   
+   根据 Markov 假设，我们可以得到递归 Bayes 更新公式。Markov假设是SLAM中一个比较重要的概念。
+   
+   如果知道当前的状态xt，Markov假设设定过去和未来的数据都是独立的。
+  
+
+** Recursive Bayesian Updating
+
+   #+BEGIN_SRC text
+     Bel(xt) = phi P(zt | xt) ~Bel(xt) 
+   #+END_SRC
+
+
+* Gaussian Filter
+
+  EKF滤波一遍比较好的文章：[[https://www.cnblogs.com/bonelee/p/9210821.html][译文]], [[http://www.bzarg.com/p/how-a-kalman-filter-works-in-pictures/][原文]]。
+
+
+  UKF: https://zhuanlan.zhihu.com/p/35729804
+
+

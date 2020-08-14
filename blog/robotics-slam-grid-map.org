@@ -1,0 +1,125 @@
+#+TITLE:       SLAM: Grid Map 模型和工程实现
+#+AUTHOR:      Clare Lee
+#+EMAIL:       congleetea@gmail.com
+#+DATE:        2019-05-16 Thu 
+#+URI:         /blog/%y/%m/%d/slam-grid-map
+#+KEYWORDS:    slam,probability grid map,cartographer
+#+TAGS:        robotics
+#+LANGUAGE:    en
+#+OPTIONS:     H:3 num:nil toc:nil \n:nil ::t |:t ^:nil -:nil f:t *:t <:t
+#+DESCRIPTION: 描述SLAM中概率珊格地图是怎么建模，以及cartographer中不需要任何计算如何快速更新概率值的.
+
+
+* 概述
+  Grid map是SLAM中地图表示的一种常用方式。我们大概都知道这种表示方式就是把地图的
+  一个点用一个概率值[0,1]来表示这个点被障碍物占据的概率。但是具体研究和使用的时
+  候有发现对它的理解似乎有点偏差。这里对Grid map进行一个总结，希望看完能理解其原
+  理和使用方法。
+
+
+* Grid 是怎么表示地图的？ 
+  测距传感器(scan)得到的是一个射线的点，点是射线打到障碍物上返回的地方，这个地方
+  最有可能是有障碍物的地方，之所以说可能是因为测量会有误差，所以总是不能完全确定
+  有障碍物的就是返回的那个点，加上传感器本身就有误差，所以一定存在不确定行。因此，
+  对一个点的状态就有概率来表示吧。
+
+  一个问题是如何表示一个点呢？scan得到的是一个点，地图上显然不能精确的表示这个点，
+  只能采用离散的方式，将一个空间划分成固定边长(分辨率)一个一个的格子，叫做像素。
+  这个像素包含了scan点附近一定范围的很多点。具体就是如果scan的点在这个格子里面，
+  就认为这个格子(cell)是被障碍物占据了，而从scan原点到scan点之间线段经过的cell则
+  认为是空白的(free)。
+
+
+** 概率表示
+   
+  我们用 $p(x=1)$ 和 $p(x=0)$ 分别表示一个cell是障碍物(occupied)或者空白(free)的
+  概率。当引入一个新的scan之后，由于存在上述的不确定性，我们不会就这样就断定相关
+  点概率为1或者0。通常是根据传感器的特性会给出一个值表示occupied( $p(hit)$ )，另
+  一个值表示free($p(miss)$)。当又有scan经过这些点之后这样我们要对相关的cell进行
+  更新。而原则就是如果一 个cell *多次确定* 是occupied或者free，那么他们的概率就
+  会越接近1或者0。
+
+
+  默认情况下，一个cell是occupied和free概率相同，也就是 $p(x=1)=p(x=0)=0.5$ ，新的
+  scan观测信息 $z$ 经过这些点之后就会更新，这时候相当于是计算 $p(x|z)$ ：
+  
+    \begin{equation}
+    p(x|z)=\frac{p(x)p(z|x)}{p(z)}
+    \end{equation}
+
+
+** 概率比表示
+
+  如果每个点都要进行这些乘除运算会比较浪费资源，那么我们用另一种更方便的表示方法
+  来处理，引入概率比$odd(x)$ ：
+  
+  \begin{equation}
+  odd(x)=\frac{p(x=1)}{p(x=0)}
+  \end{equation}
+
+  我们会设置一个概率的最大最小值，防止分母出现0的情况，比如[0.1,0.9]。
+  - 初始情况下:
+    一个cell的状态没有任何信息，occupied和free的概率都是0.5，那
+    $odd(x)=0.5/0.5=1$ 。当一个cell是障碍物可能性更大的时候，分子大于分母，
+    $odd(x)>1$ ，反之 $0 < odd(x) < 1$
+
+  
+  - 当一个cell第一次被scan更新:
+    
+    \begin{cases}odd(x)=\frac{p(hit)}{1-p(hit)} & x \ is \ occupied\\odd(x)=\frac{p(miss)}{1-p(miss)} & x \ is\ free \end{cases}
+
+  - 当一个cell再次被更新时：
+    
+    \begin{equation}
+    odd_{new}(x) = odd(x|z) = \frac{p(x=1|z)}{p(x=0|z)}=\frac{\frac{p(z|x=1)p(x=1)}{p(z)}}{\frac{p(z|x=1)p(x=1)}{p(z)}}=\frac{p(z|x=1)p(x=1)}{p(z|x=0)p(x=0)}=odd_{old}(x)\frac{p(z|x=1)}{p(z|x=0)}
+    \end{equation}
+
+    其中 $odd_{new}(x)$ 表示更新后的状态， $odd_{old}(x)$ 表示上次更新的状态。
+    $\frac{p(z|x=1)}{p(z|x=0)}$ 是传感器的观测模型，由传感器自身决定，是一个常数。
+    结果为：
+
+    \begin{equation}
+    \frac{p(z|x=1)}{p(z|x=1)} = \begin{cases}\frac{p(z=1|x=1)}{p(z=1|x=0)} & p(hit)\\\frac{p(z=0|x=1)}{p(z=0|x=0)} & p(miss)\end{cases}
+    \end{equation}
+
+    
+    
+** 概率比的对数表示  
+   上面的计算依然是有几个乘除运算，更了更加简单，我们可以使用对数，将其转化为加
+   减运算。对上式两边取对数：
+
+   \begin{equation}
+   \lg{odd_{new}(x)} = \lg{odd_{old}(x)} + \lg{\frac{p(z|x=1)}{p(z|x=0)}}
+   \end{equation}
+   当一个cell倾向于是occupied的时候，对数>0，反之则<0。
+
+   其中加号左侧是上一次更新的结果，后边依然是随传感器本身确定的常数，相应的这个
+   cell被确定为occupied或者free对应两个常数，我们分别定义为 $looccu$ 和 $lofree$ 。
+   这样更新结果就简单了。
+  
+   
+   加入 $looccu=0.9$ ，$lofree=-0.7$ ，看看下面的更新结果。
+  
+   #+CAPTION: 更新例子
+   #+LABEL: fig:SED-HR4049
+   [[./images/grid_map.png]]
+
+
+** 工程中直接查表不计算就更新结果
+   在看cartographer的代码的时候，发现它预先保存了两个表，将概率区间 [pmin, pmax]
+   直接通过查表就可以更新结果。
+
+   因为前面说了更新的实质就是这个cell状态被确定的次数越多，状态确定性越大。上式
+   中加号右边是两种值，那么就可以创建两个表 hit_tables 和 miss_table，加号坐标的
+   值范围也是确定的，那么我们就将这个范围按照足够小的步长分别计算出结果存在两个
+   表中。这样每一个 $\lg{odd_{old}(x)}$ 在两个表中分别对应一个结果。根据上次更新
+   的结果直接在两个表中查询就得到了更新的结果了。一次计算都不用。
+  
+   cartographer中为了效率更高，将[pmin,pmax]的浮点数全部映射到uint16的整数区间，
+   两个表都是一个数组，index就代表概率的大小，其实更加简单了。
+   
+
+* 参考
+
+  [1] [[https://zhuanlan.zhihu.com/p/21738718][zhihu: 占据栅格地图]]
+

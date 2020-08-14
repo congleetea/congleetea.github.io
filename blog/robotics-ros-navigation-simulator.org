@@ -1,0 +1,74 @@
+#+TITLE:       ROS下navigation的仿真
+#+AUTHOR:      Clare Lee
+#+EMAIL:       congleetea@gmail.com
+#+DATE:        2019-11-22 Fri
+#+URI:         /blog/%y/%m/%d/robotics-ros-navigation-simulator
+#+KEYWORDS:    ros,navigation,simulator,turtlebot3
+#+TAGS:        robotics
+#+LANGUAGE:    en
+#+OPTIONS:     H:3 num:nil toc:nil \n:nil ::t |:t ^:nil -:nil f:t *:t <:t
+#+DESCRIPTION: 记录使用ros进行导航仿真
+
+
+* 使用gazebo和turtlebot仿真
+  
+  在没有机器人的情况下，可以使用gazebo进行仿真，这里记录一下在ros kinetic中，使用
+  gazebo进行仿真的步骤。
+
+  - 首先安装ros，这就不必多说了。
+  - sudo apt-get install ros-kinetic-gazebo-ros ros-kinetic-turtlebot3-simulations ros-kinetic-turtlebot3 
+  - 建图
+    #+BEGIN_SRC text
+      export TURTLEBOT3_MODEL=burger
+      rosrun rviz rviz -d `rospack find turtlebot3_slam`/rviz/turtlebot3_slam.rviz
+
+      export TURTLEBOT3_MODEL=burger
+      roslaunch turtlebot3_gazebo turtlebot3_world.launch
+
+      export TURTLEBOT3_MODEL=burger
+      roslaunch turtlebot3_slam turtlebot3_slam.launch
+
+      export TURTLEBOT3_MODEL=burger
+      roslaunch turtlebot3_teleop turtlebot3_teleop_key.launch
+
+      export TURTLEBOT3_MODEL=burger
+      rosrun map_server map_saver -f $PWD/map
+    #+END_SRC
+
+  - 导航
+
+    #+BEGIN_SRC text
+      export TURTLEBOT3_MODEL=burger
+      rosrun rviz rviz -d `rospack find turtlebot3_navigation`/rviz/turtlebot3_nav.rviz
+
+      export TURTLEBOT3_MODEL=burger
+      roslaunch turtlebot3_gazebo turtlebot3_world.launch
+
+      export TURTLEBOT3_MODEL=burger
+      roslaunch turtlebot3_navigation turtlebot3_navigation.launch map_file:=$PWD/map.yaml
+    #+END_SRC
+
+    校正位置: 点击2D Pose Estimation，画出机器人大致的位置和方位，程序会自动确定位
+    置。点击3D Nav Goal画出机器人的目标位置和方位。机器人就会到那个位置。
+
+    
+* 使用rbx1仿真
+  如果已经有地图的话，不需要启动gazebo，直接在rviz中对导航进行仿真。
+  - git clone两个工程: arbotix_ros和rbx1，编译。
+    #+BEGIN_SRC text
+      https://github.com/vanadiumlabs/arbotix_ros.git
+      https://github.com/pirobot/rbx1.git
+    #+END_SRC
+  - 启动
+    #+BEGIN_SRC text
+      roslaunch rbx1_bringup fake_turtlebot.launch
+      roslaunch rbx1_nav fake_amcl.launch map:=test_map.yaml
+      rosrun rviz rviz -d `rospack find rbx1_nav`/nav.rviz
+    #+END_SRC
+    然后直接在rviz中点击目标点就可以导航了。
+
+* 取消当前导航
+  move_base中可以通过发送消息到topic: /move_base/cancel　就可以取消当前的导航。
+  #+BEGIN_SRC text
+    rostopic pub /move_base/cancel actionlib_msgs/GoalID -- {}
+  #+END_SRC

@@ -1,0 +1,24 @@
+#+TITLE:       雷达
+#+AUTHOR:      Xuancong Lee
+#+EMAIL:       congleetea@gmail.com
+#+DATE:        2018-11-12 Mon
+#+URI:         /blog/%y/%m/%d/lidars
+#+KEYWORDS:    lidar
+#+TAGS:        robotics
+#+LANGUAGE:    en
+#+OPTIONS:     H:3 num:nil toc:nil \n:nil ::t |:t ^:nil -:nil f:t *:t <:t
+#+DESCRIPTION: <TODO: insert your description here>
+
+* 概述
+
+  目前自动驾驶领域传感器主要有摄像头、毫米波雷达和激光雷达组成。
+
+
+** 波源
+
+*** 毫米波
+    
+    光速运行，波长在1~10mm之间的电磁波，根据 c = lamda(波长) × f(requency)，可以计算其频率在 30~300GHz之间。
+
+
+*** 激光

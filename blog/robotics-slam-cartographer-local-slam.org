@@ -1,0 +1,542 @@
+#+TITLE:       SLAM-cartographer: Local SLAM
+#+AUTHOR:      Clare Lee
+#+EMAIL:       congleetea@gmail.com
+#+DATE:        2019-04-24 Wed
+#+URI:         /blog/%y/%m/%d/cartographer-local-slam
+#+KEYWORDS:    cartographer,imu,laser,sensors
+#+TAGS:        robotics
+#+LANGUAGE:    en
+#+OPTIONS:     H:3 num:nil toc:nil \n:nil ::t |:t ^:nil -:nil f:t *:t <:t
+#+DESCRIPTION: 描述cartographer Local SLAM
+
+
+* 总体处理方法
+  - 按照配置的比例采用数据；
+  - 将数据转化到tracking坐标系中；
+  - 将数据加入到位姿估计器中，位姿估计器添加这些数据对位姿做出估计；
+    imu和里程计数据需要首先判断，当没有任何位姿估计，或者当前数据的时间在最后一
+    个位姿的时间后面时才采用，也就是说比最后一个位姿旧的数据都不会采用。
+  - GlobalTrajectoryBuilder中先调用LocalTrajectoryBuilder处理，进行 LocalSLAM；
+  - GlobalTrajectoryBuilder中调用PoseGraph处理, 进行全局优化。
+
+
+* 一些处理器
+
+** 固定比例采样器 cartographer::common::FixedRatioSampler
+
+  目的是按照固定的比例采样数据。
+
+  #+BEGIN_SRC text
+   每次调用该函数就产生一个脉冲(++num_pulse). 该消息被采纳之后++num_samples_.
+    加入ratio是0.5，就是采用一半数据。那么每次调用Pulse则会：
+    0次：num_pulses_ = 1,  num_samples_ = 0; 0/1 < 0.5, 采用, num_samples_ = 1；
+    1次：num_pulses_ = 2,  num_samples_ = 1; 1/2 = 0.5, 不采用, num_samples_ = 1；
+    2次：num_pulses_ = 3,  num_samples_ = 1; 1/3 < 0.5, 采用, num_samples_ = 2；
+    3次：num_pulses_ = 4,  num_samples_ = 2; 2/4 = 0.5, 不采用, num_samples_ = 2；
+    ...
+  #+END_SRC
+
+ - 所以这样看来，并不是按照固定速率采用数据。而是对数据进行了按比例选择使用。
+ - 所有的距离传感器都只有一个采样器，所以就算不同的传感器也会同等的按照比例来选
+   择。
+
+
+** RangeDataCollator 距离数据校对机
+
+  输入的距离数据是对每一帧数据进行细分，然后按照数据送进来的，但是有多个距离传感
+  器的点云信息，他们的各个点可能时间会重合，因此，这里就是将所有传感器的点云信息
+  进行时间的整理，保证所有点的时间是单调的。
+
+  从不同传感器上来的距离数据进行时间同步。分析一下需要做到什么？
+  多个距离传感器的数据合并到一起，他们的原点可能不一样，因此，要保存各自的原点。
+
+    #+CAPTION: 距离数据校对机
+    #+LABEL: fig:SED-HR4049
+    [[./images/cartographer_range_data_collator.png]]
+
+  具体实现方式：
+  - 需要保存的数据：
+    - 有一个时间表示这一次要同步的数据的时间段：current_start_, current_end_;
+    - 有一个map暂时保存各个sensor_id的距离数据: std::map<std::string, sensor::TimedPointCloudData> id_to_pending_data_;
+    - 每次返回一个同步之后的数据：sensor::TimedPointCloudOriginData
+      result{time, origins, {pointcloud_with_origin}};
+  - 实现过程:
+    - 确定合并数据的起始时间和结束时间:
+      - 如果该sensor_id在map中没有已经保存的数据，将该消息插入map中，处理的数据的
+        起始时间是上次处理结束的时间，结束时间是当前所有sensor_id的最早的一条数据
+        的时间。然后合并数据。
+
+      - 如果该sensor_id在map中已经有数据了。那就把这次要处理的数据的起始时间确定为
+        上次结束的时间，结束时间则是该sensor_id已经存在的数据的时间。处理完成之后
+        该sensor_id已有的数据会从map中删除，然后把新这条数据插入map中，直接返回，
+        等待下次处理。
+    - 合并数据
+      - 遍历每个sensor_id的数据，如果找出时间在current_start_和current_end_之间
+        的部分，将这些数据复制到result中，并且把origin也放到其中，点云数据包含
+        origin的索引。
+      - merge完成之后如果这个sensor_id的数据处理到了末尾，那就删除这条数据，否则
+        只保存剩余的数据，等待下次处理。
+      - 对result中的数据按时间排序。
+      - 处理结束之后返回result。
+
+
+** ImuTracker
+   目的是使用角速度和线加速度跟踪方位角。由于平均化后的线加速度(假设移动很慢)，
+   是直接测量为g倍数的，roll/pitch不会漂移，但是重力加速度会漂移。
+   - gravity_vector_: 重力向量会被不断更新。
+
+   - void Advance(common::Time time): 将姿态更新到时刻time。
+     通过计算time和上次的时间差，imu的角速度乘时间差得到角位移，在加上原来的姿态
+     得到新的姿态orientation_；同时更新时间和重力向量。
+
+
+** PoseExtrapolator
+   位姿估计器在Node中有一个，在LocalTrajectoryBuilder也有一个。
+   所以，在添加数据的时候要添加两次，在Node中要添加到Node的估计器中，在
+   LocalTrajectoryBuilder中也就添加到其中的估计器中。Node中的估计器貌似只有在发
+   布LocalTrajectory的时候有用。也就只有执行发布数据的时候才会将local_slam_pose
+   添加到其中。
+
+   LocalTrajectoryBuilder中的估计器会在两种情况下初始化：
+   - 当配置不适用imu数据时处理距离数据的时候会初始化;
+   - 当配置使用imu数据的时候，必须在处理imu的时候初始化估计器；
+   处理odom数据的时候不会初始化，而且没有估计器odom数据不会被处理。当配置使用imu
+   数据时必须在处理imu时初始化了估计器之后才会处理距离数据。
+
+   估计器的一些重要参数：
+   - pose_queue_duration_(0.001): 由于我们要从位姿里面推断速度，为了稳定性，我们
+     一般选择1ms以内的姿态来估计。 *但是我们能不能保证1ms内能产生位姿？*
+   - imu_data_: 保存imu的双向队列std::deque。
+   - timed_pose_queue_: 保存估计的位姿的双向队列std::deque。只保存时间在
+     pose_queue_duration_范围内的位姿，旧的数据要删除掉。
+   - cached_extrapolated_pose_: 保存推断出来的位姿,初始化为位置为0,姿态为0度。
+
+
+*** 初始化 PoseExtrapolator
+    - 初始化需要一个pose_queue_duration_(kExtrapolationEstimationTimeSec), 重力加
+      速度常数。
+    - 初始化之后立刻添加一个位置为0，姿态为0度的位姿。添加位姿的过程有很多事情要
+      做，主要包括，实例化imu_tracker_(ImuTracking)；更新速度信息；处理imu和odom
+      数据；初始化odometry_imu_tracker_和extrapolator_imu_tracker_都指向imu_tracker_.
+
+
+*** 估计器添加imu数据
+    比较简单，就是将数据加入到imu数据的队里中，然后遍历一遍，把时间比最新估计时间
+    旧的imu删除掉。
+
+*** 估计器添加Odom数据
+    前面和Imu一样，将数据加入到odom的队列中，然后遍历一遍，把时间比最新估计时间
+    旧的odom数据删掉。然后根据最新和最旧的odometry数据计算线速度
+    linear_velocity_from_odometry_和角速度angular_velocity_from_odometry_。
+
+*** 估计器添加LaserScan数据
+
+
+*** 添加位姿pose到估计器的过程
+    - 确保ImuTracker实例化：如果imu_tracker_没有实例化，先实例化，实例化时需要用
+      到重力加速度常数，初始时间。重力常数主要用来做距离的修正。
+    - 将该位姿pose加入到timed_pose_queue_中。删除其中比加入时间早
+      pose_queue_duration_的位姿。
+    - 根据timed_pose_queue_中的位姿估计速度：找出队列中最久和最新的位姿和时间，
+      通过除以时间得到线速度(linear_velocity_from_poses_)和角速度(angular_velocity_from_poses_)。
+      Note: 计算角速度的时候是使用四元素old_q.inverse() * new_q 得到old_q到new_q
+      的角位移，然后除与时间得到的。
+    - 进一步处理ImuTracker：如果到该时间之前没有imu数据，那么使用从poses中推断的
+      角速度和一个假的重力来帮助保障2d的稳定。
+
+
+** AdaptiveVoxelFilter 体素滤波器
+
+
+** LocalTrajectoryBuilder
+   - active_submaps_: ActiveSubmaps2D
+
+
+
+** scan_matching::RealTimeCorrelativeScanMatcher2D
+
+   实时关联性匹配：目的是为Ceres产生一个好的初值。通过
+   use_online_correlative_scan_matching 启用。参数包括：
+   - linear_search_window：
+   - angular_search_window：
+   - translation_delta_cost_weight:
+   - rotation_delta_cost_weight:
+
+
+** CeresScanMatcher2D
+
+   相关配置：
+   #+BEGIN_SRC lua
+     ceres_scan_matcher = {
+         occupied_space_weight = 1.,
+         translation_weight = 10.,
+         rotation_weight = 40.,
+         ceres_solver_options = {
+             use_nonmonotonic_steps = false,
+             max_num_iterations = 20,
+             num_threads = 1,
+         },
+     },
+   #+END_SRC
+
+   match的时候是一个最小二乘的优化问题，需要计算残差，这里的残差有三部分：
+   - OccupiedSpaceCostFunctor: 所占比重occupied_space_weight确定；
+   - TranslationDeltaCostFunctor: 所占比重translation_weight确定；
+   - RotationDeltaCostFunctor: 所占比重rotation_weight确定；
+
+
+** MotionFilter
+   输入一系列位姿，对它们进行滤波之后得到较少的几个位姿。为了减少计算量，不会每
+   一帧scan都加到submap中，只有当时间间隔，平移，旋转超过下面参数中规定的范围才
+   会将scan加入到submap中。而不满足这些条件的位姿就认为是相似的位姿，和上一次相
+   似的位姿下的scan不会被插入到submap中。
+
+   #+BEGIN_SRC lua
+   motion_filter = {
+     max_time_seconds = 5.,
+     max_distance_meters = 0.2,
+     max_angle_radians = math.rad(1.),
+   },
+   #+END_SRC
+
+
+** ActiveSubmap2D and Submap
+   LocalTrajectoryBuilder中会使用submap的参数实例化ActiveSubmap2D，当scanmatch之
+   后，会使用MotionFilter判断位姿和上一次插入scan的位姿是否超过一定的范围，超过
+   一定的范围之后才会插入scan。
+
+   submap的所有配置如下：
+   #+BEGIN_SRC lua
+     submaps = {
+         num_range_data = 90,  -- 每个子图接受的scan帧数，超过就新建submap.
+         grid_options_2d = {
+             grid_type = "PROBABILITY_GRID", -- submap类型。
+             resolution = 0.05, -- submap的分辨率
+         },
+         range_data_inserter = {
+             range_data_inserter_type = "PROBABILITY_GRID_INSERTER_2D",
+             probability_grid_range_data_inserter = {
+                 insert_free_space = true,
+                 hit_probability = 0.55,
+                 miss_probability = 0.49,
+             },
+             tsdf_range_data_inserter = {
+                 truncation_distance = 0.3,
+                 maximum_weight = 10.,
+                 update_free_space = false,
+                 normal_estimation_options = {
+                     num_normal_samples = 4,
+                     sample_radius = 0.5,
+                 },
+                 project_sdf_distance_to_scan_normal = true,
+                 update_weight_range_exponent = 0,
+                 update_weight_angle_scan_normal_to_ray_kernel_bandwidth = 0.5,
+                 update_weight_distance_cell_to_hit_kernel_bandwidth = 0.5,
+             },
+         },
+     },
+   #+END_SRC
+
+
+*** ActiveSubmap2D
+   - 当要插入第一帧ranges数据的时候，第一个活跃submap会被创建。
+   - 当submap数量超过1个的时候，每一帧ranges数据都总是会插入两个submap中，旧的
+     submap用来做matching，新的则是初始化后用来matching下一个submap。
+   - 当一定数量(默认90)的ranges数量插入之后，旧的submap就不会再变化了。当前的子
+     图也就变成了old submap，用来做scan-to-map的匹配, 同时新的submap又创建了。最
+     老的submap就不再被ActiveSubmap2D维护了。 *所以注意，这里不是维护所有的
+     submaps, 只维护最多两张。*
+
+   cartographer 的 submap 有两种类型：PROBABILITY_GRID 和 TSDF。这里我们只讨论我们
+   用的PROBABILITY_GRID。
+
+   添加submap时记录了该submap在local map坐标系下的位置local_pose_，以及Grid的限
+   制条件，比如分辨率，长宽，最大值。
+
+*** ActiveSubmap2D添加submap
+    添加submap只需要加入该submap的第一个ranges的origin位置即可。
+    - GreateGrid: 带入原点创建grid。由于我们用的是PROBABILITY_GRID，因此这里实例
+      化ProbabilityGrid，该类需要MapLimit和cell的转化表conversion_tables_(传入地
+      址，会被更新。这个表的key是<unknown_result, lower_bound, upper_bound>为key，
+      value为32768*2个整数转化到上下界的浮点vector)。
+    - MapLimit: resolution, max=origin+0.5*kInitialSubmapSize*resolution;
+      CellLimits 限制初始的宽和高的像素: kInitialSubmapSize。这样做origin就在
+      submap的中心，这样能够保证该submap和上一个submap有足够重合的部分。
+    - 创建ProbabilityGrid:Grid2D, 初始化Grid2D的时候查询<unknown_result,
+      lower_bound, upper_bound>在conversion_tables_中的浮点vector，如果没有要创
+      建。
+    - 用上一步的grid和conversion_tables_表创建Submap2D。其继承Submap。
+      - Submap 需要带入origin(ranges的origin)作为submap的local_pose_，表示该
+        submap在local map frame中的位姿。
+      - 跟踪该Submap插入的ranges数量，完成后设置insertion_finished, 该submap在
+        localSLAM中就不会在改变，而准备进行全局的闭环优化。
+
+
+*** RangeDataInserterInterface and ProbabilityGridRangeDataInserter2D
+
+    RangeDataInserterInterface(ranges_data_inserter_): 这个对象处理更新grid的各
+    个cells。通过CreateRangeDataInserter()创建
+    ProbabilityGridRangeDataInserter2D的对象。这个对象最主要的就是返回两个表
+    hit_table,和miss_table。
+    - 根据配置的hit和miss概率(默认概率是0.55,0.49)创建表。
+
+
+
+    这里涉及到cell的概率的计算。详细内容参考zhihu引用的文章[1]。Odds的使用在论
+    文中可以看到，zhihu文章给做了解释。
+
+    \begin{equation}
+    odds(probability) = \frac{probability}{correspondence\_cost}=\frac{probability}{1.0-probability}
+    \end{equation}
+
+    - float SlowValueToBoundedFloat
+      由于浮点数的计算比较麻烦，所以，这里cartographer在处理cell的概率的时候将浮
+      点数转化为[0,32767]的整数处理，处理完之后再通过查询一个表，直接返回对应的
+      浮点数。这样可以节省计算资源。
+
+      该函数把一个value(code中即[1,32767])之间的数转化为[lower_bound,
+      upper_bound] (code中即[0.1,0.9])之间的浮点数。unknown_value对应unknown_result,
+      对于Probability分别是0和最小概率；对于CorrespondenceCost分别是0和最大CorrespondenceCost。
+
+      下面这个函数主要讨论区间内的计算方法：
+      #+BEGIN_SRC c++
+        float SlowValueToBoundedFloat(const uint16 value, const uint16 unknown_value,
+                                      const float unknown_result,
+                                      const float lower_bound,
+                                      const float upper_bound)
+      #+END_SRC
+
+      \begin{equation}
+      \frac{fvalue - lower\_bound}{upper\_bound - lower\_bound} = \frac{value - 1}{32767-1}
+      \end{equation}
+
+      最后我们得到：
+      \begin{equation}
+      fvalue = \frac{upper\_bound - lower\_bound}{32767-1}\cdot{(value - 1)}+lower\_bound=kScale\cdot{value}-kScale+ lower\_bound
+      \end{equation}
+
+      另外unknown_value单独处理,直接对应unknown_result即可。
+
+
+    - uint16 BoundedFloatToValue
+
+      #+BEGIN_SRC c++
+        uint16 BoundedFloatToValue(const float float_value,
+                                   const float lower_bound,
+                                   const float upper_bound)
+      #+END_SRC
+
+      这是上面的逆运算，讲一个float数转化到[1,32767]之间。如果float_value不在
+      lower_bound和upper_bound之间[0.1,0.9]，需要限制在这里面。
+
+      \begin{equation}
+      \frac{float\_value - lower\_bound}{uint16 - 1} = \frac{upper\_bound - lower\_bound}{32767 - 1}
+      \end{equation}
+
+      \begin{equation}
+      uint16 = \frac{(float\_value - lower\_bound)\cdot32766}{upper\_bound - lower\_bound} + 1
+      \end{equation}
+
+
+
+** PoseGraph全局优化器
+   PoseGraph是在创建MapBuiler的时候实例化的，然后作为参数送给
+   GlobalTrajectoryBuilder。它对应的参数主要在pose_graph.lua中。
+
+   实例化位姿图优化器pose_graph_需要带入一个optimization::OptimizationProblem2D
+   的对象(其配置主要在pose_graph.lua中的optimization_problem中)。
+
+
+* 各类传感器数据处理
+
+** IMU
+
+  - 按比例提取数据，和LaserScan一样.
+  - 查找sensor相对tracking的平移和旋转，将加速度和角速度都转化到机器人
+    坐标系中。原则上希望imu安装在机器人中心，所以会检查两坐标系的平移大小，如果
+    太大的话，可能会不准确。
+  - Node的位姿估计器添加Imu数据：
+    - 判断如果imu的时间比timed_pose_queue_中最新的姿态时间晚才把imu数据放到一个队列中。
+    - 修正imu数据。将imu按照时间重新排序，将时间小于最近的一个位姿时间的全部删除。
+  - Localtrajectorybuilder 处理Imu数据。
+    配置使用imu的话，LocalTrajectoryBuilder需要imu处理的时候初始化
+    extrapolator，否则里程计数据和距离数据都不会处理，并插入一个初始值,
+    同时将imu数据加入到extrapolator的队里中，清除旧的imu数据。队列里面的数据会在
+    处理距离数据插入pose的时候进一步处理。
+  - 全局优化器pose_graph_处理imu数据。
+
+
+** Odometry
+  - 按比例提取数据，和LaserScan一样.
+  - 查找sensor相对tracking的平移和旋转.
+  - Node中的位姿估计器添加Imu数据：
+    - 判断如果imu的时间比timed_pose_queue_中最新的姿态时间晚才把imu数据放到一个队列中。
+    - 修正imu数据。将imu按照时间重新排序，将时间小于最近的一个位姿时间的全部删除。
+    - 如果odom数据超过两个，计算角速度, 如果已有估计的位姿，再计算线速度。
+  - Localtrajectorybuilder 处理里程计数据。 *只有位姿估计器extrapolator已经存在才
+    会处理。* 这一步的处理主要有两个：
+    - 加入到odom的队列中，并删除比最新位姿旧的odom数据；
+    - 通过里程计差值计算角速度angular_velocity_from_odometry_和线速度
+      linear_velocity_from_odometry_。以备后面使用。注意，这里会计算最久和最新
+      的里程计之间的速度，而且每次odom来了都会更新，直到要计算下一个位姿的时候，
+      就可以认为是这个速度是上一次位姿估计到这个次位姿估计的平均速度了。
+  - 全局优化器pose_graph_处理odom数据。
+
+
+** LaserScan
+
+  - 按比例提取数据：
+    使用FixedRatioSampler按设置的比例确定是否采用该Scan, 如果不采用直接返回。
+  - 距离转化为点云，并带上时间偏移：
+    将采用的激光转换为带灵敏度的点云。转换为点云之后整个点云带有一个时间，该时间
+    就是接收到的数据的时间。同时每个距离点也包含一个相对最后一个点的时间偏移。这
+    样通过这个偏移就可以求出每个点的时间戳了。注意这些点云是相对激光坐标系的。
+  - 将距离点分成多份，单份处理：
+    将点云细分之后处理。即将一帧激光的点云数据分成几份，一份一份地处理。注意，这
+    时候需要将每一份数据的时间偏移调整为以这一份的最后一条数据为基准。
+  - 查找激光坐标系和tracking坐标系(其实就是BASE坐标系)的转换。
+  - TrajectoryBuilder添加距离数据，从全局TrajectoryBuilder进入，调用
+    LocalTrajectoryBuilder先进行LocalSLAM.
+    - 使用 range_data_collator 同步多个距离传感器的数据，返回按时间排列的数据。
+    - 如果配置不适用imu数据，则初始化位姿估计器 extrapolator。否则要等处理imu的
+      时候将extrapolator初始化好，否则距离数据不会被处理。
+    - 计算同步后的数据第一个点的时间，如果这个点的时间比位姿估计器估计的最近的时
+      间要旧，说明这个数据过时了，直接返回。否则据需处理距离数据。
+    - 遍历每一个range点。估计每个距离点对应的位姿，这样每个距离点都有一个对应的
+      位姿。
+    - 遍历每个range点，根据上面估计的位姿计算这些点在local中的位置和距离，确定这
+      些点是returns(打到障碍物返回的点)，还是misses(丢失的点)，依据就是距离是否
+      在配置的最大最小距离内。丢失的点位置确定方法是原点(向量)+misses_data_ray_length
+      / range * 距离(向量)。这个公式的作用是选择在miss方向上距离原点
+      misses_data_ray_length长度处选择一个点作为miss点加入misses中，后面我们在更
+      新submap的概率的时候，returns点的概率是选择hit_table概率表查询结果的，而原点到
+      return中间射线的点和到misses射线的点都是通过miss_table来查询概率的。这两个
+      表前面submap部分做了说明。总结起来就是超过最大距离的射线我们选择一个中间的
+      距离点，到这个中间距离点的我们都认为是可能是空白区域。
+    - 等到保存的数据分数超过规定的数量就开始处理。
+    - 估计位姿，并进行重力对齐, 后面会用这个位姿进行scanmatch；
+    - 使用体素滤波器过来returns的距离点。
+    - 使用估计的位姿和过滤后的点云进行scanmatch。返回校正之后的位姿,scanmatch主要有：
+      - 如果配置使用RealTimeCorrelativeScanMatch,则先做一次匹配得到一个较好的初
+        值给后面的Ceres匹配；
+      - 给定一个好的初值，初值的好坏决定match的快慢和效果；
+      - 给定grid子图，点云。构建包含三倍部分的带权重的代价函数，使用Ceres最后得
+        到一个通过观测点云优化的机器人位姿。如果没有子图，则直接返回预测的位姿。
+      - 统计校正后的位姿和预测的位姿的偏差大小。
+    - 将该位姿再次重力对齐后插入估计器中。
+    - 通过校正的位姿，重新计算点云在local map中的位置。注意这里使用的点云是没有
+      经过体素滤波稀疏化的点云。否则加入地图的点就太少了。
+    - 将校正之后的点云插入子图中。
+      - 判断该位姿和上一次将scan插入submap的位姿在时间间隔，平移和旋转上是否超过
+        配置规定的范围(如果没有则认为是相似位姿)，如果是相似位姿则不会插入submap。
+      - 调用ActiveSubmaps2D接口插入scan。
+        - 两种情况下会新建submap: 一是还没有任何submap，二是最近的submap插入的
+          scan数据打到配置要求的数量(默认90)，submap的原点就是机器人当前的位置。
+          注意，超过90帧新建submap，旧的依然还会加入新的scan。
+        - 遍历所有的活跃submap，每一个都执行以下插入动作, 这里用了一个超分辨率的
+          方法，将原有的像素变大，使之更准确:
+          - 遍历所有的returns和misses点，修改grid的大小，保证所有点都在grid内。注
+            意，这一步保证扩大grid大小的submap一定是活跃的。创建submap的grid的时
+            候会使用odds方法产生一个hit_table和miss_table，供更新各个cell的概率使
+            用。
+          - 找出所有的returns点，按照hit_table更新returns cells的概率；
+          - 计算原点到returns的射线经过的cells，按照miss_table更新概率;
+          - 计算原点到misses的射线经过的cells，按照miss_table更新概率;
+          - 以上都将更新过的cell index加入到update_indices_向量中。
+          - 更新num_range_data数目。
+        - 检查ActiveSubmap2D中保存的最早的submap，如果插入的scan数量超过2倍规定
+          的数量，标记为Finished。ComputeCroppedGrid裁剪submap，并设置概率。
+    - 返回LocalSLAM的Matching结果，包括：
+      - time，gravity_alignment
+      - range_data_in_local.
+      - filtered_gravity_aligned_point_cloud
+      - 校正后的位姿.
+      - 更新后的所有submaps.
+    - 使用pose_graph添加节点和submap, 供图优化处理。
+
+
+** 总结一下LocalSLAM得到的结果
+
+   LocalSLAM最终返回的结果是MatchingResult：
+
+   #+BEGIN_SRC c++
+     struct MatchingResult {
+       common::Time time;
+       transform::Rigid3d local_pose;
+       sensor::RangeData range_data_in_local;
+       // 'nullptr' if dropped by the motion filter.
+       std::unique_ptr<const InsertionResult> insertion_result;
+     };
+   #+END_SRC
+
+   MatchingResult包含：
+   - time: 此次matching的scan时间。
+   - local_pose: 此次matching的scan的位姿。
+   - range_data_in_local: 未过滤的距离数据。
+   - insertion_result: range_data_in_local插入submap返回的结果。
+
+   InsertionResult:
+
+   #+BEGIN_SRC c++
+     struct InsertionResult {
+       std::shared_ptr<const TrajectoryNode::Data> constant_data;
+       std::vector<std::shared_ptr<const Submap2D>> insertion_submaps;
+     };
+   #+END_SRC
+   其中
+   - constant_data 包含此次range插入submap包含的主要内容：
+     #+BEGIN_SRC c++
+       struct TrajectoryNode {
+         struct Data {
+           common::Time time;
+
+           // Transform to approximately gravity align the tracking frame as
+           // determined by local SLAM.
+           Eigen::Quaterniond gravity_alignment;
+
+           // Used for loop closure in 2D: voxel filtered returns in the
+           // 'gravity_alignment' frame.
+           sensor::PointCloud filtered_gravity_aligned_point_cloud;
+
+           // Used for loop closure in 3D.
+           sensor::PointCloud high_resolution_point_cloud;
+           sensor::PointCloud low_resolution_point_cloud;
+           Eigen::VectorXf rotational_scan_matcher_histogram;
+
+           // The node pose in the local SLAM frame.
+           transform::Rigid3d local_pose;
+         };
+
+         common::Time time() const { return constant_data->time; }
+
+         // This must be a shared_ptr. If the data is used for visualization while the
+         // node is being trimmed, it must survive until all use finishes.
+         std::shared_ptr<const Data> constant_data;
+
+         // The node pose in the global SLAM frame.
+         transform::Rigid3d global_pose;
+       };
+
+     #+END_SRC
+
+
+   - insertion_submaps: 此次matching相关的submap，最多两个, ranges可能都会插入到
+     这两个submap中。Submap2D继承了Submap,其中有个const transform::Rigid3d
+     local_pose_, 表示submap的位姿。
+
+   上面出现了好几个位姿，总结一下各个位姿到底是什么：
+
+   - insertion_submaps里的submap中的local_pose_: 这个是在AddSubmap函数中创建新的
+     submap的时候加入的，是创建submap时的第一个ranges的原点。
+   - TrajectoryNode::Data中的local_pose: 这是node在Local map frame 下面的位姿。
+   - constant_data中的global_pose: 这是node在Global map frame下面的位姿。
+
+   注意，我们常常会把Local map frame坐标系理解成submap的坐标系，这是不对的，
+   local map frame坐标系和global map frame一样是固定的坐标系，每个submap相对
+   local map frame有一个转换关系。这个变换就是通过insertion_submaps里的submap的
+   local_pose来变换的。
+
+
+* 参考
+
+  [1] [[https://zhuanlan.zhihu.com/p/21738718][占据栅格地图（Occupancy Grid Map）]]

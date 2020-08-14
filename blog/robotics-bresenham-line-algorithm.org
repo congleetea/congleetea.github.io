@@ -1,0 +1,19 @@
+#+TITLE:       布雷森汉姆直线算法
+#+AUTHOR:      Xuancong Lee
+#+EMAIL:       congleetea@gmail.com
+#+DATE:        2018-09-18 Tue
+#+URI:         /blog/%y/%m/%d/bresenham-line-algorithm
+#+KEYWORDS:    bresenham,line algorithm
+#+TAGS:        robotics
+#+LANGUAGE:    en
+#+OPTIONS:     H:3 num:nil toc:nil \n:nil ::t |:t ^:nil -:nil f:t *:t <:t
+#+DESCRIPTION: 直线算法
+
+
+
+
+* 参考 
+
+https://zh.wikipedia.org/wiki/%E5%B8%83%E9%9B%B7%E6%A3%AE%E6%BC%A2%E5%A7%86%E7%9B%B4%E7%B7%9A%E6%BC%94%E7%AE%97%E6%B3%95
+
+https://blog.oldj.net/2010/08/27/bresenham-algorithm/

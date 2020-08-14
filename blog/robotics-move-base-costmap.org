@@ -1,0 +1,87 @@
+#+TITLE:       move_base costmap 类关系及costmap更新过程
+#+AUTHOR:      Xuancong Lee
+#+EMAIL:       congleetea@gmail.com
+#+DATE:        2018-09-12 Wed
+#+URI:         /blog/%y/%m/%d/costmap
+#+KEYWORDS:    costmap,move_base,navigation,slam
+#+TAGS:        robotics
+#+LANGUAGE:    en
+#+OPTIONS:     H:3 num:nil toc:nil \n:nil ::t |:t ^:nil -:nil f:t *:t <:t
+#+DESCRIPTION: costmap类之间的关系以及costmap更新过程
+
+
+* 类关系图
+
+  #+CAPTION: costmap类关系
+  #+LABEL: fig:SED-HR4049
+  [[./images/costmap_class.png]]
+
+
+  - layered cosmtap和需要保存一个costmap的分层都会实例化一个Costmap2D，这里static,
+    obstacle都用到了，inflation没有用到。
+  - Costmap2D中有表示map原点，分辨率，尺寸的变量，在rolling_window中，layered的会发
+    生改变，否则是不会变的，总是和static map一样大。
+
+
+* 更新cosmtap过程
+
+  要从各Layer创建开始说起，各层继承关系有些差别：如果这一层需要保存costmap的值，那么
+  就继承CostmapLayer，进一步继承Layer和Costmap2D，这样可以通过Costmap2D来保存costmap；
+  如果不需要保存costmap，就直接继承Layer即可。
+
+  static，obstacle和inflation这三层中，static和obstacle需要保存costmap，所以都继承的是
+  CostmapLayer，inflation不用保存costmap，这一层膨胀前面两层的结果即可。
+
+
+** 全局costmap更新过程
+
+#+BEGIN_SRC plantuml :file ./gimages/global_costmap.png  :cmdline -charset UTF-8
+start
+:static map arrived;
+:layered_costmap.resizeMap初始化layered_cosmtap;
+:layered_costmap.matchSize调用各层的matchSize调整size;
+:static.matchSize将static.costmap调为和layered.costmap一致,并计算static.costmap;
+:obstacle.matchSize将obstacle.costmap调为和layered.costmap一致,并计算obstacle.costmap;
+:inflation.matchSize保存size，初始化kernel和seen_数组，没有inflation.costmap;
+repeat
+:开始updateBounds调用各层的updateBounds;
+:初始化min为最大值1e30，max为最小值-1e30;
+:static.updateBounds;
+if("新地图第一次updateBounds") then(yes)
+  :min,max置为layered.costmap的左下角和右上角，其实就是static map的对角;
+  :min=static.left_down,max=static.right_up;
+else
+  :min=1e30,max=-1e30;
+endif
+:obstacle.updateBounds;
+:遍历buffer中的障碍点,计算包含所有障碍点的边界,\n由于min要选较小的，max要选较大的，所以第一次可能还是和static一样大,\n但是第二次不执行static.updateBounds，所以选择结果一定是obstacle的结果;
+:min=smaller,max=bigger;
+:inflation.updateBounds;
+:inflation首先会缓存obstacle执行边界的结果last_bound;
+:min=min(last_bound,min),max=max(last_bound,max);
+:结束updateBounds;
+:开始updateCosts调用各层的updateCosts,layered.costmap=last_update;
+:static.updateCosts;
+if("新地图第一次updateCosts") then(yes)
+  :利用static.costmap更新layered.costmap;
+endif
+:obstacle.updateCosts;
+:利用updateBounds更新的obstacle.costmap更新layered.costmap;
+:inflation.updateCosts;
+:选择layered.costmap中的所有障碍点，根据距离扩展更新layered.costmap;
+:结束updateCosts;
+:publish layered.costmap,下次在layered.costmap基础上更新;
+repeat while("间隔时间到")
+stop
+#+END_SRC
+
+
+** 说明
+
+- updateBounds不改变各层的costmap的size，除非新地图来了重新resize。
+
+- 原则上每一层的size要比上一层小。
+
+- 新地图出现，会改变所有层大小。
+
+- 膨胀半径或者足迹改变，会重新膨胀所有信息，而不只是膨胀bounds内的区域。

@@ -1,0 +1,137 @@
+#+TITLE:       机器人运动规划-动态窗口法(dwa)
+#+AUTHOR:      Clare Lee
+#+EMAIL:       congleetea@gmail.com
+#+DATE:        2019-09-05 Thu
+#+URI:         /blog/%y/%m/%d/motion-plan-dwa
+#+KEYWORDS:    motion plan,dwa,velocity windows
+#+TAGS:        robotics
+#+LANGUAGE:    en
+#+OPTIONS:     H:3 num:nil toc:nil \n:nil ::t |:t ^:nil -:nil f:t *:t <:t
+#+DESCRIPTION: dwa review
+
+* 概述
+  动态窗口法(Dynamic Windows Approach)
+  有以下特点：
+  - 考虑机器人动力学特性；
+  - 考虑机器人惯性；
+  - 可以实现高速行驶。
+
+  根据运动方程的推导，可以把机器人的轨迹看成是两种形式：直线行走和弧线行走。前者
+  没有角速度，后者有角速度。在此基础上考虑：
+  - 机器人产生的可行的弧形轨迹；
+  - 可允许的速度；
+  - 动态窗口。
+  最终形成了一些列可选择的速度（速度窗口），然后遍历这些速度，根据一个评价函数，
+  计算这些速度对应的评价函数值，选择评价函数值最大的速度作为机器人的速度。
+
+  评价函数包括三部分(每个部分都占一定的权重)：
+  - 车头方向朝向目标点，与目标点的夹角越小，函数值越大。保证机器人总是往目标点行
+    走，不至于中途徘徊。
+  - 速度产生的弧线与最近障碍物距离越远，函数值越大。保证安全。
+  - 速度大小。速度越大，值越大。保证以最快的速度行走。
+  当然使用这还可以根据自己的需要增加各种约束条件。比如可以增加贴合全局路径的程度
+  等等。
+
+
+* 简要推导
+  因为窗口是线速度和角速度的窗口，因此，在推导的时候我们要把这些运动约束转化成线
+  速度(v)和角速度(w)的关系，同时要基于当前的位置(x,y,theta)。
+
+** 运动方程
+   - 一般运动方程
+
+     #+CAPTION: 一般运动方程
+     #+LABEL: fig:SED-HR4049
+     [[./images/dwa-general-motion-equation.png]]
+
+
+     由于速度不能直接设置，使用加速度进一步得到：
+
+     #+CAPTION: 带加速度的运动方程
+     #+LABEL: fig:SED-HR4049
+     [[./images/dwa-motion-equation-with-acc.png]]
+
+     这里只依赖初始速度和位姿的加速度。我们假定一个时间片段内加速度是相同的，那
+     么可以得到离散形式：
+
+     #+CAPTION: 离散运动方程
+     #+LABEL: fig:SED-HR4049
+     [[./images/dwa-constant-acc-motion-equation.png]]
+
+   - 估计的运动方程
+     我们进一步估计，当我们取的时间片段足够小的时候，可以认为速度是常数，这样可
+     以得到：
+     #+CAPTION: 均匀速度
+     #+LABEL: fig:SED-HR4049
+     [[./images/dwa-constant-vel-motion-equation.png]]
+
+     进一步可以得到：
+     #+CAPTION: 线速度和角速度
+     #+LABEL: fig:SED-HR4049
+     [[./images/dwa-circle-motion-equation-x.png]]
+     #+CAPTION: 线速度和角速度
+     #+LABEL: fig:SED-HR4049
+     [[./images/dwa-circle-motion-equation-y.png]]
+     #+CAPTION: 圆形方程
+     #+LABEL: fig:SED-HR4049
+     [[./images/dwa-circle-motion-equation.png]]
+
+     可以看出，这是以线速度和角速度比值(也就是机器人行走的半径)为半径的，圆心为
+     (Mx,My)的一个圆。
+
+
+** 动态窗口
+   确定速度窗口，根据三个步骤：
+   - 在当前位置，考虑各种速度（线速度和角速度），这些速度将构成一些列环形的轨迹。
+   - 可允许的速度：要保证该该速度形式能在最近的障碍物前停下来。
+     #+CAPTION: 可允许的速度
+     #+LABEL: fig:SED-HR4049
+     [[./images/dwa-admissible-velocities.png]]
+
+   - 动态窗口：以当前速度为中心，一个确定的加速度（该加速度有限制）和时间窗口，
+     可以确定这是时间片段内能达到的速度边界。
+     #+CAPTION: 动态窗口
+     #+LABEL: fig:SED-HR4049
+     [[./images/dwa-dynamic-window.png]]
+
+
+   上面三种考虑得到的速度的集合就是最终的速度窗口。
+
+   #+CAPTION: 最终的速度窗口 
+   #+LABEL: fig:SED-HR4049
+   [[./images/dwa-search-velocities.png]]
+
+
+** 速度的选择 
+   上面根据各种条件确定了一个以当前速度为中心的速度窗口，如何选择这些速度呢？根
+   据一些约束条件，构建一个评价函数，对速度窗口里面的速度一次计算评价函数值，选
+   择评价函数值最大的速度。
+   
+   评价函数怎么选择呢？
+   #+CAPTION: 评价函数,(v,w)都是Vr里面的速度。 
+   #+LABEL: fig:SED-HR4049
+   [[./images/dwa-objective-function.png]]
+
+   - 目标朝向：180-theta，theta是机器人方向与目标点的夹角。说明，偏角越小，该值
+     就越大。这一项保证了机器人能尽可能地往目标点前进，不至于在某个地方徘徊。 
+   - 与最近障碍物的距离：每个速度都对应一条直线(角速度=0)或一个弧线，线条延长之
+     后可能会与障碍物相交，说明照此速度一直走就会撞到障碍物，这个距离越远说明越
+     安全。因此，距离越大，这个值越大。 
+   - 速度大小：尽量选择速度比较大的，这样可能保证以最快的速度到达目标点。
+     
+   每一项都有一个权重，代表他们的影响程度。
+   除此之外，我们还可以加上其他的一些因素，比如所得路径是否贴合全局路径等等。
+   
+   
+** 一些影响因素
+   - 当前速度的影响：当前的速度决定了能走的空间。比如在靠近障碍物的地方要转弯，
+     如果速度太快，可调的速度可能不能实现转弯。
+   - 加速度的影响：加速度是认为选择的，加速度越大，速度窗口就会越大，反之依然。
+
+     
+
+* references
+  - WIKI：[[https://en.wikipedia.org/wiki/Dynamic_window_approach][Dynamic window approach]]
+  - 论文：The dynamic window approach to collision avoidance
+  - 博客：[[http://adrianboeing.blogspot.com/2012/05/dynamic-window-algorithm-motion.html][Dynamic Window Algorithm motion planning]]
+  - 讨论：[[https://answers.ros.org/question/274564/difference-between-dwa-local_planner-and-teb-local_planner/][Difference between DWA local_planner and TEB local_planner]]

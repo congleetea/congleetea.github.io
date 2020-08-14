@@ -1,0 +1,214 @@
+#+TITLE:       Costmap: inflation 层
+#+AUTHOR:      Xuancong Lee
+#+EMAIL:       congleetea@gmail.com
+#+DATE:        2018-09-10
+#+URI:         /blog/%y/%m/%d/costmap-inflation-layer
+#+KEYWORDS:    navigation,costmap,inflation
+#+TAGS:        robotics
+#+LANGUAGE:    en
+#+OPTIONS:     H:3 num:nil toc:nil \n:nil ::t |:t ^:nil -:nil f:t *:t <:t
+#+DESCRIPTION: costmap inflation layer.
+
+
+* 概述
+
+  膨胀层cost的计算是根据cell距离障碍物的距离计算，总的原则就是 *距离障碍物越近，cost就越大* ，而
+  远近的界限主要是两个，一个是机器人的内切半径范围，另一个是膨胀半径范围，表示如下图：
+
+  值得注意的是，我们使用半径是已经经过膨胀之后的半径。使用参数footprint_padding
+  参数膨胀的。
+
+  #+CAPTION: inflation layer cost computation
+  #+LABEL: fig:SED-HR4049
+  [[./images/robotics_inflation.png]]
+
+
+  即：
+
+  - Lethal: 这些方格里面是实实在在的障碍物；
+  - Inscribed: 这些方格距离障碍物的距离小于机器人的内切半径，机器人中心落在这些方格里面当然会和一些障碍物发生碰撞；   
+  - Possibly circumscribed: 这些方格距离障碍物距离大于内切半径，机器人中心落在这些方格里面时，在某些朝向上可能会和障碍物发生碰撞，所以(但是在膨胀半径内)通过指数分布来确定cost即可; 
+  - Freespace: 超过膨胀半径的认为是空的区域；
+  - Unknown: 其他区域作为位置区域，我们在初始化的时候，如果设置了track_unknown_space,则将其设置为255了,否则设置为0。 
+   
+
+* 代码实现 
+  
+  move_base中，全局规划的时候如果使用了inflation layer，会根据膨胀半径和机器人内切半径(由足迹确定)，计算出两个大小相同的矩阵，作为kernel，来计算cost值。
+
+  
+** 参数和变量
+
+*** 参数
+
+  | 参数                |   默认 | 说明 |
+  |---------------------+--------+------|
+  | INFLATION_PADDING   | 0.1(m) |      |
+  | COST_SCALING_FACTOR |      0 |      |
+  | INFLATE_UNKNOWN     |      1 |      |
+
+  #+BEGIN_SRC c++
+    static const unsigned char NO_INFORMATION = 255;
+    static const unsigned char LETHAL_OBSTACLE = 254;
+    static const unsigned char INSCRIBED_INFLATED_OBSTACLE = 253;
+    static const unsigned char FREE_SPACE = 0;
+  #+END_SRC
+
+
+*** 重要变量
+
+   | 变量                          | 默认                      | 说明                                                                                          |
+   |-------------------------------+---------------------------+-----------------------------------------------------------------------------------------------|
+   | inflate_unknown_              | INFLATE_UNKNOWN           |                                                                                               |
+   | need_reinflation_             | false                     | 当cost_scaling_factor,inflation_radius,footprint变化的时候，需要重新计算kernel,重新计算边界。 |
+   | seen_[size_x * size_y]        | new bool[size_x * size_y] | 用来标记这个index对应的方格是否已经被计算过。                                                 |
+   | height_                       | COST_SCALING_FACTOR       | 计算cost时用到的一个系数。                                                                    |
+   | inflation_radius_             | INFLATION_PADDING         | 膨胀半径.                                                                                     |
+   | cell_inflation_radius         |                           | inflation_radius_(m)转化为cells个数(基于resolution).                                          |
+   | cached_cell_inflation_radius_ |                           | cell_inflation_radius的缓存，出现变化，二者不同的时候，要重新计算kernel和costs。              |
+   | inscribed_radius_             | 内切圆半径                |                                                                                               |
+   | inflation_cells_              |                           |                                                                                               |
+   | cached_distances_             |                           | size为cell_inflation_radius_+2的double指针数组。                                              |
+   | cached_costs_                 |                           | size为cell_inflation_radius_+2的uchar指针数组。                                               |
+ 
+
+** 计算cost值
+
+
+*** 计算kernel值
+
+  如果 cell_inflation_radius_ == 0, 则不用进行膨胀。
+
+  #+BEGIN_SRC c++
+    cached_costs_ = new unsigned char* [cell_inflation_radius_ + 2];
+    cached_distances_ = new double*[cell_inflation_radius_ + 2];
+  #+END_SRC
+
+  注意 cached_costs_ 和 cached_distance_ 保存的内容是指针，最后表示的其实就是一个行数和列数相同的矩阵。
+
+  计算方法如下：
+
+  #+BEGIN_SRC c++
+    for (unsigned int j = 0; j <= cell_inflation_radius_ + 1; ++j) {
+      cached_distances_[i][j] = hypot(i, j);
+    }
+  #+END_SRC
+
+  也就是 i 行 j 列的 cached_distances 值是以i，j为直角边的斜边长。比如，如果 cell_inflation_radius_ = 1,
+  那么矩阵就是1+2=3维：
+
+  #+BEGIN_SRC text
+    [[0, 1,         2]
+     [1, sqrt(1+1), sqrt(1+2)]
+     [2, sqrt(2+1), sqrt(2+2)]]
+  #+END_SRC
+
+  其实就是表示离(0,0)距离i，j位置的格子个数。
+
+  计算 cached_costs_ 是根据刚才计算的 cached_distance_ 来计算的。
+
+  #+BEGIN_SRC c++
+  for (unsigned int i = 0; i <= cell_inflation_radius_ + 1; ++i) {
+    for (unsigned int j = 0; j <= cell_inflation_radius_ + 1; ++j) {
+      cached_costs_[i][j] = computeCost(cached_distances_[i][j]);
+    }
+  }
+  #+END_SRC
+
+  也就是一一对应 cached_distances_ 来计算:
+
+  #+BEGIN_SRC c++
+  inline unsigned char computeCost(double distance) const {
+    unsigned char cost = 0;
+
+    if (distance == 0)
+      cost = LETHAL_OBSTACLE;
+    else if (distance * resolution_ <= inscribed_radius_)
+      cost = INSCRIBED_INFLATED_OBSTACLE;
+    else {
+      // make sure cost falls off by Euclidean distance
+      double euclidean_distance = distance * resolution_;
+      double factor = exp(-1.0 * weight_ * (euclidean_distance - inscribed_radius_));
+      cost = (unsigned char)((INSCRIBED_INFLATED_OBSTACLE - 1) * factor);
+    }
+
+    return cost;
+  }
+  #+END_SRC
+
+  也就是计算距离障碍物欧式距离 euclidean_distance, 根据远近来确定cost的大小：
+
+  | euclidean_distance                         | cost                                                         |
+  |--------------------------------------------+--------------------------------------------------------------|
+  | 0                                          | LETHAL_OBSTACLE(254)                                         |
+  | > 0 && <= inscribed_radius_                | INSCRIBED_INFLATED_OBSTACLE(253)                             |
+  | > inscribed_radius_ && <= inflation_radius | factor由指数分布确定，(INSCRIBED_INFLATED_OBSTACLE-1)*factor |
+
+  最后也计算出一个cost的正矩阵来。后面更新cost时就基于这个矩阵来计算。
+
+
+  
+*** 计算cost值
+
+  首先，定义一个class: CellData表示一个cell以及这个点附近的一个障碍物cell。在计算cost的时候维持一个map：
+
+  #+BEGIN_SRC c++
+  class CellData {
+   public:
+    /**
+     * @brief  Constructor for a CellData objects
+     * @param  i The index of the cell in the cost map
+     * @param  x The x coordinate of the cell in the cost map
+     * @param  y The y coordinate of the cell in the cost map
+     * @param  sx The x coordinate of the closest obstacle cell in the costmap
+     * @param  sy The y coordinate of the closest obstacle cell in the costmap
+     * @return
+     */
+    explicit CellData(double i, unsigned int x, unsigned int y, unsigned int sx, unsigned int sy)
+      : index_(i),
+        x_(x),
+        y_(y),
+        src_x_(sx),
+        src_y_(sy) {
+    }
+  
+    unsigned int index_;
+    unsigned int x_, y_;
+    unsigned int src_x_, src_y_;
+  };
+
+
+  std::map<double, std::vector<CellData>> inflation_cells_;
+  #+END_SRC
+
+  这个map的key表示distance，cell距离障碍物的距离(cell个数×resolution); value是一个vector，
+  表示和障碍区距离为key的所有cell和障碍物对。初始时候，距离为0的key的值是所有障碍物cell
+  的vector。从distance==0开始计算，每计算一个cell，就将这个cell标记为seen，后面就不会计算这个点了。
+  同时，会将这个cell前后左右四个cell加入到inflation_cells_中对应distance的vector中。
+
+  如此遍历这个inflation_cells_不同距离的所有cells，计算每个cell的新cost：
+
+  #+BEGIN_SRC c++
+      if (old_cost == NO_INFORMATION && (inflate_unknown_ ? (cost > FREE_SPACE) : (cost >= INSCRIBED_INFLATED_OBSTACLE))) {
+        master_array[index] = cost;
+      } else {
+         master_array[index] = std::max(old_cost, cost);
+      }
+  #+END_SRC
+
+  即对未知区域的处理是：
+    - 如果设置了inflation_unknown,并且新计算的cost>FREE_SPACE,就使用新的cost覆盖；
+    - 如果没有设置inflation_unknown,并且cost > INSCRIBED_INFLATED_OBSTACLE, 也是用新的cost覆盖。 
+  
+  其他情况选择新旧cost中比较大的一个作为新的cost。 
+
+  
+
+  
+* 总结
+  
+  总的来说，要注意两个参数，一个是 footprint_padding，另一个是 inflation_radius_。 
+  前者在原始的机器人多边形基础上进行xy方向的膨胀，然后在膨胀层再膨胀
+  inflation_radius_, 这个参数通常使用机器人的半径，保证机器人能通过。前者
+  footprint_padding 可以认为是安全距离，保证机器人能通过时两边还能距离障碍物这个
+  距离。

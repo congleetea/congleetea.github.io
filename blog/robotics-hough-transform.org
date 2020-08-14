@@ -1,0 +1,30 @@
+#+TITLE:       霍夫变换
+#+AUTHOR:      Xuancong Lee
+#+EMAIL:       congleetea@gmail.com
+#+DATE:        2018-09-28 Fri
+#+URI:         /blog/%y/%m/%d/hough-transform
+#+KEYWORDS:    hough,line
+#+TAGS:        robotics
+#+LANGUAGE:    en
+#+OPTIONS:     H:3 num:nil toc:nil \n:nil ::t |:t ^:nil -:nil f:t *:t <:t
+#+DESCRIPTION: 霍夫变换
+
+
+#+CAPTION: 霍夫空间和笛卡尔空间的变换 
+#+LABEL: fig:SED-HR4049
+[[./images/hough_decare.jpg]]
+
+
+- 霍夫空间(r,theta)坐标系中的一个点代表笛卡尔坐标系中的一条直线。
+
+- 霍夫空间的一条曲线代表笛卡尔空间的一条直线。
+
+- 笛卡尔坐标下的一个点代表的曲线经过霍夫坐标系下的很多点，说明这个点是多条直线的点。
+ 
+- 将笛卡尔坐标系下的所有点转换到霍夫坐标系下，在霍夫坐标系下交点最多的点代表的笛卡尔坐标系下的直线就是你要找的直线，
+  而经过这直线的点可以通过霍夫坐标系下经过这个点的所有曲线得到。
+
+- 通常对图像进行霍夫变换时先提取轮廓，只对轮廓上的点变换这样就减小了很多计算量，否则每个点都按一定的theta步长计算一
+  个 2pi 周期，计算量非常大。
+
+https://www.zhihu.com/question/35268803

@@ -1,0 +1,10 @@
+#+TITLE:       Efficient Sparse Pose Adjustment for 2D Mapping
+#+AUTHOR:      Clare Lee
+#+EMAIL:       congleetea@gmail.com
+#+DATE:        2019-05-11 Sat
+#+URI:         /blog/%y/%m/%d/efficient-sparse-pose-adjustment-for-2d-mapping
+#+KEYWORDS:    SPA,optimization,pose graph
+#+TAGS:        robotics
+#+LANGUAGE:    en
+#+OPTIONS:     H:3 num:nil toc:nil \n:nil ::t |:t ^:nil -:nil f:t *:t <:t
+#+DESCRIPTION: Efficient Sparse Pose Adjustment for 2D Mapping笔记
