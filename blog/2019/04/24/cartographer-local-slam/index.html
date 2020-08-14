@@ -42,9 +42,9 @@
   <h1>SLAM-cartographer: Local SLAM</h1>
 
 
-<div id="outline-container-org93be799" class="outline-2">
-<h2 id="org93be799">总体处理方法</h2>
-<div class="outline-text-2" id="text-org93be799">
+<div id="outline-container-org95dd59c" class="outline-2">
+<h2 id="org95dd59c">总体处理方法</h2>
+<div class="outline-text-2" id="text-org95dd59c">
 <ul class="org-ul">
 <li>按照配置的比例采用数据；</li>
 <li>将数据转化到tracking坐标系中；</li>
@@ -58,13 +58,13 @@ imu和里程计数据需要首先判断，当没有任何位姿估计，或者�
 </div>
 
 
-<div id="outline-container-orgb0de792" class="outline-2">
-<h2 id="orgb0de792">一些处理器</h2>
-<div class="outline-text-2" id="text-orgb0de792">
+<div id="outline-container-org004a2cb" class="outline-2">
+<h2 id="org004a2cb">一些处理器</h2>
+<div class="outline-text-2" id="text-org004a2cb">
 </div>
-<div id="outline-container-orga2f417b" class="outline-3">
-<h3 id="orga2f417b">固定比例采样器 cartographer::common::FixedRatioSampler</h3>
-<div class="outline-text-3" id="text-orga2f417b">
+<div id="outline-container-orgbab457d" class="outline-3">
+<h3 id="orgbab457d">固定比例采样器 cartographer::common::FixedRatioSampler</h3>
+<div class="outline-text-3" id="text-orgbab457d">
 <p>
 目的是按照固定的比例采样数据。
 </p>
@@ -89,9 +89,9 @@ imu和里程计数据需要首先判断，当没有任何位姿估计，或者�
 </div>
 
 
-<div id="outline-container-org59e6e00" class="outline-3">
-<h3 id="org59e6e00">RangeDataCollator 距离数据校对机</h3>
-<div class="outline-text-3" id="text-org59e6e00">
+<div id="outline-container-orgc0bdc87" class="outline-3">
+<h3 id="orgc0bdc87">RangeDataCollator 距离数据校对机</h3>
+<div class="outline-text-3" id="text-orgc0bdc87">
 <p>
 输入的距离数据是对每一帧数据进行细分，然后按照数据送进来的，但是有多个距离传感
 器的点云信息，他们的各个点可能时间会重合，因此，这里就是将所有传感器的点云信息
@@ -104,7 +104,7 @@ imu和里程计数据需要首先判断，当没有任何位姿估计，或者�
 </p>
 
 
-<div id="org6bd9468" class="figure">
+<div id="org0726386" class="figure">
 <p><img src="/assets/blog/2019/04/24/cartographer-local-slam/cartographer_range_data_collator.png" alt="cartographer_range_data_collator.png" />
 </p>
 <p><span class="figure-number">Figure 1: </span>距离数据校对机</p>
@@ -150,9 +150,9 @@ origin的索引。</li>
 </div>
 
 
-<div id="outline-container-orgfb47626" class="outline-3">
-<h3 id="orgfb47626">ImuTracker</h3>
-<div class="outline-text-3" id="text-orgfb47626">
+<div id="outline-container-orge821e0a" class="outline-3">
+<h3 id="orge821e0a">ImuTracker</h3>
+<div class="outline-text-3" id="text-orge821e0a">
 <p>
 目的是使用角速度和线加速度跟踪方位角。由于平均化后的线加速度(假设移动很慢)，
 是直接测量为g倍数的，roll/pitch不会漂移，但是重力加速度会漂移。
@@ -168,9 +168,9 @@ origin的索引。</li>
 </div>
 
 
-<div id="outline-container-org32d68cd" class="outline-3">
-<h3 id="org32d68cd">PoseExtrapolator</h3>
-<div class="outline-text-3" id="text-org32d68cd">
+<div id="outline-container-org8e54bd6" class="outline-3">
+<h3 id="org8e54bd6">PoseExtrapolator</h3>
+<div class="outline-text-3" id="text-org8e54bd6">
 <p>
 位姿估计器在Node中有一个，在LocalTrajectoryBuilder也有一个。
 所以，在添加数据的时候要添加两次，在Node中要添加到Node的估计器中，在
@@ -205,9 +205,9 @@ pose_queue_duration_范围内的位姿，旧的数据要删除掉。</li>
 </div>
 
 
-<div id="outline-container-orgf479de7" class="outline-4">
-<h4 id="orgf479de7">初始化 PoseExtrapolator</h4>
-<div class="outline-text-4" id="text-orgf479de7">
+<div id="outline-container-orgcdf50d6" class="outline-4">
+<h4 id="orgcdf50d6">初始化 PoseExtrapolator</h4>
+<div class="outline-text-4" id="text-orgcdf50d6">
 <ul class="org-ul">
 <li>初始化需要一个pose_queue_duration_(kExtrapolationEstimationTimeSec), 重力加
 速度常数。</li>
@@ -219,9 +219,9 @@ pose_queue_duration_范围内的位姿，旧的数据要删除掉。</li>
 </div>
 
 
-<div id="outline-container-org8431611" class="outline-4">
-<h4 id="org8431611">估计器添加imu数据</h4>
-<div class="outline-text-4" id="text-org8431611">
+<div id="outline-container-org815b509" class="outline-4">
+<h4 id="org815b509">估计器添加imu数据</h4>
+<div class="outline-text-4" id="text-org815b509">
 <p>
 比较简单，就是将数据加入到imu数据的队里中，然后遍历一遍，把时间比最新估计时间
 旧的imu删除掉。
@@ -229,9 +229,9 @@ pose_queue_duration_范围内的位姿，旧的数据要删除掉。</li>
 </div>
 </div>
 
-<div id="outline-container-orge8d528b" class="outline-4">
-<h4 id="orge8d528b">估计器添加Odom数据</h4>
-<div class="outline-text-4" id="text-orge8d528b">
+<div id="outline-container-orgdebe674" class="outline-4">
+<h4 id="orgdebe674">估计器添加Odom数据</h4>
+<div class="outline-text-4" id="text-orgdebe674">
 <p>
 前面和Imu一样，将数据加入到odom的队列中，然后遍历一遍，把时间比最新估计时间
 旧的odom数据删掉。然后根据最新和最旧的odometry数据计算线速度
@@ -240,14 +240,14 @@ linear_velocity_from_odometry_和角速度angular_velocity_from_odometry_。
 </div>
 </div>
 
-<div id="outline-container-org8e26bf4" class="outline-4">
-<h4 id="org8e26bf4">估计器添加LaserScan数据</h4>
+<div id="outline-container-org212e663" class="outline-4">
+<h4 id="org212e663">估计器添加LaserScan数据</h4>
 </div>
 
 
-<div id="outline-container-org44b7e5d" class="outline-4">
-<h4 id="org44b7e5d">添加位姿pose到估计器的过程</h4>
-<div class="outline-text-4" id="text-org44b7e5d">
+<div id="outline-container-org7f90e8e" class="outline-4">
+<h4 id="org7f90e8e">添加位姿pose到估计器的过程</h4>
+<div class="outline-text-4" id="text-org7f90e8e">
 <ul class="org-ul">
 <li>确保ImuTracker实例化：如果imu_tracker_没有实例化，先实例化，实例化时需要用
 到重力加速度常数，初始时间。重力常数主要用来做距离的修正。</li>
@@ -265,14 +265,14 @@ Note: 计算角速度的时候是使用四元素old_q.inverse() * new_q 得到ol
 </div>
 
 
-<div id="outline-container-org0bfcb8b" class="outline-3">
-<h3 id="org0bfcb8b">AdaptiveVoxelFilter 体素滤波器</h3>
+<div id="outline-container-org517063c" class="outline-3">
+<h3 id="org517063c">AdaptiveVoxelFilter 体素滤波器</h3>
 </div>
 
 
-<div id="outline-container-orgf5ca3a8" class="outline-3">
-<h3 id="orgf5ca3a8">LocalTrajectoryBuilder</h3>
-<div class="outline-text-3" id="text-orgf5ca3a8">
+<div id="outline-container-org7db9f7c" class="outline-3">
+<h3 id="org7db9f7c">LocalTrajectoryBuilder</h3>
+<div class="outline-text-3" id="text-org7db9f7c">
 <ul class="org-ul">
 <li>active_submaps_: ActiveSubmaps2D</li>
 </ul>
@@ -281,9 +281,9 @@ Note: 计算角速度的时候是使用四元素old_q.inverse() * new_q 得到ol
 
 
 
-<div id="outline-container-org2244c2a" class="outline-3">
-<h3 id="org2244c2a">scan_matching::RealTimeCorrelativeScanMatcher2D</h3>
-<div class="outline-text-3" id="text-org2244c2a">
+<div id="outline-container-org96ef11e" class="outline-3">
+<h3 id="org96ef11e">scan_matching::RealTimeCorrelativeScanMatcher2D</h3>
+<div class="outline-text-3" id="text-org96ef11e">
 <p>
 实时关联性匹配：目的是为Ceres产生一个好的初值。通过
 use_online_correlative_scan_matching 启用。参数包括：
@@ -298,9 +298,9 @@ use_online_correlative_scan_matching 启用。参数包括：
 </div>
 
 
-<div id="outline-container-org8751a88" class="outline-3">
-<h3 id="org8751a88">CeresScanMatcher2D</h3>
-<div class="outline-text-3" id="text-org8751a88">
+<div id="outline-container-org73d5635" class="outline-3">
+<h3 id="org73d5635">CeresScanMatcher2D</h3>
+<div class="outline-text-3" id="text-org73d5635">
 <p>
 相关配置：
 </p>
@@ -330,9 +330,9 @@ match的时候是一个最小二乘的优化问题，需要计算残差，这里
 </div>
 
 
-<div id="outline-container-org3fab06d" class="outline-3">
-<h3 id="org3fab06d">MotionFilter</h3>
-<div class="outline-text-3" id="text-org3fab06d">
+<div id="outline-container-orgc7f9584" class="outline-3">
+<h3 id="orgc7f9584">MotionFilter</h3>
+<div class="outline-text-3" id="text-orgc7f9584">
 <p>
 输入一系列位姿，对它们进行滤波之后得到较少的几个位姿。为了减少计算量，不会每
 一帧scan都加到submap中，只有当时间间隔，平移，旋转超过下面参数中规定的范围才
@@ -352,9 +352,9 @@ match的时候是一个最小二乘的优化问题，需要计算残差，这里
 </div>
 
 
-<div id="outline-container-orgb6989ff" class="outline-3">
-<h3 id="orgb6989ff">ActiveSubmap2D and Submap</h3>
-<div class="outline-text-3" id="text-orgb6989ff">
+<div id="outline-container-org4b7072d" class="outline-3">
+<h3 id="org4b7072d">ActiveSubmap2D and Submap</h3>
+<div class="outline-text-3" id="text-org4b7072d">
 <p>
 LocalTrajectoryBuilder中会使用submap的参数实例化ActiveSubmap2D，当scanmatch之
 后，会使用MotionFilter判断位姿和上一次插入scan的位姿是否超过一定的范围，超过
@@ -398,9 +398,9 @@ submap的所有配置如下：
 </div>
 
 
-<div id="outline-container-org8dd8999" class="outline-4">
-<h4 id="org8dd8999">ActiveSubmap2D</h4>
-<div class="outline-text-4" id="text-org8dd8999">
+<div id="outline-container-org16f914c" class="outline-4">
+<h4 id="org16f914c">ActiveSubmap2D</h4>
+<div class="outline-text-4" id="text-org16f914c">
 <ul class="org-ul">
 <li>当要插入第一帧ranges数据的时候，第一个活跃submap会被创建。</li>
 <li>当submap数量超过1个的时候，每一帧ranges数据都总是会插入两个submap中，旧的
@@ -423,9 +423,9 @@ cartographer 的 submap 有两种类型：PROBABILITY_GRID 和 TSDF。这里我�
 </div>
 </div>
 
-<div id="outline-container-org56a80f5" class="outline-4">
-<h4 id="org56a80f5">ActiveSubmap2D添加submap</h4>
-<div class="outline-text-4" id="text-org56a80f5">
+<div id="outline-container-org4df30b6" class="outline-4">
+<h4 id="org4df30b6">ActiveSubmap2D添加submap</h4>
+<div class="outline-text-4" id="text-org4df30b6">
 <p>
 添加submap只需要加入该submap的第一个ranges的origin位置即可。
 </p>
@@ -452,9 +452,9 @@ localSLAM中就不会在改变，而准备进行全局的闭环优化。</li>
 </div>
 
 
-<div id="outline-container-org52dccf2" class="outline-4">
-<h4 id="org52dccf2">RangeDataInserterInterface and ProbabilityGridRangeDataInserter2D</h4>
-<div class="outline-text-4" id="text-org52dccf2">
+<div id="outline-container-org06ccd0d" class="outline-4">
+<h4 id="org06ccd0d">RangeDataInserterInterface and ProbabilityGridRangeDataInserter2D</h4>
+<div class="outline-text-4" id="text-org06ccd0d">
 <p>
 RangeDataInserterInterface(ranges_data_inserter_): 这个对象处理更新grid的各
 个cells。通过CreateRangeDataInserter()创建
@@ -549,9 +549,9 @@ uint16 = \frac{(float\_value - lower\_bound)\cdot32766}{upper\_bound - lower\_bo
 
 
 
-<div id="outline-container-org8a05cac" class="outline-3">
-<h3 id="org8a05cac">PoseGraph全局优化器</h3>
-<div class="outline-text-3" id="text-org8a05cac">
+<div id="outline-container-org85785c0" class="outline-3">
+<h3 id="org85785c0">PoseGraph全局优化器</h3>
+<div class="outline-text-3" id="text-org85785c0">
 <p>
 PoseGraph是在创建MapBuiler的时候实例化的，然后作为参数送给
 GlobalTrajectoryBuilder。它对应的参数主要在pose_graph.lua中。
@@ -566,13 +566,13 @@ GlobalTrajectoryBuilder。它对应的参数主要在pose_graph.lua中。
 </div>
 
 
-<div id="outline-container-org5fa892a" class="outline-2">
-<h2 id="org5fa892a">各类传感器数据处理</h2>
-<div class="outline-text-2" id="text-org5fa892a">
+<div id="outline-container-orgf215e9b" class="outline-2">
+<h2 id="orgf215e9b">各类传感器数据处理</h2>
+<div class="outline-text-2" id="text-orgf215e9b">
 </div>
-<div id="outline-container-orgd0d981c" class="outline-3">
-<h3 id="orgd0d981c">IMU</h3>
-<div class="outline-text-3" id="text-orgd0d981c">
+<div id="outline-container-orga2f8ce8" class="outline-3">
+<h3 id="orga2f8ce8">IMU</h3>
+<div class="outline-text-3" id="text-orga2f8ce8">
 <ul class="org-ul">
 <li>按比例提取数据，和LaserScan一样.</li>
 <li>查找sensor相对tracking的平移和旋转，将加速度和角速度都转化到机器人
@@ -594,9 +594,9 @@ extrapolator，否则里程计数据和距离数据都不会处理，并插入�
 </div>
 
 
-<div id="outline-container-orga73266d" class="outline-3">
-<h3 id="orga73266d">Odometry</h3>
-<div class="outline-text-3" id="text-orga73266d">
+<div id="outline-container-org8d9e0c4" class="outline-3">
+<h3 id="org8d9e0c4">Odometry</h3>
+<div class="outline-text-3" id="text-org8d9e0c4">
 <ul class="org-ul">
 <li>按比例提取数据，和LaserScan一样.</li>
 <li>查找sensor相对tracking的平移和旋转.</li>
@@ -621,9 +621,9 @@ linear_velocity_from_odometry_。以备后面使用。注意，这里会计算�
 </div>
 
 
-<div id="outline-container-org0fbf453" class="outline-3">
-<h3 id="org0fbf453">LaserScan</h3>
-<div class="outline-text-3" id="text-org0fbf453">
+<div id="outline-container-orgaeb4d2b" class="outline-3">
+<h3 id="orgaeb4d2b">LaserScan</h3>
+<div class="outline-text-3" id="text-orgaeb4d2b">
 <ul class="org-ul">
 <li>按比例提取数据：
 使用FixedRatioSampler按设置的比例确定是否采用该Scan, 如果不采用直接返回。</li>
@@ -710,9 +710,9 @@ scan数据打到配置要求的数量(默认90)，submap的原点就是机器人
 </div>
 
 
-<div id="outline-container-orge172353" class="outline-3">
-<h3 id="orge172353">总结一下LocalSLAM得到的结果</h3>
-<div class="outline-text-3" id="text-orge172353">
+<div id="outline-container-org878ec4d" class="outline-3">
+<h3 id="org878ec4d">总结一下LocalSLAM得到的结果</h3>
+<div class="outline-text-3" id="text-org878ec4d">
 <p>
 LocalSLAM最终返回的结果是MatchingResult：
 </p>
@@ -821,9 +821,9 @@ local_pose来变换的。
 </div>
 
 
-<div id="outline-container-org2e1f724" class="outline-2">
-<h2 id="org2e1f724">参考</h2>
-<div class="outline-text-2" id="text-org2e1f724">
+<div id="outline-container-org35acba5" class="outline-2">
+<h2 id="org35acba5">参考</h2>
+<div class="outline-text-2" id="text-org35acba5">
 <p>
 [1] <a href="https://zhuanlan.zhihu.com/p/21738718">占据栅格地图（Occupancy Grid Map）</a>
 </p>

@@ -42,9 +42,9 @@
   <h1>白话SLAM</h1>
 
 
-<div id="outline-container-org3fdbd5f" class="outline-2">
-<h2 id="org3fdbd5f">概述</h2>
-<div class="outline-text-2" id="text-org3fdbd5f">
+<div id="outline-container-org0b408e4" class="outline-2">
+<h2 id="org0b408e4">概述</h2>
+<div class="outline-text-2" id="text-org0b408e4">
 <p>
 看了书，闭上书，啥都没了。有时候觉得还是要关上书自己能复述一遍，或者跟旁人讲一
 次，如果对方能听懂，还能经得住对方的问题轰炸，你应该就算理解一些了。所以我想用
@@ -53,9 +53,9 @@
 </div>
 </div>
 
-<div id="outline-container-orgb4742dd" class="outline-2">
-<h2 id="orgb4742dd">SLAM是什么</h2>
-<div class="outline-text-2" id="text-orgb4742dd">
+<div id="outline-container-orga44d6a5" class="outline-2">
+<h2 id="orga44d6a5">SLAM是什么</h2>
+<div class="outline-text-2" id="text-orga44d6a5">
 <p>
 SLAM就是机器人通过传感器测量结果估计出自己的姿态和周围环境的情况。如果传感器是
 绝对精确的，那么直接通过传感器我们就可以得出结果，SLAM也就完美解决了。但是现实
@@ -73,18 +73,18 @@ SLAM和基于图优化的SLAM(前者叫online SLAM，得到最终的位置，后
 </div>
 
 
-<div id="outline-container-org70d2023" class="outline-2">
-<h2 id="org70d2023">SLAM的大致步骤</h2>
-<div class="outline-text-2" id="text-org70d2023">
+<div id="outline-container-org77f053f" class="outline-2">
+<h2 id="org77f053f">SLAM的大致步骤</h2>
+<div class="outline-text-2" id="text-org77f053f">
 <ul class="org-ul">
 <li>通过传感器信息估计一个结果；</li>
 <li>通过其他信息优化机器人位置和测量结果。</li>
 </ul>
 </div>
 
-<div id="outline-container-org505cb5e" class="outline-3">
-<h3 id="org505cb5e">基于滤波的SLAM</h3>
-<div class="outline-text-3" id="text-org505cb5e">
+<div id="outline-container-org8f814fc" class="outline-3">
+<h3 id="org8f814fc">基于滤波的SLAM</h3>
+<div class="outline-text-3" id="text-org8f814fc">
 <p>
 基于滤波的SLAM，主要是EKF SLAM，大致步骤是通过控制量(比如码盘记录的轮子偏移量)得
 到一个机器人估计的位姿，然后通过测量的结果对这个位姿进行一个修正，前一步叫预
@@ -106,9 +106,9 @@ SLAM和基于图优化的SLAM(前者叫online SLAM，得到最终的位置，后
 </div>
 </div>
 
-<div id="outline-container-orgbfdce50" class="outline-3">
-<h3 id="orgbfdce50">基于优化的SLAM</h3>
-<div class="outline-text-3" id="text-orgbfdce50">
+<div id="outline-container-org45516c9" class="outline-3">
+<h3 id="org45516c9">基于优化的SLAM</h3>
+<div class="outline-text-3" id="text-org45516c9">
 <p>
 基于优化的SLAM分为前端和后端两部分。前端通过特征提取等方式得到一个结果，后端
 将这个结果和前面测量的结果一起优化，最后优化得到一个最优的轨迹和环境测量值。

@@ -43,9 +43,9 @@
 
 
 
-<div id="outline-container-org5518ab6" class="outline-2">
-<h2 id="org5518ab6">进程标识 trap_exit 的作用</h2>
-<div class="outline-text-2" id="text-org5518ab6">
+<div id="outline-container-orgdf34ad9" class="outline-2">
+<h2 id="orgdf34ad9">进程标识 trap_exit 的作用</h2>
+<div class="outline-text-2" id="text-orgdf34ad9">
 <p>
 普通的进程一旦需要除了normal的异常信息就会退出，如果在启动的时候加上process_flag(trap_exit, true), 进程就会接受到
 进程退出的消息，进程监控了这个消息就可以避免进程死亡。
@@ -138,9 +138,9 @@ undefined
 </div>
 </div>
 
-<div id="outline-container-org786ec07" class="outline-2">
-<h2 id="org786ec07">使用trap_exit可以作为监督者，和supervisor有什么区别</h2>
-<div class="outline-text-2" id="text-org786ec07">
+<div id="outline-container-orgb8c9ab8" class="outline-2">
+<h2 id="orgb8c9ab8">使用trap_exit可以作为监督者，和supervisor有什么区别</h2>
+<div class="outline-text-2" id="text-orgb8c9ab8">
 <p>
 supervisor有重启机制，使用trap_exit可以检测进程的异常信息，避免进程自身死亡，但是他不会重启他的子进程，在emqttd中，
 esockd_connection_sup就是使用process_flag(trap_exit,true)来启动的，虽然具有监督功能，但是不会重启子进程connection，
