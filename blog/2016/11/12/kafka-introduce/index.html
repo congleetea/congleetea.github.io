@@ -42,9 +42,9 @@
   <h1>Kafka介绍</h1>
 
 
-<div id="outline-container-org23d0c45" class="outline-2">
-<h2 id="org23d0c45">Kafka 的设计</h2>
-<div class="outline-text-2" id="text-org23d0c45">
+<div id="outline-container-orgc20c41d" class="outline-2">
+<h2 id="orgc20c41d">Kafka 的设计</h2>
+<div class="outline-text-2" id="text-orgc20c41d">
 <p>
 设计的动机: 能够作为一个统一的可以处理一家大公司可能有的所有实时数据的平台。
 </p>
@@ -84,9 +84,9 @@
 </div>
 </div>
 
-<div id="outline-container-org137df2d" class="outline-2">
-<h2 id="org137df2d">Topic和分区</h2>
-<div class="outline-text-2" id="text-org137df2d">
+<div id="outline-container-orgf5a75f6" class="outline-2">
+<h2 id="orgf5a75f6">Topic和分区</h2>
+<div class="outline-text-2" id="text-orgf5a75f6">
 <ul class="org-ul">
 <li>Topic是一类消息的集合，通常这些消息比较大，因此一个Topic会分成多个分区，数据按照某种规则送到各个分区上。</li>
 <li>分区Partition相当与Topic的其中一个队列，到达同一个分区上的消息有一个偏移值，这个值会一次递增。</li>
@@ -105,9 +105,9 @@
 </div>
 </div>
 
-<div id="outline-container-org0a3aab9" class="outline-2">
-<h2 id="org0a3aab9">生产者和消费者</h2>
-<div class="outline-text-2" id="text-org0a3aab9">
+<div id="outline-container-orgf3b6574" class="outline-2">
+<h2 id="orgf3b6574">生产者和消费者</h2>
+<div class="outline-text-2" id="text-orgf3b6574">
 <ul class="org-ul">
 <li>生产者直接将消息发送分区的leader broker，不经过任何路由层，包括zookeeper。</li>
 <li>生产者确定每条消息送给那个partition，方式有round-robin，也可以根据指定的key计算哈希值让相同key的消息发送固定的分区(这适合消费着对消息位置比较敏感的场合)。</li>
@@ -118,13 +118,13 @@
 </div>
 </div>
 
-<div id="outline-container-org590ea52" class="outline-2">
-<h2 id="org590ea52">Kafka可以扮演的三种角色</h2>
-<div class="outline-text-2" id="text-org590ea52">
+<div id="outline-container-org9b54152" class="outline-2">
+<h2 id="org9b54152">Kafka可以扮演的三种角色</h2>
+<div class="outline-text-2" id="text-org9b54152">
 </div>
-<div id="outline-container-org92ad814" class="outline-3">
-<h3 id="org92ad814">Messaging System</h3>
-<div class="outline-text-3" id="text-org92ad814">
+<div id="outline-container-org77dce29" class="outline-3">
+<h3 id="org77dce29">Messaging System</h3>
+<div class="outline-text-3" id="text-org77dce29">
 <ul class="org-ul">
 <li>传统的消息系统有两种模式：队列和Publish/Subscribe，前者多个消费者抢一个列队的消息，只能由一个消费者消费，消费完即删除；后者会将消息分发给所有需要消费该消息的消费者。前者属于单播，后者属于广播。</li>
 <li>Kafka提出消费组的概念可以实现上面两类，一个消费组的消费者只能由一个能消费一条消息，属于单播，但和传统消息系统不一样的是消费完后消息不会被删除；如果每个消费者做一个组，那就都会消费每一条消息，属于广播。</li>
@@ -133,9 +133,9 @@
 </div>
 </div>
 
-<div id="outline-container-orgba0eacd" class="outline-3">
-<h3 id="orgba0eacd">Storage System</h3>
-<div class="outline-text-3" id="text-orgba0eacd">
+<div id="outline-container-org03d03f6" class="outline-3">
+<h3 id="org03d03f6">Storage System</h3>
+<div class="outline-text-3" id="text-org03d03f6">
 <ul class="org-ul">
 <li>Kafka解耦了消息发布和消费，这样就像一个数据库一样，其实也是一个数据存储系统。</li>
 <li>到Kafka的数据被写进磁盘，并有副本来容错。Kafka允许producer等待ack确认消息已经写到kafka并已经有一定数量的副本。</li>
@@ -145,9 +145,9 @@
 </div>
 </div>
 
-<div id="outline-container-org33d04ea" class="outline-3">
-<h3 id="org33d04ea">Stream Processing</h3>
-<div class="outline-text-3" id="text-org33d04ea">
+<div id="outline-container-org40cc845" class="outline-3">
+<h3 id="org40cc845">Stream Processing</h3>
+<div class="outline-text-3" id="text-org40cc845">
 <ul class="org-ul">
 <li>仅仅读写存数据还不够，流处理还可以实时处理数据, 即从输入topic中提取连续的数据，处理之后放到另外一个topics。</li>
 <li>这类运用可以使用producer和consumer来实现，也就是消费者消费topic-in的数据之后，处理之后产生新的数据送到topic-out中。</li>
@@ -157,21 +157,21 @@
 </div>
 </div>
 
-<div id="outline-container-org02d7d9f" class="outline-2">
-<h2 id="org02d7d9f">配置</h2>
-<div class="outline-text-2" id="text-org02d7d9f">
+<div id="outline-container-org3b5ce44" class="outline-2">
+<h2 id="org3b5ce44">配置</h2>
+<div class="outline-text-2" id="text-org3b5ce44">
 </div>
-<div id="outline-container-orgbdf8cab" class="outline-3">
-<h3 id="orgbdf8cab">Kafka Broker的配置</h3>
+<div id="outline-container-org23d17ae" class="outline-3">
+<h3 id="org23d17ae">Kafka Broker的配置</h3>
 </div>
-<div id="outline-container-orgdac5f67" class="outline-3">
-<h3 id="orgdac5f67">Producer 和 Consumer 的配置</h3>
+<div id="outline-container-orgeca61ab" class="outline-3">
+<h3 id="orgeca61ab">Producer 和 Consumer 的配置</h3>
 </div>
 </div>
 
-<div id="outline-container-orgaa98995" class="outline-2">
-<h2 id="orgaa98995">消息的保证</h2>
-<div class="outline-text-2" id="text-orgaa98995">
+<div id="outline-container-org301d57e" class="outline-2">
+<h2 id="org301d57e">消息的保证</h2>
+<div class="outline-text-2" id="text-org301d57e">
 <ul class="org-ul">
 <li>和mqtt一样，消息有三种保证：最多投递一次(可能丢失，不会重新投递)；至少投递一次（不会丢失，且有可能重复）；有且仅有一次(不会丢失且只有一次).</li>
 <li>Publish的消息有committed的概念，committed的消息是只要复制该分区的broker有一个alive(broker alive的定义在后面)，这条消息就不会被丢失, 也可以说是这些消息已经到达了所有的ISR。</li>
@@ -188,9 +188,9 @@
 </div>
 </div>
 
-<div id="outline-container-org714b5b9" class="outline-2">
-<h2 id="org714b5b9">分区的broker角色和副本</h2>
-<div class="outline-text-2" id="text-org714b5b9">
+<div id="outline-container-org346ce06" class="outline-2">
+<h2 id="org346ce06">分区的broker角色和副本</h2>
+<div class="outline-text-2" id="text-org346ce06">
 <ul class="org-ul">
 <li>分区的副本因此在创建topic的时候指定。</li>
 <li>保存同一分区的broker集合有不同的角色，leader，replicas和isr。</li>
@@ -207,21 +207,21 @@ bin/kafka-preferred-replica-election.sh --zookeeper zk_host:port/chroot
 </div>
 </div>
 
-<div id="outline-container-org84a46c7" class="outline-2">
-<h2 id="org84a46c7">权限控制</h2>
-<div class="outline-text-2" id="text-org84a46c7">
+<div id="outline-container-org63401d7" class="outline-2">
+<h2 id="org63401d7">权限控制</h2>
+<div class="outline-text-2" id="text-org63401d7">
 </div>
-<div id="outline-container-org151041a" class="outline-3">
-<h3 id="org151041a">使用SASL认证</h3>
-<div class="outline-text-3" id="text-org151041a">
+<div id="outline-container-orgfeeb70b" class="outline-3">
+<h3 id="orgfeeb70b">使用SASL认证</h3>
+<div class="outline-text-3" id="text-orgfeeb70b">
 <p>
 有以下步骤：
 </p>
 </div>
 
-<div id="outline-container-org05e1f5a" class="outline-4">
-<h4 id="org05e1f5a">配置zk集群</h4>
-<div class="outline-text-4" id="text-org05e1f5a">
+<div id="outline-container-org599580b" class="outline-4">
+<h4 id="org599580b">配置zk集群</h4>
+<div class="outline-text-4" id="text-org599580b">
 <p>
 zk集群可以不配置auth。
 </p>
@@ -229,9 +229,9 @@ zk集群可以不配置auth。
 </div>
 </div>
 
-<div id="outline-container-orgd80d9ff" class="outline-3">
-<h3 id="orgd80d9ff">配置kafka服务器</h3>
-<div class="outline-text-3" id="text-orgd80d9ff">
+<div id="outline-container-orgc5c31f0" class="outline-3">
+<h3 id="orgc5c31f0">配置kafka服务器</h3>
+<div class="outline-text-3" id="text-orgc5c31f0">
 <ul class="org-ul">
 <li>vim config/kafka_server_jaas.conf</li>
 </ul>

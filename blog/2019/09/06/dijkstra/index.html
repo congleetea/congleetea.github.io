@@ -41,9 +41,9 @@
         
   <h1>机器人运动规划-Dijkstra</h1>
 
-<div id="outline-container-org9c4ce53" class="outline-2">
-<h2 id="org9c4ce53">概述</h2>
-<div class="outline-text-2" id="text-org9c4ce53">
+<div id="outline-container-org10128d7" class="outline-2">
+<h2 id="org10128d7">概述</h2>
+<div class="outline-text-2" id="text-org10128d7">
 <ul class="org-ul">
 <li>单源最短路径法: 就是从某一个节点到 <b>其他所有节点</b> 的最短路径的计算。</li>
 <li>不能处理负权边，但是可以将负权边全部加上一个数变成正数。</li>
@@ -52,13 +52,13 @@
 </div>
 </div>
 
-<div id="outline-container-org1b90a30" class="outline-2">
-<h2 id="org1b90a30">执行步骤</h2>
-<div class="outline-text-2" id="text-org1b90a30">
+<div id="outline-container-org7a8d1a8" class="outline-2">
+<h2 id="org7a8d1a8">执行步骤</h2>
+<div class="outline-text-2" id="text-org7a8d1a8">
 </div>
-<div id="outline-container-orgdedcae9" class="outline-3">
-<h3 id="orgdedcae9">需要的数据结构</h3>
-<div class="outline-text-3" id="text-orgdedcae9">
+<div id="outline-container-orgbe4c561" class="outline-3">
+<h3 id="orgbe4c561">需要的数据结构</h3>
+<div class="outline-text-3" id="text-orgbe4c561">
 <ul class="org-ul">
 <li>一个保存图的结构，用于保存节点的邻居关系；</li>
 <li>一个保存节点是否已经得到最短路径，找到最短路劲的节点标记为已处理节点；</li>
@@ -67,9 +67,9 @@
 </div>
 </div>
 
-<div id="outline-container-orgbf06718" class="outline-3">
-<h3 id="orgbf06718">步骤</h3>
-<div class="outline-text-3" id="text-orgbf06718">
+<div id="outline-container-orge8fc87b" class="outline-3">
+<h3 id="orge8fc87b">步骤</h3>
+<div class="outline-text-3" id="text-orge8fc87b">
 <ul class="org-ul">
 <li>从起点开始，从邻居中找出代价最低的节点，那么最短时间到达这个节点的代价就求出
 来了。标记该节点为已处理节点，更新该节点的最小代价值。</li>
@@ -82,15 +82,15 @@
 </div>
 </div>
 
-<div id="outline-container-orgb0d2a5d" class="outline-3">
-<h3 id="orgb0d2a5d">例子</h3>
-<div class="outline-text-3" id="text-orgb0d2a5d">
+<div id="outline-container-org9a75d2b" class="outline-3">
+<h3 id="org9a75d2b">例子</h3>
+<div class="outline-text-3" id="text-org9a75d2b">
 <p>
 如下图的树状图，线段数值表示代价值，节点0是起点。
 </p>
 
 
-<div id="org4e9a973" class="figure">
+<div id="orgc93c89c" class="figure">
 <p><img src="/assets/blog/2019/09/06/dijkstra/motion-plan-graph.jpg" alt="motion-plan-graph.jpg" />
 </p>
 <p><span class="figure-number">Figure 1: </span>图</p>
@@ -741,9 +741,9 @@ c) 找出未处理节点(2,3,4)中代价最小的节点2，将其标记为已处
 </div>
 
 
-<div id="outline-container-org6de6689" class="outline-2">
-<h2 id="org6de6689">总结</h2>
-<div class="outline-text-2" id="text-org6de6689">
+<div id="outline-container-orgc6d0ed9" class="outline-2">
+<h2 id="orgc6d0ed9">总结</h2>
+<div class="outline-text-2" id="text-orgc6d0ed9">
 <ul class="org-ul">
 <li>Dijkstra 保证当前选出的代价最小的节点与起点之间的路径总是最优的，(不管后面)，
 所以到目标点时可以保证起点和目标点的路径也是最优的。</li>

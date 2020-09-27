@@ -41,9 +41,9 @@
         
   <h1>TOOL: VSCode配置ROS的使用</h1>
 
-<div id="outline-container-org5371095" class="outline-2">
-<h2 id="org5371095">概述</h2>
-<div class="outline-text-2" id="text-org5371095">
+<div id="outline-container-orgf4dfdab" class="outline-2">
+<h2 id="orgf4dfdab">概述</h2>
+<div class="outline-text-2" id="text-orgf4dfdab">
 <p>
 vscode在linux下面也是一个比较好用的代码编辑器。由于我们经常要用到ROS，因此这里讲
 述一下相关的配置。
@@ -58,36 +58,36 @@ vscode的所有配置文件都在~/.vscode目录中。很多人习惯搞多个RO
 </div>
 
 
-<div id="outline-container-org9037761" class="outline-2">
-<h2 id="org9037761">vscode配置ros插件</h2>
-<div class="outline-text-2" id="text-org9037761">
+<div id="outline-container-orga4f280a" class="outline-2">
+<h2 id="orga4f280a">vscode配置ros插件</h2>
+<div class="outline-text-2" id="text-orga4f280a">
 </div>
-<div id="outline-container-org6104cf0" class="outline-3">
-<h3 id="org6104cf0">安装vscode</h3>
-<div class="outline-text-3" id="text-org6104cf0">
+<div id="outline-container-org5ecef1e" class="outline-3">
+<h3 id="org5ecef1e">安装vscode</h3>
+<div class="outline-text-3" id="text-org5ecef1e">
 <p>
 这一步可以直接上官网，根据官网安装就行。不同的版本可能有用一些差别，但是对于
 配置方法应该是一样的。我用的是1.42.0
 </p>
 </div>
 </div>
-<div id="outline-container-orga00282b" class="outline-3">
-<h3 id="orga00282b">安装ROS插件</h3>
-<div class="outline-text-3" id="text-orga00282b">
+<div id="outline-container-org685d954" class="outline-3">
+<h3 id="org685d954">安装ROS插件</h3>
+<div class="outline-text-3" id="text-org685d954">
 <p>
 打开vscode，使用快捷键Ctrl+Shift+X，左边会有一个输入框，输入ROS，选择一下，
 点击安装即可。
 </p>
 
 
-<div id="org314e7c4" class="figure">
+<div id="orgf6554bc" class="figure">
 <p><img src="/assets/blog/2019/12/18/vscode-setting-for-ros/vscode-install-plugin.png" alt="vscode-install-plugin.png" />
 </p>
 <p><span class="figure-number">Figure 1: </span>install plugin</p>
 </div>
 
 
-<div id="orga6c2493" class="figure">
+<div id="orgd13baa6" class="figure">
 <p><img src="/assets/blog/2019/12/18/vscode-setting-for-ros/vscode-install-ROS-plugin.png" alt="vscode-install-ROS-plugin.png" />
 </p>
 <p><span class="figure-number">Figure 2: </span>install ros plugin</p>
@@ -95,14 +95,14 @@ vscode的所有配置文件都在~/.vscode目录中。很多人习惯搞多个RO
 </div>
 </div>
 
-<div id="outline-container-org377a427" class="outline-3">
-<h3 id="org377a427">安装C/C++插件</h3>
-<div class="outline-text-3" id="text-org377a427">
+<div id="outline-container-org3499307" class="outline-3">
+<h3 id="org3499307">安装C/C++插件</h3>
+<div class="outline-text-3" id="text-org3499307">
 <p>
 使用快捷键Ctrl+Shift+X, 在左边输入框中输入"c/c++"安装。
 </p>
 
-<div id="orga5da034" class="figure">
+<div id="org1eceaec" class="figure">
 <p><img src="/assets/blog/2019/12/18/vscode-setting-for-ros/vscode-install-c-cpp.png" alt="vscode-install-c-cpp.png" />
 </p>
 <p><span class="figure-number">Figure 3: </span>install c/cpp plugin</p>
@@ -111,9 +111,9 @@ vscode的所有配置文件都在~/.vscode目录中。很多人习惯搞多个RO
 </div>
 
 
-<div id="outline-container-orgfb44b6f" class="outline-3">
-<h3 id="orgfb44b6f">配置c/c++</h3>
-<div class="outline-text-3" id="text-orgfb44b6f">
+<div id="outline-container-orgec77383" class="outline-3">
+<h3 id="orgec77383">配置c/c++</h3>
+<div class="outline-text-3" id="text-orgec77383">
 <p>
 Ctrl+Shift+P, 输入C/C++: Edit Configuration (JSON), 输入一下内容：
 </p>
@@ -140,9 +140,9 @@ Ctrl+Shift+P, 输入C/C++: Edit Configuration (JSON), 输入一下内容：
 </div>
 </div>
 
-<div id="outline-container-orgfd9bab9" class="outline-3">
-<h3 id="orgfd9bab9">配置 catkin_make</h3>
-<div class="outline-text-3" id="text-orgfd9bab9">
+<div id="outline-container-org68d39f5" class="outline-3">
+<h3 id="org68d39f5">配置 catkin_make</h3>
+<div class="outline-text-3" id="text-org68d39f5">
 <p>
 Ctrl+Shift+P, 输入tasks: Configure Task, 会在~/.vscode中生成task.json文件, 修改如下:
 </p>
@@ -168,9 +168,9 @@ Ctrl+Shift+P, 输入tasks: Configure Task, 会在~/.vscode中生成task.json文�
 </div>
 </div>
 
-<div id="outline-container-orga05c663" class="outline-3">
-<h3 id="orga05c663">使用</h3>
-<div class="outline-text-3" id="text-orga05c663">
+<div id="outline-container-orgccc58f6" class="outline-3">
+<h3 id="orgccc58f6">使用</h3>
+<div class="outline-text-3" id="text-orgccc58f6">
 <p>
 配置完成之后，打开工作空间目录文件夹。可以目录栏右键新建package和文件。
 Ctrl+Shift+B进行编译。
@@ -180,9 +180,9 @@ Ctrl+Shift+B进行编译。
 </div>
 
 
-<div id="outline-container-orgc110141" class="outline-2">
-<h2 id="orgc110141">astyle</h2>
-<div class="outline-text-2" id="text-orgc110141">
+<div id="outline-container-org316c3ee" class="outline-2">
+<h2 id="org316c3ee">astyle</h2>
+<div class="outline-text-2" id="text-org316c3ee">
 <ul class="org-ul">
 <li>安装astyle 3.1</li>
 <li>Ctrl+Shift+X 打开扩展工具页面，输入astyle，安装。</li>

@@ -42,30 +42,30 @@
   <h1>从贝叶斯滤波开始</h1>
 
 
-<div id="outline-container-org6c2cdd8" class="outline-2">
-<h2 id="org6c2cdd8">概述</h2>
-<div class="outline-text-2" id="text-org6c2cdd8">
+<div id="outline-container-org088ad7f" class="outline-2">
+<h2 id="org088ad7f">概述</h2>
+<div class="outline-text-2" id="text-org088ad7f">
 <p>
-在看<a id="org8b61e5f"></a>一书中，理论要求很强。为了能够理清楚前后的关系，所以不断更新了这篇文章。
+在看<a id="orgb9ee971"></a>一书中，理论要求很强。为了能够理清楚前后的关系，所以不断更新了这篇文章。
 就从Bayes讲起吧。这里尽量不涉及公式，只做线条式的描述。
 </p>
 </div>
 </div>
 
 
-<div id="outline-container-orgabe19da" class="outline-2">
-<h2 id="orgabe19da">Bayes</h2>
-<div class="outline-text-2" id="text-orgabe19da">
+<div id="outline-container-org520c579" class="outline-2">
+<h2 id="org520c579">Bayes</h2>
+<div class="outline-text-2" id="text-org520c579">
 </div>
-<div id="outline-container-orge6e72a7" class="outline-3">
-<h3 id="orge6e72a7">Bayes的推导</h3>
-<div class="outline-text-3" id="text-orge6e72a7">
+<div id="outline-container-org0ad179f" class="outline-3">
+<h3 id="org0ad179f">Bayes的推导</h3>
+<div class="outline-text-3" id="text-org0ad179f">
 <p>
 Bayes是概率机器人中最基础的一个概念。它的产生其实很简单，就是基于联合概率密度，条件概率密度等概念产生的。
 </p>
 
 
-<div id="org0250afd" class="figure">
+<div id="org60260c9" class="figure">
 <p><img src="/assets/blog/2018/11/04/from-bayes/bayes_formula.png" alt="bayes_formula.png" />
 </p>
 <p><span class="figure-number">Figure 1: </span>贝叶斯公式</p>
@@ -81,7 +81,7 @@ Bayes是概率机器人中最基础的一个概念。它的产生其实很简单
 </p>
 
 
-<div id="org2b7aeca" class="figure">
+<div id="org63ff483" class="figure">
 <p><img src="/assets/blog/2018/11/04/from-bayes/bayes_formula_normalization.png" alt="bayes_formula_normalization.png" />
 </p>
 <p><span class="figure-number">Figure 2: </span>贝叶斯归一化</p>
@@ -90,9 +90,9 @@ Bayes是概率机器人中最基础的一个概念。它的产生其实很简单
 </div>
 
 
-<div id="outline-container-orga746e6b" class="outline-3">
-<h3 id="orga746e6b">Bayes的扩展</h3>
-<div class="outline-text-3" id="text-orga746e6b">
+<div id="outline-container-org9cdd13e" class="outline-3">
+<h3 id="org9cdd13e">Bayes的扩展</h3>
+<div class="outline-text-3" id="text-org9cdd13e">
 <p>
 上面给出了一个条件下的Bayes公式，在实际运用中我们可以增加不同的条件。比如SLAM中需要的观测信息，于是就有了：
 </p>
@@ -117,9 +117,9 @@ Bayes是概率机器人中最基础的一个概念。它的产生其实很简单
 </div>
 
 
-<div id="outline-container-org58cf559" class="outline-3">
-<h3 id="org58cf559">Markov假设</h3>
-<div class="outline-text-3" id="text-org58cf559">
+<div id="outline-container-org8278970" class="outline-3">
+<h3 id="org8278970">Markov假设</h3>
+<div class="outline-text-3" id="text-org8278970">
 <p>
 根据 Markov 假设，我们可以得到递归 Bayes 更新公式。Markov假设是SLAM中一个比较重要的概念。
 </p>
@@ -131,9 +131,9 @@ Bayes是概率机器人中最基础的一个概念。它的产生其实很简单
 </div>
 
 
-<div id="outline-container-org8098d2e" class="outline-3">
-<h3 id="org8098d2e">Recursive Bayesian Updating</h3>
-<div class="outline-text-3" id="text-org8098d2e">
+<div id="outline-container-org9bde008" class="outline-3">
+<h3 id="org9bde008">Recursive Bayesian Updating</h3>
+<div class="outline-text-3" id="text-org9bde008">
 <div class="org-src-container">
 <pre class="src src-text">Bel(xt) = phi P(zt | xt) ~Bel(xt) 
 </pre>
@@ -143,9 +143,9 @@ Bayes是概率机器人中最基础的一个概念。它的产生其实很简单
 </div>
 
 
-<div id="outline-container-org9bcd306" class="outline-2">
-<h2 id="org9bcd306">Gaussian Filter</h2>
-<div class="outline-text-2" id="text-org9bcd306">
+<div id="outline-container-orgf94f3ff" class="outline-2">
+<h2 id="orgf94f3ff">Gaussian Filter</h2>
+<div class="outline-text-2" id="text-orgf94f3ff">
 <p>
 EKF滤波一遍比较好的文章：<a href="https://www.cnblogs.com/bonelee/p/9210821.html">译文</a>, <a href="http://www.bzarg.com/p/how-a-kalman-filter-works-in-pictures/">原文</a>。
 </p>

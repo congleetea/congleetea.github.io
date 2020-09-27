@@ -42,9 +42,9 @@
   <h1>SLAM: Grid Map 模型和工程实现</h1>
 
 
-<div id="outline-container-org82b040c" class="outline-2">
-<h2 id="org82b040c">概述</h2>
-<div class="outline-text-2" id="text-org82b040c">
+<div id="outline-container-orgb4c4783" class="outline-2">
+<h2 id="orgb4c4783">概述</h2>
+<div class="outline-text-2" id="text-orgb4c4783">
 <p>
 Grid map是SLAM中地图表示的一种常用方式。我们大概都知道这种表示方式就是把地图的
 一个点用一个概率值[0,1]来表示这个点被障碍物占据的概率。但是具体研究和使用的时
@@ -55,9 +55,9 @@ Grid map是SLAM中地图表示的一种常用方式。我们大概都知道这�
 </div>
 
 
-<div id="outline-container-org53e8d8a" class="outline-2">
-<h2 id="org53e8d8a">Grid 是怎么表示地图的？</h2>
-<div class="outline-text-2" id="text-org53e8d8a">
+<div id="outline-container-org55ae12c" class="outline-2">
+<h2 id="org55ae12c">Grid 是怎么表示地图的？</h2>
+<div class="outline-text-2" id="text-org55ae12c">
 <p>
 测距传感器(scan)得到的是一个射线的点，点是射线打到障碍物上返回的地方，这个地方
 最有可能是有障碍物的地方，之所以说可能是因为测量会有误差，所以总是不能完全确定
@@ -75,9 +75,9 @@ Grid map是SLAM中地图表示的一种常用方式。我们大概都知道这�
 </div>
 
 
-<div id="outline-container-orgc9bf238" class="outline-3">
-<h3 id="orgc9bf238">概率表示</h3>
-<div class="outline-text-3" id="text-orgc9bf238">
+<div id="outline-container-org2375ac1" class="outline-3">
+<h3 id="org2375ac1">概率表示</h3>
+<div class="outline-text-3" id="text-org2375ac1">
 <p>
 我们用 \(p(x=1)\) 和 \(p(x=0)\) 分别表示一个cell是障碍物(occupied)或者空白(free)的
 概率。当引入一个新的scan之后，由于存在上述的不确定性，我们不会就这样就断定相关
@@ -100,9 +100,9 @@ p(x|z)=\frac{p(x)p(z|x)}{p(z)}
 </div>
 
 
-<div id="outline-container-orgb7a4b24" class="outline-3">
-<h3 id="orgb7a4b24">概率比表示</h3>
-<div class="outline-text-3" id="text-orgb7a4b24">
+<div id="outline-container-org68495f8" class="outline-3">
+<h3 id="org68495f8">概率比表示</h3>
+<div class="outline-text-3" id="text-org68495f8">
 <p>
 如果每个点都要进行这些乘除运算会比较浪费资源，那么我们用另一种更方便的表示方法
 来处理，引入概率比\(odd(x)\) ：
@@ -153,9 +153,9 @@ odd_{new}(x) = odd(x|z) = \frac{p(x=1|z)}{p(x=0|z)}=\frac{\frac{p(z|x=1)p(x=1)}{
 
 
 
-<div id="outline-container-org194aad3" class="outline-3">
-<h3 id="org194aad3">概率比的对数表示</h3>
-<div class="outline-text-3" id="text-org194aad3">
+<div id="outline-container-org409adf1" class="outline-3">
+<h3 id="org409adf1">概率比的对数表示</h3>
+<div class="outline-text-3" id="text-org409adf1">
 <p>
 上面的计算依然是有几个乘除运算，更了更加简单，我们可以使用对数，将其转化为加
 减运算。对上式两边取对数：
@@ -180,7 +180,7 @@ cell被确定为occupied或者free对应两个常数，我们分别定义为 \(l
 </p>
 
 
-<div id="org98bdbbc" class="figure">
+<div id="orge4a0844" class="figure">
 <p><img src="/assets/blog/2019/05/16/slam-grid-map/grid_map.png" alt="grid_map.png" />
 </p>
 <p><span class="figure-number">Figure 1: </span>更新例子</p>
@@ -189,9 +189,9 @@ cell被确定为occupied或者free对应两个常数，我们分别定义为 \(l
 </div>
 
 
-<div id="outline-container-org29aa4e4" class="outline-3">
-<h3 id="org29aa4e4">工程中直接查表不计算就更新结果</h3>
-<div class="outline-text-3" id="text-org29aa4e4">
+<div id="outline-container-orgcb10bd9" class="outline-3">
+<h3 id="orgcb10bd9">工程中直接查表不计算就更新结果</h3>
+<div class="outline-text-3" id="text-orgcb10bd9">
 <p>
 在看cartographer的代码的时候，发现它预先保存了两个表，将概率区间 [pmin, pmax]
 直接通过查表就可以更新结果。
@@ -214,9 +214,9 @@ cartographer中为了效率更高，将[pmin,pmax]的浮点数全部映射到uin
 </div>
 
 
-<div id="outline-container-orgbc0fc89" class="outline-2">
-<h2 id="orgbc0fc89">参考</h2>
-<div class="outline-text-2" id="text-orgbc0fc89">
+<div id="outline-container-org00ff79c" class="outline-2">
+<h2 id="org00ff79c">参考</h2>
+<div class="outline-text-2" id="text-org00ff79c">
 <p>
 [1] <a href="https://zhuanlan.zhihu.com/p/21738718">zhihu: 占据栅格地图</a>
 </p>
