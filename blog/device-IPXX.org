@@ -1,0 +1,42 @@
+#+TITLE:       防护等级IPXX什么意思
+#+AUTHOR:      Clare Lee
+#+EMAIL:       congleetea@gmail.com
+#+DATE:        2020-09-27 Sun
+#+URI:         /blog/%y/%m/%d/what-is-IPXX-for-device
+#+KEYWORDS:    IPXX,device
+#+TAGS:        devices
+#+LANGUAGE:    en
+#+OPTIONS:     H:3 num:nil toc:nil \n:nil ::t |:t ^:nil -:nil f:t *:t <:t
+#+DESCRIPTION: 记录电子设备的防防水防尘等级
+
+* 概述
+  IP表示国际防护等级认证(International Protection Marking)，亦称作异物防护等级
+  （Ingress Protection Rating）或IP代码（IP Code）。定义了机械和电子设备能提供针
+  对固态异物侵入（包括身体部位如手指，灰尘，砂砾等），液态渗入，意外接触有何等程
+  度的防护能力。
+
+  #+CAPTION: 表示含义 
+  #+LABEL: fig:SED-HR4049
+  [[./images/IPX_Codes_Explanation_Chart.jpg]]
+
+
+  我们经常听说的IP65和IP67。其实本来还有比这个负杂的，我们这就只说明这种表示方式
+  的。前一个数字表示防尘等级(固态微粒防护)，后一个表示防水等级(液态渗透防护)。
+
+* 等级标准
+  
+  固态微粒防护：
+
+  #+CAPTION: 固态防护等级 
+  #+LABEL: fig:SED-HR4049
+  [[./images/IP-first-num.png]]
+
+  
+  液态渗透防护：
+
+  #+CAPTION: 液态渗透防护 
+  #+LABEL: fig:SED-HR4049
+  [[./images/IP-second-num.png]]
+
+
+  图片截取自wiki (https://zh.wikipedia.org/wiki/%E5%9B%BD%E9%99%85%E9%98%B2%E6%8A%A4%E7%AD%89%E7%BA%A7%E8%AE%A4%E8%AF%81).
