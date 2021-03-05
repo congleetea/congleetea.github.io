@@ -42,9 +42,9 @@
   <h1>Costmap: inflation 层</h1>
 
 
-<div id="outline-container-org0beef25" class="outline-2">
-<h2 id="org0beef25">概述</h2>
-<div class="outline-text-2" id="text-org0beef25">
+<div id="outline-container-org8ee58f9" class="outline-2">
+<h2 id="org8ee58f9">概述</h2>
+<div class="outline-text-2" id="text-org8ee58f9">
 <p>
 膨胀层cost的计算是根据cell距离障碍物的距离计算，总的原则就是 <b>距离障碍物越近，cost就越大</b> ，而
 远近的界限主要是两个，一个是机器人的内切半径范围，另一个是膨胀半径范围，表示如下图：
@@ -56,7 +56,7 @@
 </p>
 
 
-<div id="orga9693a3" class="figure">
+<div id="orgf37eb1f" class="figure">
 <p><img src="/assets/blog/2018/09/10/costmap-inflation-layer/robotics_inflation.png" alt="robotics_inflation.png" />
 </p>
 <p><span class="figure-number">Figure 1: </span>inflation layer cost computation</p>
@@ -78,22 +78,22 @@
 </div>
 
 
-<div id="outline-container-orgcbc4c2e" class="outline-2">
-<h2 id="orgcbc4c2e">代码实现</h2>
-<div class="outline-text-2" id="text-orgcbc4c2e">
+<div id="outline-container-orgb2e2a2b" class="outline-2">
+<h2 id="orgb2e2a2b">代码实现</h2>
+<div class="outline-text-2" id="text-orgb2e2a2b">
 <p>
 move_base中，全局规划的时候如果使用了inflation layer，会根据膨胀半径和机器人内切半径(由足迹确定)，计算出两个大小相同的矩阵，作为kernel，来计算cost值。
 </p>
 </div>
 
 
-<div id="outline-container-org6bcc2c2" class="outline-3">
-<h3 id="org6bcc2c2">参数和变量</h3>
-<div class="outline-text-3" id="text-org6bcc2c2">
+<div id="outline-container-orgbc51031" class="outline-3">
+<h3 id="orgbc51031">参数和变量</h3>
+<div class="outline-text-3" id="text-orgbc51031">
 </div>
-<div id="outline-container-org2303b8c" class="outline-4">
-<h4 id="org2303b8c">参数</h4>
-<div class="outline-text-4" id="text-org2303b8c">
+<div id="outline-container-org67bb87e" class="outline-4">
+<h4 id="org67bb87e">参数</h4>
+<div class="outline-text-4" id="text-org67bb87e">
 <table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
 
 
@@ -143,9 +143,9 @@ static const unsigned char FREE_SPACE = 0;
 </div>
 
 
-<div id="outline-container-org1d60852" class="outline-4">
-<h4 id="org1d60852">重要变量</h4>
-<div class="outline-text-4" id="text-org1d60852">
+<div id="outline-container-orgdf1a4ee" class="outline-4">
+<h4 id="orgdf1a4ee">重要变量</h4>
+<div class="outline-text-4" id="text-orgdf1a4ee">
 <table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
 
 
@@ -236,13 +236,13 @@ static const unsigned char FREE_SPACE = 0;
 </div>
 
 
-<div id="outline-container-org75c037a" class="outline-3">
-<h3 id="org75c037a">计算cost值</h3>
-<div class="outline-text-3" id="text-org75c037a">
+<div id="outline-container-org9c91fde" class="outline-3">
+<h3 id="org9c91fde">计算cost值</h3>
+<div class="outline-text-3" id="text-org9c91fde">
 </div>
-<div id="outline-container-org0d18665" class="outline-4">
-<h4 id="org0d18665">计算kernel值</h4>
-<div class="outline-text-4" id="text-org0d18665">
+<div id="outline-container-orgc0e73a2" class="outline-4">
+<h4 id="orgc0e73a2">计算kernel值</h4>
+<div class="outline-text-4" id="text-orgc0e73a2">
 <p>
 如果 cell_inflation_radius_ == 0, 则不用进行膨胀。
 </p>
@@ -365,9 +365,9 @@ cached_distances_ = new double*[cell_inflation_radius_ + 2];
 
 
 
-<div id="outline-container-org70bf0b3" class="outline-4">
-<h4 id="org70bf0b3">计算cost值</h4>
-<div class="outline-text-4" id="text-org70bf0b3">
+<div id="outline-container-org75a24ed" class="outline-4">
+<h4 id="org75a24ed">计算cost值</h4>
+<div class="outline-text-4" id="text-org75a24ed">
 <p>
 首先，定义一个class: CellData表示一个cell以及这个点附近的一个障碍物cell。在计算cost的时候维持一个map：
 </p>
@@ -441,9 +441,9 @@ std::map&lt;double, std::vector&lt;CellData&gt;&gt; inflation_cells_;
 
 
 
-<div id="outline-container-orgaf29b7d" class="outline-2">
-<h2 id="orgaf29b7d">总结</h2>
-<div class="outline-text-2" id="text-orgaf29b7d">
+<div id="outline-container-orgf1c67e3" class="outline-2">
+<h2 id="orgf1c67e3">总结</h2>
+<div class="outline-text-2" id="text-orgf1c67e3">
 <p>
 总的来说，要注意两个参数，一个是 footprint_padding，另一个是 inflation_radius_。 
 前者在原始的机器人多边形基础上进行xy方向的膨胀，然后在膨胀层再膨胀

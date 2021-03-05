@@ -41,9 +41,9 @@
         
   <h1>erlang节点之间的通信原理</h1>
 
-<div id="outline-container-orgaf48715" class="outline-2">
-<h2 id="orgaf48715">问题</h2>
-<div class="outline-text-2" id="text-orgaf48715">
+<div id="outline-container-org3a597a5" class="outline-2">
+<h2 id="org3a597a5">问题</h2>
+<div class="outline-text-2" id="text-org3a597a5">
 <ul class="org-ul">
 <li>节点怎么识别到对方？</li>
 <li>节点怎么建立联系？</li>
@@ -53,9 +53,9 @@
 </div>
 </div>
 
-<div id="outline-container-orgadaab73" class="outline-2">
-<h2 id="orgadaab73">节点怎么识别对方</h2>
-<div class="outline-text-2" id="text-orgadaab73">
+<div id="outline-container-org33965d6" class="outline-2">
+<h2 id="org33965d6">节点怎么识别对方</h2>
+<div class="outline-text-2" id="text-org33965d6">
 <ul class="org-ul">
 <li>节点以分布式模式启动
 节点启动的时候如果使用了-name或者-sname，此时节点名为nodename@hostname形式，不以分布式模式启动时名字恒为
@@ -150,9 +150,9 @@ application:set_env(kernel, inet_dist_listen_max, 9105).
 </div>
 </div>
 
-<div id="outline-container-org24f448b" class="outline-2">
-<h2 id="org24f448b">节点之间怎么建立联系</h2>
-<div class="outline-text-2" id="text-org24f448b">
+<div id="outline-container-orga8d8127" class="outline-2">
+<h2 id="orga8d8127">节点之间怎么建立联系</h2>
+<div class="outline-text-2" id="text-orga8d8127">
 <p>
 节点之间的互联只要通过一种方式建立了连接，后面就可以进入分布式系统，成为其中的一个节点了。节点之间的连接主要是
 通过net_kernel来处理。
@@ -173,9 +173,9 @@ net_kernel默认会在引用到其它节点时(如rpc:call/5, spawn/4, link/1等
 </div>
 </div>
 
-<div id="outline-container-org44608ec" class="outline-2">
-<h2 id="org44608ec">节点之间的通信包括哪些</h2>
-<div class="outline-text-2" id="text-org44608ec">
+<div id="outline-container-org606486d" class="outline-2">
+<h2 id="org606486d">节点之间的通信包括哪些</h2>
+<div class="outline-text-2" id="text-org606486d">
 <ul class="org-ul">
 <li>节点之间的时钟信号（确认是否alive）
 节点之间要确定彼此是否alive的，因此会每个一段时间发送一个时钟信号，发送时钟信号的频率可以通过下面两种方式控制：
@@ -212,9 +212,9 @@ rpc传输的数据和指令
 </div>
 
 
-<div id="outline-container-org625d05f" class="outline-2">
-<h2 id="org625d05f">gen_rpc原理</h2>
-<div class="outline-text-2" id="text-org625d05f">
+<div id="outline-container-orgc2de1cf" class="outline-2">
+<h2 id="orgc2de1cf">gen_rpc原理</h2>
+<div class="outline-text-2" id="text-orgc2de1cf">
 <p>
 核心原理就是mailbox-per-node，也就是针对集群中的每个节点产生相应的进程，针对每个节点有一个相应的信箱。这样就不会所有数据
 都阻塞vm的分布式端口。
@@ -233,9 +233,9 @@ gen_rpc server是接收所有节点请求的进程。</li>
 </ul>
 </div>
 
-<div id="outline-container-org3090407" class="outline-3">
-<h3 id="org3090407">gen_rpc的各个进程状态切换</h3>
-<div class="outline-text-3" id="text-org3090407">
+<div id="outline-container-org747a311" class="outline-3">
+<h3 id="org747a311">gen_rpc的各个进程状态切换</h3>
+<div class="outline-text-3" id="text-org747a311">
 <ul class="org-ul">
 <li><p>
 server 之 gen_rpc_server_tcp

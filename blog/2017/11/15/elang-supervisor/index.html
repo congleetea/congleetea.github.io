@@ -42,9 +42,9 @@
   <h1>elang的supervisor</h1>
 
 
-<div id="outline-container-orga8c7ee3" class="outline-2">
-<h2 id="orga8c7ee3">init返回</h2>
-<div class="outline-text-2" id="text-orga8c7ee3">
+<div id="outline-container-org33c71c5" class="outline-2">
+<h2 id="org33c71c5">init返回</h2>
+<div class="outline-text-2" id="text-org33c71c5">
 <p>
 {ok, sup_flags(), child_spec()}
 </p>
@@ -55,9 +55,9 @@ sup_flags()是针对这个supervisor的属性，child_spec()是子进程规范�
 </div>
 </div>
 
-<div id="outline-container-org7afed56" class="outline-2">
-<h2 id="org7afed56">监督者标识</h2>
-<div class="outline-text-2" id="text-org7afed56">
+<div id="outline-container-org28ef411" class="outline-2">
+<h2 id="org28ef411">监督者标识</h2>
+<div class="outline-text-2" id="text-org28ef411">
 <div class="org-src-container">
 <pre class="src src-erlang">sup_flags() = #{strategy =&gt; strategy(),         % optional
                 intensity =&gt; non_neg_integer(), % optional
@@ -66,9 +66,9 @@ sup_flags()是针对这个supervisor的属性，child_spec()是子进程规范�
 </div>
 </div>
 
-<div id="outline-container-org6a1d2a1" class="outline-3">
-<h3 id="org6a1d2a1">四种重启策略strategy</h3>
-<div class="outline-text-3" id="text-org6a1d2a1">
+<div id="outline-container-orgb9af0b6" class="outline-3">
+<h3 id="orgb9af0b6">四种重启策略strategy</h3>
+<div class="outline-text-3" id="text-orgb9af0b6">
 <ul class="org-ul">
 <li>one_for_one(default)
 这类子进程其中一个挂了，只有这个进程会被重启，其他不受影响。</li>
@@ -85,9 +85,9 @@ sup_flags()是针对这个supervisor的属性，child_spec()是子进程规范�
 </div>
 </div>
 
-<div id="outline-container-org1f99296" class="outline-3">
-<h3 id="org1f99296">重启密度</h3>
-<div class="outline-text-3" id="text-org1f99296">
+<div id="outline-container-org28d798b" class="outline-3">
+<h3 id="org28d798b">重启密度</h3>
+<div class="outline-text-3" id="text-org28d798b">
 <p>
 重启密度设置是为了避免无休止的进程重启。重启密度由 intensity(次数) 和 period(s) 确定，超过这个重启密度，supervisor就会终止所有的
 子进程，然后终止自己。
@@ -97,9 +97,9 @@ sup_flags()是针对这个supervisor的属性，child_spec()是子进程规范�
 </div>
 
 
-<div id="outline-container-org475cb2d" class="outline-2">
-<h2 id="org475cb2d">子进程规范</h2>
-<div class="outline-text-2" id="text-org475cb2d">
+<div id="outline-container-org658f160" class="outline-2">
+<h2 id="org658f160">子进程规范</h2>
+<div class="outline-text-2" id="text-org658f160">
 <div class="org-src-container">
 <pre class="src src-erlang">child_spec() = #{id =&gt; child_id(),       % mandatory
                  start =&gt; mfargs(),      % mandatory
@@ -111,18 +111,18 @@ sup_flags()是针对这个supervisor的属性，child_spec()是子进程规范�
 </div>
 </div>
 
-<div id="outline-container-orga35e2c3" class="outline-3">
-<h3 id="orga35e2c3">子进程启动方式start()</h3>
-<div class="outline-text-3" id="text-orga35e2c3">
+<div id="outline-container-org7af3971" class="outline-3">
+<h3 id="org7af3971">子进程启动方式start()</h3>
+<div class="outline-text-3" id="text-org7af3971">
 <p>
 {Module, Function, Args}，子进程通过这个函数启动。simple_one_for_one 的时候，Args还要加上 start_child/2 中的参数。
 </p>
 </div>
 </div>
 
-<div id="outline-container-org8e908f4" class="outline-3">
-<h3 id="org8e908f4">restart()</h3>
-<div class="outline-text-3" id="text-org8e908f4">
+<div id="outline-container-orgfedbbd1" class="outline-3">
+<h3 id="orgfedbbd1">restart()</h3>
+<div class="outline-text-3" id="text-orgfedbbd1">
 <p>
 定义被终止的进程什么时候会被重启。
 </p>
@@ -140,9 +140,9 @@ sup_flags()是针对这个supervisor的属性，child_spec()是子进程规范�
 </div>
 </div>
 
-<div id="outline-container-org63c59a6" class="outline-3">
-<h3 id="org63c59a6">shutdown()</h3>
-<div class="outline-text-3" id="text-org63c59a6">
+<div id="outline-container-org0c9302d" class="outline-3">
+<h3 id="org0c9302d">shutdown()</h3>
+<div class="outline-text-3" id="text-org0c9302d">
 <p>
 定义进程应该被怎么杀死。
 </p>
@@ -160,18 +160,18 @@ sup_flags()是针对这个supervisor的属性，child_spec()是子进程规范�
 </div>
 </div>
 
-<div id="outline-container-org4fecbd3" class="outline-3">
-<h3 id="org4fecbd3">type()</h3>
-<div class="outline-text-3" id="text-org4fecbd3">
+<div id="outline-container-orge3964c2" class="outline-3">
+<h3 id="orge3964c2">type()</h3>
+<div class="outline-text-3" id="text-orge3964c2">
 <p>
 指明这个子进程是worker还是supervisor。
 </p>
 </div>
 </div>
 
-<div id="outline-container-orgee73a78" class="outline-3">
-<h3 id="orgee73a78">module()</h3>
-<div class="outline-text-3" id="text-orgee73a78">
+<div id="outline-container-org69f400c" class="outline-3">
+<h3 id="org69f400c">module()</h3>
+<div class="outline-text-3" id="text-org69f400c">
 <p>
 指出进程使用那个模块。
 </p>
@@ -179,9 +179,9 @@ sup_flags()是针对这个supervisor的属性，child_spec()是子进程规范�
 </div>
 </div>
 
-<div id="outline-container-orgc577fb7" class="outline-2">
-<h2 id="orgc577fb7">关于 start_child/2</h2>
-<div class="outline-text-2" id="text-orgc577fb7">
+<div id="outline-container-orgf60e151" class="outline-2">
+<h2 id="orgf60e151">关于 start_child/2</h2>
+<div class="outline-text-2" id="text-orgf60e151">
 <ul class="org-ul">
 <li>supervisor 的 init 指定的方式如果是 one_for_one 的时候，在启动了supervisor后会自动将制定了spec的worker或sub-supervisor启动起来。</li>
 <li>有时候需要手动调用start_child来在该sup下面启动worker，这时候如果不适用init的spec，那就是用start_child(Sup, NewSpec)。NewSpec就是
