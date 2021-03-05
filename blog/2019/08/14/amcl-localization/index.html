@@ -43,30 +43,30 @@
 
 
 
-<div id="outline-container-org1c4dc14" class="outline-2">
-<h2 id="org1c4dc14">概述</h2>
+<div id="outline-container-org088836a" class="outline-2">
+<h2 id="org088836a">概述</h2>
 </div>
 
-<div id="outline-container-orgbee9827" class="outline-2">
-<h2 id="orgbee9827">代码实现</h2>
-<div class="outline-text-2" id="text-orgbee9827">
+<div id="outline-container-orgc134e8a" class="outline-2">
+<h2 id="orgc134e8a">代码实现</h2>
+<div class="outline-text-2" id="text-orgc134e8a">
 </div>
-<div id="outline-container-orgb2d93bb" class="outline-3">
-<h3 id="orgb2d93bb">一些概念</h3>
-<div class="outline-text-3" id="text-orgb2d93bb">
+<div id="outline-container-org2b11267" class="outline-3">
+<h3 id="org2b11267">一些概念</h3>
+<div class="outline-text-3" id="text-org2b11267">
 </div>
-<div id="outline-container-org3aeeb5d" class="outline-4">
-<h4 id="org3aeeb5d">粒子/样本</h4>
-<div class="outline-text-4" id="text-org3aeeb5d">
+<div id="outline-container-orgcf52132" class="outline-4">
+<h4 id="orgcf52132">粒子/样本</h4>
+<div class="outline-text-4" id="text-orgcf52132">
 <p>
 一个位姿和权重。
 </p>
 </div>
 </div>
 
-<div id="outline-container-orgb344072" class="outline-4">
-<h4 id="orgb344072">cluster/聚类</h4>
-<div class="outline-text-4" id="text-orgb344072">
+<div id="outline-container-org4565168" class="outline-4">
+<h4 id="org4565168">cluster/聚类</h4>
+<div class="outline-text-4" id="text-org4565168">
 <p>
 表示一些位置比较接近的粒子的统计信息，包括聚类的粒子个数，包含的粒子的权重和，均值和
 协方差，区域。
@@ -74,9 +74,9 @@
 </div>
 </div>
 
-<div id="outline-container-org3099519" class="outline-4">
-<h4 id="org3099519">kdtree</h4>
-<div class="outline-text-4" id="text-org3099519">
+<div id="outline-container-orgb9edddf" class="outline-4">
+<h4 id="orgb9edddf">kdtree</h4>
+<div class="outline-text-4" id="text-orgb9edddf">
 <p>
 包含root节点地址，节点个数和最大数量，节点地址，叶子节点个数。
 每个node包含叶子和深度，转轴维数编号，节点key，value，cluster标签，两个子nodes。
@@ -84,9 +84,9 @@
 </div>
 </div>
 
-<div id="outline-container-orga81dbe5" class="outline-4">
-<h4 id="orga81dbe5">集合set</h4>
-<div class="outline-text-4" id="text-orga81dbe5">
+<div id="outline-container-org850a45e" class="outline-4">
+<h4 id="org850a45e">集合set</h4>
+<div class="outline-text-4" id="text-org850a45e">
 <p>
 set里面包含samples和cluster的信息，同时还包括该集合总的粒子个数，所有粒子的
 指针，一个用来保存粒子位置的kdtree，cluster的个数/最大个数，cluster的指针，
@@ -95,9 +95,9 @@ set里面包含samples和cluster的信息，同时还包括该集合总的粒子
 </div>
 </div>
 
-<div id="outline-container-orgcee25ff" class="outline-4">
-<h4 id="orgcee25ff">粒子滤波器pf</h4>
-<div class="outline-text-4" id="text-orgcee25ff">
+<div id="outline-container-org420f489" class="outline-4">
+<h4 id="org420f489">粒子滤波器pf</h4>
+<div class="outline-text-4" id="text-org420f489">
 <p>
 包含最大最小粒子个数限制，用于调整粒子个数的参数，当前使用的两个set和活跃的
 set编号，采样函数和采样需要的地图数据，用于判断收敛情况的距离值及最终的收敛情况。
@@ -106,9 +106,9 @@ set编号，采样函数和采样需要的地图数据，用于判断收敛情�
 </div>
 </div>
 
-<div id="outline-container-orgfff9ed2" class="outline-3">
-<h3 id="orgfff9ed2">流程图</h3>
-<div class="outline-text-3" id="text-orgfff9ed2">
+<div id="outline-container-org0841108" class="outline-3">
+<h3 id="org0841108">流程图</h3>
+<div class="outline-text-3" id="text-org0841108">
 <p>
 初始化滤波器流程图：
 </p>
@@ -122,13 +122,13 @@ set编号，采样函数和采样需要的地图数据，用于判断收敛情�
 </div>
 
 
-<div id="outline-container-orgb735f22" class="outline-2">
-<h2 id="orgb735f22">理解</h2>
-<div class="outline-text-2" id="text-orgb735f22">
+<div id="outline-container-orgd523636" class="outline-2">
+<h2 id="orgd523636">理解</h2>
+<div class="outline-text-2" id="text-orgd523636">
 </div>
-<div id="outline-container-org0a3d719" class="outline-3">
-<h3 id="org0a3d719">kdtree是如何插入的?</h3>
-<div class="outline-text-3" id="text-org0a3d719">
+<div id="outline-container-org128a56c" class="outline-3">
+<h3 id="org128a56c">kdtree是如何插入的?</h3>
+<div class="outline-text-3" id="text-org128a56c">
 <p>
 首先我们要知道，amcl中有两个set 来保存粒子和聚类。每次重采样就会激活另一个set，
 将粒子从原来的集合中复制到新的set中。具体插入是怎么做的呢？
@@ -246,9 +246,9 @@ set编号，采样函数和采样需要的地图数据，用于判断收敛情�
 </div>
 </div>
 
-<div id="outline-container-orgb91edd0" class="outline-3">
-<h3 id="orgb91edd0">叶子节点的个数意味着什么?</h3>
-<div class="outline-text-3" id="text-orgb91edd0">
+<div id="outline-container-org2423c8b" class="outline-3">
+<h3 id="org2423c8b">叶子节点的个数意味着什么?</h3>
+<div class="outline-text-3" id="text-org2423c8b">
 <p>
 没插入一个节点，叶子节点就会增加一个，但是并不是有多少粒子就有多少叶子节点，
 因为在插入的时候会将粒子的位姿计算在一定的分辨率内的整数结果，如果一样就只会
@@ -258,9 +258,9 @@ set编号，采样函数和采样需要的地图数据，用于判断收敛情�
 </div>
 </div>
 
-<div id="outline-container-orgbbaed2f" class="outline-3">
-<h3 id="orgbbaed2f">如何判断是否收敛?</h3>
-<div class="outline-text-3" id="text-orgbbaed2f">
+<div id="outline-container-orge85e049" class="outline-3">
+<h3 id="orge85e049">如何判断是否收敛?</h3>
+<div class="outline-text-3" id="text-orge85e049">
 <p>
 计算所有粒子的位置，在求均值，在遍历所
 有的粒子和均值的距离，如果任何一个粒子和均值的偏差大于设定值 dist_threshold，
@@ -270,9 +270,9 @@ set编号，采样函数和采样需要的地图数据，用于判断收敛情�
 </div>
 </div>
 
-<div id="outline-container-org1768c62" class="outline-2">
-<h2 id="org1768c62">实际使用的问题</h2>
-<div class="outline-text-2" id="text-org1768c62">
+<div id="outline-container-org5b406f2" class="outline-2">
+<h2 id="org5b406f2">实际使用的问题</h2>
+<div class="outline-text-2" id="text-org5b406f2">
 <ul class="org-ul">
 <li>粒子数目太多造成重采样的时候，插入node时需要很长时间，导致长时间卡在这里，无
 法发布位姿，造成导航等出现问题。所以粒子数也不能盲目增加，amcl默认是100~5000，

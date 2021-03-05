@@ -42,9 +42,9 @@
   <h1>TOOL: 双网卡上内外网的路由设置</h1>
 
 
-<div id="outline-container-org6ad79e0" class="outline-2">
-<h2 id="org6ad79e0">双网卡上内外网的设置</h2>
-<div class="outline-text-2" id="text-org6ad79e0">
+<div id="outline-container-orgd9b70ad" class="outline-2">
+<h2 id="orgd9b70ad">双网卡上内外网的设置</h2>
+<div class="outline-text-2" id="text-orgd9b70ad">
 <p>
 由于工作需要要经常连接一个内网的机器，内网不能上外网，查资料很不方便。因此买了
 一个网卡，希望一个处理内网，一个处理外网。但是出现的问题时，连上内网之后就不能
@@ -139,9 +139,13 @@ RX bytes:5510774 (5.5 MB)  TX bytes:7343823 (7.3 MB)
 </div>
 
 
-<div id="outline-container-org0bc31cc" class="outline-2">
-<h2 id="org0bc31cc">ubuntu 固定ip设置</h2>
-<div class="outline-text-2" id="text-org0bc31cc">
+<div id="outline-container-org7d5bc66" class="outline-2">
+<h2 id="org7d5bc66">ubuntu 固定ip设置</h2>
+<div class="outline-text-2" id="text-org7d5bc66">
+</div>
+<div id="outline-container-orgd31e974" class="outline-3">
+<h3 id="orgd31e974">ubuntu 16.04 及一下版本</h3>
+<div class="outline-text-3" id="text-orgd31e974">
 <p>
 sudo vim /etc/network/interfaces
 </p>
@@ -163,11 +167,67 @@ enp2s0 是网卡名称。
 </div>
 </div>
 
-<div id="outline-container-orge7bb279" class="outline-2">
-<h2 id="orge7bb279">参考</h2>
-<div class="outline-text-2" id="text-orge7bb279">
+
+<div id="outline-container-org9ab1071" class="outline-3">
+<h3 id="org9ab1071">ubuntu 18.04 及一下版本</h3>
+<div class="outline-text-3" id="text-org9ab1071">
+<p>
+Ubuntu 18.04配置和低版本很不一样, 使用netplan进行配置。
+</p>
+
+<ul class="org-ul">
+<li>通过 ifconfig 查看网卡名称，比如我的是enp3s0。</li>
+
+<li><p>
+(动态IP)编辑 /etc/netplan/01-network-manager-all.yaml 
+</p>
+<div class="org-src-container">
+<pre class="src src-yaml"># Let NetworkManager manage all devices on this system
+network:
+  version: 2
+  renderer: NetworkManager
+  ethernets:
+     enp3s0: #配置的网卡名称,使用ifconfig -a查看得到
+       dhcp4: no #dhcp4关闭
+       addresses: [192.168.1.2/24] #设置本机IP及掩码
+       gateway4: 192.168.1.1 #设置网关
+       nameservers:
+         addresses: [114.114.114.114] #设置DNS
+</pre>
+</div></li>
+
+<li>执行 sudo netplan apply 使之立即生效。</li>
+
+<li><p>
+(动态IP) 编辑 /etc/netplan/01-network-manager-all.yaml 
+</p>
+
+<div class="org-src-container">
+<pre class="src src-yaml"># Let NetworkManager manage all devices on this system
+network:
+  version: 2
+  renderer: NetworkManager
+  ethernets:
+     enp3s0: #配置的网卡名称,使用ifconfig -a查看得到
+       dhcp4: true #dhcp4开启
+       addresses: [] #设置本机IP及掩码，空
+       optional: true
+</pre>
+</div></li>
+
+<li>执行 sudo netplan apply 使之立即生效。</li>
+</ul>
+</div>
+</div>
+</div>
+
+
+<div id="outline-container-org5f301a9" class="outline-2">
+<h2 id="org5f301a9">参考</h2>
+<div class="outline-text-2" id="text-org5f301a9">
 <p>
 <a href="https://blog.csdn.net/hshl1214/article/details/53103790">Linux 双网卡（内外网） 同时使用路由设置</a>
+<a href="https://blog.csdn.net/u014454538/article/details/88646689">Ubuntu 18.04 配置静态和动态IP</a>
 </p>
 </div>
 </div>
@@ -181,7 +241,7 @@ enp2s0 是网卡名称。
     <div class="post-meta">
       <span title="post date">Published: 2019-04-24</span>
       </br>
-      <span title="last modification date">Last Modification: 2020-08-14</span>
+      <span title="last modification date">Last Modification: 2021-03-05</span>
       </br>
       <span title="author" >Author: Clare Lee</span>
     </div>

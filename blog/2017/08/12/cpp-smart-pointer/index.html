@@ -41,9 +41,9 @@
         
   <h1>C++ 智能指针</h1>
 
-<div id="outline-container-org1f8c6ae" class="outline-2">
-<h2 id="org1f8c6ae">为什么会出现智能指针</h2>
-<div class="outline-text-2" id="text-org1f8c6ae">
+<div id="outline-container-org25b66b0" class="outline-2">
+<h2 id="org25b66b0">为什么会出现智能指针</h2>
+<div class="outline-text-2" id="text-org25b66b0">
 <p>
 什么是智能，其实就是程序自动为我们做一些事情。那么智能指针到底为我们自动地做了
 什么了呢?
@@ -79,9 +79,9 @@
 </div>
 
 
-<div id="outline-container-orgc212508" class="outline-3">
-<h3 id="orgc212508">资源获取即初始化 RAII(Resource Acquisition Is Initialization)</h3>
-<div class="outline-text-3" id="text-orgc212508">
+<div id="outline-container-org010680c" class="outline-3">
+<h3 id="org010680c">资源获取即初始化 RAII(Resource Acquisition Is Initialization)</h3>
+<div class="outline-text-3" id="text-org010680c">
 <p>
 1984-1989年期间，比雅尼·斯特劳斯特鲁普和安德鲁·柯尼希在设计C++异常时，为解决
 资源管理时的异常安全性而使用了该用法，后来比雅尼·斯特劳斯特鲁普将其称为RAII。
@@ -107,9 +107,9 @@ RAII要求， <b>资源的有效期</b> 与 <b>持有资源的对象的生命期
 </div>
 
 
-<div id="outline-container-org131ade5" class="outline-3">
-<h3 id="org131ade5">智能指针</h3>
-<div class="outline-text-3" id="text-org131ade5">
+<div id="outline-container-org62f26dd" class="outline-3">
+<h3 id="org62f26dd">智能指针</h3>
+<div class="outline-text-3" id="text-org62f26dd">
 <p>
 所谓智能指针就是智能地管理指针所指向的动态资源的释放，也就是说智能指针其实是
 对一个已存在的对象的指针的管理。
@@ -137,17 +137,17 @@ RAII要求， <b>资源的有效期</b> 与 <b>持有资源的对象的生命期
 </div>
 
 
-<div id="outline-container-org11db5c2" class="outline-2">
-<h2 id="org11db5c2">智能指针的演变和实现</h2>
-<div class="outline-text-2" id="text-org11db5c2">
+<div id="outline-container-org490c692" class="outline-2">
+<h2 id="org490c692">智能指针的演变和实现</h2>
+<div class="outline-text-2" id="text-org490c692">
 <p>
 下面我们来看看各种智能指针的演变过程和实现方法。
 </p>
 </div>
 
-<div id="outline-container-org794671e" class="outline-3">
-<h3 id="org794671e">auto_ptr</h3>
-<div class="outline-text-3" id="text-org794671e">
+<div id="outline-container-org997f0c3" class="outline-3">
+<h3 id="org997f0c3">auto_ptr</h3>
+<div class="outline-text-3" id="text-org997f0c3">
 <p>
 这是98版本引入的智能指针。本质是管理权转移, 当共享指针在进行复制的时候，会把
 对象交个新的共享指针，但是旧的共享指针会被置为NULL，这样就不会导致在虚构函数
@@ -234,9 +234,9 @@ int main() {
 </div>
 
 
-<div id="outline-container-org2fce30c" class="outline-3">
-<h3 id="org2fce30c">unique_ptr (scoped_ptr)</h3>
-<div class="outline-text-3" id="text-org2fce30c">
+<div id="outline-container-orgddd1d0f" class="outline-3">
+<h3 id="orgddd1d0f">unique_ptr (scoped_ptr)</h3>
+<div class="outline-text-3" id="text-orgddd1d0f">
 <p>
 鉴于auto_ptr的缺陷，c++标准又迟迟没有改良这个指针，这期间一些大牛就在一个
 boost社区造了一个scoped_ptr指针，知道c++11的时候，c++标准才推出unique_ptr。这
@@ -306,9 +306,9 @@ int main() {
 </div>
 </div>
 
-<div id="outline-container-orgdf0821d" class="outline-3">
-<h3 id="orgdf0821d">shared_ptr</h3>
-<div class="outline-text-3" id="text-orgdf0821d">
+<div id="outline-container-org54b38bb" class="outline-3">
+<h3 id="org54b38bb">shared_ptr</h3>
+<div class="outline-text-3" id="text-org54b38bb">
 <p>
 这也是c++11才有的，在boost中名字也是一样的。他为了能够更好的执行拷贝等操作，
 引入了一个计数器，这个计数器在共享指针初始化的时候为1，后面每次被拷贝都会计数
@@ -530,9 +530,9 @@ next 的 count+1=2；同样cur也是一样的=2。在main退出的时候析构�
 </div>
 </div>
 
-<div id="outline-container-orgb85b369" class="outline-3">
-<h3 id="orgb85b369">weak_ptr</h3>
-<div class="outline-text-3" id="text-orgb85b369">
+<div id="outline-container-org4e6d901" class="outline-3">
+<h3 id="org4e6d901">weak_ptr</h3>
+<div class="outline-text-3" id="text-org4e6d901">
 <p>
 循环引用一般都会发生在这种"你中有我，我中有你"的情况里面，这里导致的问题就是内存
 泄漏，这段空间一直都没有释放,现在很明显引用计数在这里就不是很合适了，但是
@@ -591,9 +591,9 @@ int main() {
 </div>
 
 
-<div id="outline-container-org433a04a" class="outline-2">
-<h2 id="org433a04a">小结</h2>
-<div class="outline-text-2" id="text-org433a04a">
+<div id="outline-container-orga322c41" class="outline-2">
+<h2 id="orga322c41">小结</h2>
+<div class="outline-text-2" id="text-orga322c41">
 <p>
 至此，我们把几个智能指针就解释清楚了。总结一下：
 </p>
@@ -618,9 +618,9 @@ weak_ptr 辅助。</li>
 </div>
 
 
-<div id="outline-container-orgdaa9f72" class="outline-2">
-<h2 id="orgdaa9f72">参考</h2>
-<div class="outline-text-2" id="text-orgdaa9f72">
+<div id="outline-container-org602ff2c" class="outline-2">
+<h2 id="org602ff2c">参考</h2>
+<div class="outline-text-2" id="text-org602ff2c">
 <ul class="org-ul">
 <li>c++经验之谈一：RAII原理介绍 <a href="https://zhuanlan.zhihu.com/p/34660259">https://zhuanlan.zhihu.com/p/34660259</a></li>
 <li>浅谈智能指针的历史包袱: <a href="https://www.cnblogs.com/tp-16b/p/9033370.html">https://www.cnblogs.com/tp-16b/p/9033370.html</a></li>

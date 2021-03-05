@@ -42,11 +42,11 @@
   <h1>move_base costmap 类关系及costmap更新过程</h1>
 
 
-<div id="outline-container-org3a0552d" class="outline-2">
-<h2 id="org3a0552d">类关系图</h2>
-<div class="outline-text-2" id="text-org3a0552d">
+<div id="outline-container-orgc644a1b" class="outline-2">
+<h2 id="orgc644a1b">类关系图</h2>
+<div class="outline-text-2" id="text-orgc644a1b">
 
-<div id="org0b66c83" class="figure">
+<div id="orgb8f902a" class="figure">
 <p><img src="/assets/blog/2018/09/12/costmap/costmap_class.png" alt="costmap_class.png" />
 </p>
 <p><span class="figure-number">Figure 1: </span>costmap类关系</p>
@@ -63,9 +63,9 @@ obstacle都用到了，inflation没有用到。</li>
 </div>
 
 
-<div id="outline-container-orgb903734" class="outline-2">
-<h2 id="orgb903734">更新cosmtap过程</h2>
-<div class="outline-text-2" id="text-orgb903734">
+<div id="outline-container-org14ae821" class="outline-2">
+<h2 id="org14ae821">更新cosmtap过程</h2>
+<div class="outline-text-2" id="text-org14ae821">
 <p>
 要从各Layer创建开始说起，各层继承关系有些差别：如果这一层需要保存costmap的值，那么
 就继承CostmapLayer，进一步继承Layer和Costmap2D，这样可以通过Costmap2D来保存costmap；
@@ -79,9 +79,9 @@ CostmapLayer，inflation不用保存costmap，这一层膨胀前面两层的结�
 </div>
 
 
-<div id="outline-container-orgf9df059" class="outline-3">
-<h3 id="orgf9df059">全局costmap更新过程</h3>
-<div class="outline-text-3" id="text-orgf9df059">
+<div id="outline-container-org1135975" class="outline-3">
+<h3 id="org1135975">全局costmap更新过程</h3>
+<div class="outline-text-3" id="text-org1135975">
 
 <div class="figure">
 <p><img src="/assets/blog/2018/09/12/costmap/global_costmap.png" alt="global_costmap.png" />
@@ -91,9 +91,9 @@ CostmapLayer，inflation不用保存costmap，这一层膨胀前面两层的结�
 </div>
 
 
-<div id="outline-container-orgedc7de0" class="outline-3">
-<h3 id="orgedc7de0">说明</h3>
-<div class="outline-text-3" id="text-orgedc7de0">
+<div id="outline-container-org0d5f46e" class="outline-3">
+<h3 id="org0d5f46e">说明</h3>
+<div class="outline-text-3" id="text-org0d5f46e">
 <ul class="org-ul">
 <li>updateBounds不改变各层的costmap的size，除非新地图来了重新resize。</li>
 
