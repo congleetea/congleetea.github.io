@@ -80,6 +80,8 @@
 
 
 * ubuntu 固定ip设置
+  
+** ubuntu 16.04 及一下版本
 sudo vim /etc/network/interfaces
 
 #+BEGIN_SRC text
@@ -94,9 +96,49 @@ gateway 192.168.1.1
 
 enp2s0 是网卡名称。
 
+
+** ubuntu 18.04 及一下版本
+   Ubuntu 18.04配置和低版本很不一样, 使用netplan进行配置。
+
+- 通过 ifconfig 查看网卡名称，比如我的是enp3s0。 
+  
+- (动态IP)编辑 /etc/netplan/01-network-manager-all.yaml 
+    #+BEGIN_SRC yaml 
+    # Let NetworkManager manage all devices on this system
+    network:
+      version: 2
+      renderer: NetworkManager
+      ethernets:
+         enp3s0: #配置的网卡名称,使用ifconfig -a查看得到
+           dhcp4: no #dhcp4关闭
+           addresses: [192.168.1.2/24] #设置本机IP及掩码
+           gateway4: 192.168.1.1 #设置网关
+           nameservers:
+             addresses: [114.114.114.114] #设置DNS
+    #+END_SRC
+
+- 执行 sudo netplan apply 使之立即生效。 
+   
+- (动态IP) 编辑 /etc/netplan/01-network-manager-all.yaml 
+
+  #+BEGIN_SRC yaml
+  # Let NetworkManager manage all devices on this system
+  network:
+    version: 2
+    renderer: NetworkManager
+    ethernets:
+       enp3s0: #配置的网卡名称,使用ifconfig -a查看得到
+         dhcp4: true #dhcp4开启
+         addresses: [] #设置本机IP及掩码，空
+         optional: true
+  #+END_SRC
+
+- 执行 sudo netplan apply 使之立即生效。 
+
+
 * 参考
   
   [[https://blog.csdn.net/hshl1214/article/details/53103790][Linux 双网卡（内外网） 同时使用路由设置]]
-  
+  [[https://blog.csdn.net/u014454538/article/details/88646689][Ubuntu 18.04 配置静态和动态IP]]
   
   
